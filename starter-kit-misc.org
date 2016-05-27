@@ -120,13 +120,39 @@ ido-mode is like magic pixie dust!
     :bind ("C-c SPC" . ace-jump-mode))
 #+END_SRC
 
-** Flycheck
+** Flyspell
 #+BEGIN_SRC emacs-lisp
-  (use-package flycheck
-    :ensure t
-    :init
-    (add-hook 'after-init-hook #'global-flycheck-mode))
+  (when (eq system-type 'gnu/linux)
+    (use-package flyspell
+      :ensure t
+      :init
+      (add-hook 'org-mode-hook 'flyspell-mode)
+      (add-hook 'text-mode-hook 'flyspell-mode)
+      :bind
+      (("C-; ," . flyspell-goto-next-error)
+       ("C-; ." . flyspell-auto-correct-word))
+      :config
+      (setq flyspell-issue-message-flag nil)
+      (define-key flyspell-mode-map (kbd "C-.") nil)
+      (define-key flyspell-mode-map (kbd "C-,") nil)
+      (define-key flyspell-mode-map (kbd "C-;") nil)
+      (with-eval-after-load "ispell"
+        (setq ispell-program-name "hunspell")
+        (setq ispell-directory "en_US,de_DE")
+        (ispell-set-spellchecker-params)
+        (when (> emacs-major-version 24)
+          (ispell-hunspell-add-multi-dic '(("en_US", "de_DE")))))))
 #+END_SRC
+
+Install the required dictionaries!
+#+BEGIN_SRC sh
+  # Ubuntu
+  sudo apt-get install aspell-de
+  # Arch
+  sudo pacman -S aspell-de
+#+END_SRC
+
+#+RESULTS:
 
 ** Autocomplete
 #+BEGIN_SRC emacs-lisp
@@ -156,6 +182,7 @@ ido-mode is like magic pixie dust!
 #+BEGIN_SRC emacs-lisp
   (use-package workgroups2
     :ensure t
+;    :disabled t
     :config
     (setq wg-prefix-key (kbd "C-x w"))
     (setq wg-flag-modified t
@@ -183,5 +210,6 @@ ido-mode is like magic pixie dust!
 
 ** Magit
 #+BEGIN_SRC emacs-lisp
-(use-package magit :ensure t)
+(use-package magit :ensure t
+:defer t)
 #+END_SRC

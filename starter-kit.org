@@ -183,21 +183,3 @@ everyone using the starter kit.
   #+begin_src emacs-lisp
     (load-file "~/.emacs.d/src/beautify-java.el")
   #+end_src
-
-** TODO Flyspell [0/1]
-*** TODO Installing Haskell-Mode Extensions
-    :PROPERTIES:
-    :tangle:   no
-    :END:
-**** Install flycheck
- #+begin_src emacs-lisp
-   (starter-kit-install-if-needed 'flycheck)
-   (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
-   (global-flycheck-mode)
- #+end_src
-**** Install flyspell-haskell
- #+begin_src emacs-lisp
-   (starter-kit-install-if-needed 'flyspell)
-  
- #+end_src
-    

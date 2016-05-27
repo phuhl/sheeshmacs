@@ -194,11 +194,11 @@ file using the `org-babel-lob-ingest' function.
   (use-package ox-publish
     :config
     (setq org-publish-project-alist
-          '(
+          `(
             ("org-notes"
-             :base-directory org-base-dir
+             :base-directory ,org-base-dir
              :base-extension "org"
-             :publishing-directory org-exp-dir
+             :publishing-directory ,org-exp-dir
              :recursive t
              :publishing-function org-html-publish-to-html
              :headline-levels 5             ; Just the default for this project.
@@ -208,9 +208,9 @@ file using the `org-babel-lob-ingest' function.
              :sitemap-title ""         ; ... with title 'Sitemap'.
              )
             ("org-static"
-             :base-directory org-base-dir
+             :base-directory ,org-base-dir
              :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-             :publishing-directory org-exp-dir
+             :publishing-directory ,org-exp-dir
              :recursive t
              :publishing-function org-publish-attachment
              )
