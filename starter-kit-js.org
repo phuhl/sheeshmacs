@@ -1,0 +1,106 @@
+#+TITLE: Starter Kit JS
+
+This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
+
+* Starter Kit JS
+#+BEGIN_SRC emacs-lisp
+  (use-package js2-mode
+    :ensure t
+    :mode ("\\.js$" . js2-mode)
+    :interpreter ("node" . js2-mode)
+    :config
+    (add-hook 'js2-mode-hook (lambda () (setq js2-basic-offest 2)))
+    (add-hook 'js2-mode-hook 'run-starter-kit-coding-hook)
+    (add-hook 'js2-mode-hook
+              '(lambda ()
+                 (define-key js2-mode-map "\C-ci" 'js-doc-insert-function-doc)
+                 (define-key js2-mode-map "@" 'js-doc-insert-tag)))
+    )
+  (use-package js-doc
+    :ensure t)
+#+END_SRC
+
+#+begin_src emacs-lisp
+(font-lock-add-keywords 'js2-mode
+                        '(("\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\)"
+                           1 font-lock-warning-face t)))
+#+end_src
+
+* Tern
+Once in a while it can be usefull to restart tern.
+#+BEGIN_SRC emacs-lisp
+  (defun delete-tern-process ()
+    (interactive)
+    (delete-process "Tern"))
+  (add-hook 'js2-mode-hook (lambda ()
+                             (auto-complete-mode)))
+  (use-package tern-auto-complete
+    :ensure t)
+
+  (use-package tern
+    :ensure t
+    :config
+    (eval-after-load 'tern
+      '(progn
+         (require 'tern-auto-complete)
+         (tern-ac-setup)))
+    )
+#+END_SRC
+
+* Web-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :ensure t
+    :mode (
+           ("\\.phtml\\'" . web-mode)
+           ("\\.tpl\\.php\\'" . web-mode)
+           ("\\.[agj]sp\\'" . web-mode)
+           ("\\.as[cp]x\\'" . web-mode)
+           ("\\.erb\\'" . web-mode)
+           ("\\.mustache\\'" . web-mode)
+           ("\\.djhtml\\'" . web-mode)
+           ("\\.html?\\'" . web-mode)
+           ("\\.jsx\\'" . web-mode))
+    :config
+    (add-hook 'web-mode-hook 'run-starter-kit-coding-hook)
+    (add-hook 'web-mode-hook (lambda ()
+                               (setq web-mode-markup-indent-offset 2)
+                               (setq web-mode-css-indent-offset 2)
+                               (setq web-mode-code-indent-offset 2)
+                               ))
+    )
+
+  (font-lock-add-keywords 'web-mode
+                          '(("\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\)"
+                             1 font-lock-warning-face t)))
+  ;; for better jsx syntax-highlighting in web-mode
+  ;; - courtesy of Patrick @halbtuerke
+  (defadvice web-mode-highlight-part (around tweak-jsx activate)
+    (if (equal web-mode-content-type "jsx")
+        (let ((web-mode-enable-part-face nil))
+          ad-do-it)
+      ad-do-it))
+
+#+END_SRC
+
+* Spell checking
+#+BEGIN_SRC emacs-lisp
+  ;; disable jshint since we prefer eslint checking
+  (setq-default flycheck-disabled-checkers
+    (append flycheck-disabled-checkers
+      '(javascript-jshint)))
+
+  ;; use eslint with web-mode for jsx files
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
+
+  ;; disable json-jsonlist checking for json files
+  (setq-default flycheck-disabled-checkers
+    (append flycheck-disabled-checkers
+      '(json-jsonlist)))
+#+END_SRC
+
+* JSON
+#+BEGIN_SRC emacs-lisp
+  (use-package json-mode
+    :ensure t)
+#+END_SRC

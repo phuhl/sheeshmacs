@@ -6,6 +6,19 @@ This section contains all code implementing the Emacs Starter Kit.  It
 is probably safe to stop reading at this point unless you are
 interested in the actual code implementing the starter kit.
 
+** Pathes
+Pathes, potentially different on every system
+#+begin_src emacs-lisp
+(setq org-link-abbrev-alist
+      '(("dropboxpath" . "~/Dropbox")
+        ("cloudpath" . "~/")
+        ("imgpath" . "~/images")
+        ))
+
+(defvar org-base-dir "~/todo")
+(defvar org-exp-dir "~/todo_html")
+#+end_src
+
 ** Starter kit basics
 - Load path (=src= + subdirs, =elpa= for packages) and custom-file (=custom.el=)
   #+name: starter-kit-load-paths
@@ -109,6 +122,23 @@ interested in the actual code implementing the starter kit.
         (setq system-name (car (split-string system-name "\\."))))
   #+end_src
 
+- Installing/Loading use-package
+  #+begin_src emacs-lisp
+    (require 'package)
+    (setq package-enable-at-startup nil)
+    (package-initialize)
+
+    ;; Install 'use-package' if necessary
+    (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package))
+
+    ;; Enable use-package
+    (eval-when-compile
+      (require 'use-package))
+    (require 'diminish)                ;; if you use :diminish
+    (require 'bind-key)                ;; if you use any :bind variant
+  #+end_src
 ** Starter kit core
 The following files contain the remainder of the core of the Emacs
 Starter Kit.  All of the code in this section should be loaded by
@@ -129,28 +159,45 @@ everyone using the starter kit.
   (starter-kit-load "starter-kit-misc.org")
   #+end_src
 
+- Further stuff ([[file:starter-kit-haskell.org][starter-kit-haskell]], [[file:starter-kit-org.org][starter-kit-org]],
+  [[file:starter-kit-yasnippet.org][starter-kit-yasnippet]], [[file:starter-kit-lisp.org][starter-kit-lisp]], [[file:starter-kit-js.org][starter-kit-js]])
+  #+begin_src emacs-lisp
+  (starter-kit-load "haskell")
+  (starter-kit-load "org")
+  (starter-kit-load "yasnippet")
+  (starter-kit-load "lisp")
+  (starter-kit-load "js")
+  #+end_src
+  
 ** Settings from M-x customize
 #+name: m-x-customize-customizations
 #+begin_src emacs-lisp
   (load custom-file 'noerror)
 #+end_src
 
-** Stuff
+** Variables
+#+begin_src emacs-lisp
+(setq column-number-mode t)
+#+end_src
+** TODO Stuff
   #+begin_src emacs-lisp
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((plantuml . t)))
-
-    (setq org-plantuml-jar-path
-          (expand-file-name "/usr/share/plantuml/plantuml.jar"))
-
-    (defun  shk-fix-inline-images ()
-      (when org-inline-image-overlays
-        (org-redisplay-inline-images)))
-
-    (eval-after-load 'org
-                   (add-hook 'org-babel-after-execute-hook 'shk-fix-inline-images))
-
-    (load-file "~/.emacs.d/beautify-java.el")
-
+    (load-file "~/.emacs.d/src/beautify-java.el")
   #+end_src
+
+** TODO Flyspell [0/1]
+*** TODO Installing Haskell-Mode Extensions
+    :PROPERTIES:
+    :tangle:   no
+    :END:
+**** Install flycheck
+ #+begin_src emacs-lisp
+   (starter-kit-install-if-needed 'flycheck)
+   (add-hook 'flycheck-mode-hook #'flycheck-haskell-setup)
+   (global-flycheck-mode)
+ #+end_src
+**** Install flyspell-haskell
+ #+begin_src emacs-lisp
+   (starter-kit-install-if-needed 'flyspell)
+  
+ #+end_src
+    

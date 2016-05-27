@@ -9,22 +9,21 @@ Things that don't fit anywhere else.
 ** Window systems
 #+srcname: starter-kit-window-view-stuff
 #+begin_src emacs-lisp 
-  
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
-  
+
   (setq visible-bell t
         font-lock-maximum-decoration t
         inhibit-startup-message t
         transient-mark-mode t
         shift-select-mode nil
-;        uniquify-buffer-name-style 'forward
-        whitespace-style '(trailing lines space-before-tab
-                                    indentation space-after-tab)
+        ;; uniquify-buffer-name-style 'forward
+        whitespace-style '(trailing lines tabs lines-tail indentation )
         whitespace-line-column 80
-;        ediff-window-setup-function 'ediff-setup-windows-plain
-  )
+        whitespace-global-modes '(not org-mode)
+        ;; ediff-window-setup-function 'ediff-setup-windows-plain
+        )
 #+end_src
 
 ** Highlight matching parentheses when the point is on them.
@@ -54,14 +53,135 @@ ido-mode is like magic pixie dust!
 #+begin_src emacs-lisp 
   (set-default 'indent-tabs-mode nil)
   (set-default 'indicate-empty-lines t)
+  (set-default 'tab-width 2)
+
 ;  (set-default 'imenu-auto-rescan t)
 
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
-  (defvar starter-kit-coding-hook nil
-    "Hook that gets run on activation of any programming mode.")
 
   (defalias 'yes-or-no-p 'y-or-n-p)
   ;; Seed the random-number generator
   (random t)
 #+end_src
+
+** Browser/PDF Viewer
+#+begin_src emacs-lisp
+  (when (eq system-type 'gnu/linux)
+    (setq browse-url-browser-function 'browse-url-generic
+          browse-url-generic-program "chromium")
+    (setq org-file-apps
+          (quote
+           ((auto-mode . emacs)
+            ("\\.mm\\'" . default)
+            ("\\.x?html?\\'" . "chromium %s")
+            ("\\.pdf\\'" . "evince %s")))))
+#+end_src
+
+** Killring backwards
+#+begin_src emacs-lisp
+; Killring backwards
+(defun yank-pop-forwards (arg)
+  (interactive "p")
+  (yank-pop (- arg)))
+
+(global-set-key "\M-Y" 'yank-pop-forwards) ; M-Y (M-Shift-y), Killring rückwärts drehen
+#+end_src
+
+** Multiple Cursors
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+    :ensure t
+    :bind (
+           ;; Cursor in each line of active region
+           ("C-c m r" . mc/edit-lines)
+           ;; based on keywords:
+           ("C-c m n" . mc/mark-next-like-this)
+           ("C-c m p" . mc/mark-previous-like-this)
+           ("C-c m a" . mc/mark-all-like-this)
+           ;; pop marks and make them to cursors
+           ("C-c m m" . mc/mark-pop)
+           ;; Rectangular region
+           ("C-c M-SPC" . set-rectangular-region-anchor)))
+
+#+END_SRC
+
+** Expand Region
+#+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :ensure t
+    :bind ("C-=" . er/expand-region))
+#+END_SRC
+
+** Ace-Jump-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-jump-mode
+    :ensure t
+    :bind ("C-c SPC" . ace-jump-mode))
+#+END_SRC
+
+** Flycheck
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :ensure t
+    :init
+    (add-hook 'after-init-hook #'global-flycheck-mode))
+#+END_SRC
+
+** Autocomplete
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-complete
+    :ensure t
+    :init
+    (global-auto-complete-mode t)
+    :config
+    (ac-config-default))
+#+END_SRC
+
+** Jump in 3 line-steps
+#+BEGIN_SRC emacs-lisp
+;; 3 Lines at once
+(global-set-key "\M-n" '(lambda ()
+                          (interactive)
+                          (forward-line 3)
+                          ))
+
+(global-set-key "\M-p" '(lambda ()
+                          (interactive)
+                          (forward-line -3)
+                          ))
+#+END_SRC
+
+** Workgroups
+#+BEGIN_SRC emacs-lisp
+  (use-package workgroups2
+    :ensure t
+    :config
+    (setq wg-prefix-key (kbd "C-x w"))
+    (setq wg-flag-modified t
+          wg-mode-line-decor-left-brace "|"
+          wg-mode-line-decor-right-brace "|"
+          wg-mode-line-decor-divider "|")
+    (workgroups-mode 1))
+#+END_SRC
+
+** Google Translator
+#+BEGIN_SRC emacs-lisp
+;; https://github.com/atykhonov/google-translate
+  (use-package google-translate
+    :ensure t
+    :init
+    (setq google-translate-default-source-language "en")
+    (setq google-translate-default-target-language "de")
+    :config
+    (require google-translate-default-ui)
+    :bind (
+           ("C-c t" . google-translate-at-point)
+           ("C-c T" . google-translate-query-translate)
+           ("C-c R" . google-translate-query-translate-reverse)))
+#+END_SRC
+
+** Magit
+#+BEGIN_SRC emacs-lisp
+(use-package magit :ensure t)
+#+END_SRC

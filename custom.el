@@ -6,6 +6,7 @@
  '(custom-enabled-themes (quote (tsdh-dark)))
  '(menu-bar-mode nil)
  '(scroll-bar-mode nil)
+ '(scroll-error-top-bottom t)
  '(tool-bar-mode nil))
 (custom-set-faces
  )
