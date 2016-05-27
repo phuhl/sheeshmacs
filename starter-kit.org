@@ -1,0 +1,156 @@
+#+TITLE: Emacs Starter Kit
+
+* Implementation
+
+This section contains all code implementing the Emacs Starter Kit.  It
+is probably safe to stop reading at this point unless you are
+interested in the actual code implementing the starter kit.
+
+** Starter kit basics
+- Load path (=src= + subdirs, =elpa= for packages) and custom-file (=custom.el=)
+  #+name: starter-kit-load-paths
+  #+begin_src emacs-lisp
+    (let ((elisp-dir (expand-file-name "src" starter-kit-dir)))
+      ;; add the src directory to the load path
+      (add-to-list 'load-path elisp-dir)
+      ;; load specific files
+      (when (file-exists-p elisp-dir)
+        (let ((default-directory elisp-dir))
+          (normal-top-level-add-subdirs-to-load-path))))
+	  ;    (setq autoload-file (concat starter-kit-dir "loaddefs.el"))
+    (setq package-user-dir (concat starter-kit-dir "elpa"))
+    (setq custom-file (concat starter-kit-dir "custom.el"))
+  #+end_src
+
+- Ubiquitous Packages which should be loaded on startup rather than
+  autoloaded on demand since they are likely to be used in every
+  session.
+  #+name: starter-kit-load-on-startup
+  #+begin_src emacs-lisp
+  ;    (require 'cl)
+  ;    (require 'cl-lib)
+  (require 'saveplace)
+  ;    (require 'ffap)
+  ;    (require 'uniquify)
+  ;    (require 'ansi-color)
+  ;    (require 'recentf)
+  #+end_src
+
+- ELPA archive repositories
+  #+begin_src emacs-lisp
+        (setq package-archives
+              '(("gnu"         . "https://elpa.gnu.org/packages/")
+                ("org"         . "http://orgmode.org/elpa/")
+                ("melpa"       . "https://melpa.org/packages/")
+		;                ("marmalade"   . "http://marmalade-repo.org/packages/")
+		))
+        (package-initialize)
+  #+end_src
+
+- Function for loading other parts of the starter kit
+  #+name: starter-kit-load
+  #+begin_src emacs-lisp
+    (defun starter-kit-load (file &optional header-or-tag)
+      "Load configuration from other starter-kit-*.org files.
+    If the optional argument is the id of a subtree then only
+    configuration from within that subtree will be loaded.  If it is
+    not an id then it will be interpreted as a tag, and only subtrees
+    marked with the given tag will be loaded.
+    
+    For example, to load all of starter-kit-lisp.org simply
+    add (starter-kit-load \"lisp\") to your configuration.
+    
+    To load only the 'window-system' config from
+    starter-kit-misc-recommended.org add
+     (starter-kit-load \"misc-recommended\" \"window-system\")
+    to your configuration."
+      (let ((file (expand-file-name (if (string-match "starter-kit-.+\.org" file)
+                                        file
+                                      (format "starter-kit-%s.org" file))
+                                    starter-kit-dir)))
+        (org-babel-load-file
+         (if header-or-tag
+             (let* ((base (file-name-nondirectory file))
+                    (dir  (file-name-directory file))
+                    (partial-file (expand-file-name
+                                   (concat "." (file-name-sans-extension base)
+                                           ".part." header-or-tag ".org")
+                                   dir)))
+               (unless (file-exists-p partial-file)
+                 (with-temp-file partial-file
+                   (insert
+                    (with-temp-buffer
+                      (insert-file-contents file)
+                      (save-excursion
+                        (condition-case nil ;; collect as a header
+                            (progn
+                              (org-link-search (concat"#"header-or-tag))
+                              (org-narrow-to-subtree)
+                              (buffer-string))
+                          (error ;; collect all entries with as tags
+                           (let (body)
+                             (org-map-entries
+                              (lambda ()
+                                (save-restriction
+                                  (org-narrow-to-subtree)
+                                  (setq body (concat body "\n" (buffer-string)))))
+                              header-or-tag)
+                             body))))))))
+               partial-file)
+           file))))
+  #+end_src
+
+- Work around a bug on OS X where system-name is FQDN.
+  #+name: starter-kit-osX-workaround
+  #+begin_src emacs-lisp
+    (if (or
+        (eq system-type 'darwin)
+        (eq system-type 'berkeley-unix))
+        (setq system-name (car (split-string system-name "\\."))))
+  #+end_src
+
+** Starter kit core
+The following files contain the remainder of the core of the Emacs
+Starter Kit.  All of the code in this section should be loaded by
+everyone using the starter kit.
+
+- Starter kit function definitions in [[file:starter-kit-defuns.org][starter-kit-defuns]]
+  #+begin_src emacs-lisp
+  (starter-kit-load "starter-kit-defuns.org")
+  #+end_src
+
+- Key Bindings in [[file:starter-kit-bindings.org][starter-kit-bindings]]
+  #+begin_src emacs-lisp
+  (starter-kit-load "starter-kit-bindings.org")
+  #+end_src
+
+- Miscellaneous settings in [[file:starter-kit-misc.org][starter-kit-misc]]
+  #+begin_src emacs-lisp
+  (starter-kit-load "starter-kit-misc.org")
+  #+end_src
+
+** Settings from M-x customize
+#+name: m-x-customize-customizations
+#+begin_src emacs-lisp
+  (load custom-file 'noerror)
+#+end_src
+
+** Stuff
+  #+begin_src emacs-lisp
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((plantuml . t)))
+
+    (setq org-plantuml-jar-path
+          (expand-file-name "/usr/share/plantuml/plantuml.jar"))
+
+    (defun  shk-fix-inline-images ()
+      (when org-inline-image-overlays
+        (org-redisplay-inline-images)))
+
+    (eval-after-load 'org
+                   (add-hook 'org-babel-after-execute-hook 'shk-fix-inline-images))
+
+    (load-file "~/.emacs.d/beautify-java.el")
+
+  #+end_src

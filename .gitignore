@@ -3,3 +3,10 @@
 
 # Packaging
 .cask
+
+# Generated/Packages
+elpa/
+
+# Emacs
+*~
+*\#
