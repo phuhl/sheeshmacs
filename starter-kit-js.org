@@ -97,6 +97,9 @@ Once in a while it can be usefull to restart tern.
 #+END_SRC
 
 * Spell checking
+ :PROPERTIES:
+ :tangled:  no
+ :END:
 #+BEGIN_SRC emacs-lisp
   ;; disable jshint since we prefer eslint checking
   (setq-default flycheck-disabled-checkers
