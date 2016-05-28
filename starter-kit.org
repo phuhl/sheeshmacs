@@ -181,5 +181,5 @@ everyone using the starter kit.
 #+end_src
 ** TODO Stuff
   #+begin_src emacs-lisp
-    (load-file "~/.emacs.d/src/beautify-java.el")
+;    (load-file "~/.emacs.d/src/beautify-java.el")
   #+end_src
