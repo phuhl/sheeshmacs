@@ -145,18 +145,23 @@ file using the `org-babel-lob-ingest' function.
 #+begin_src emacs-lisp
   ;; Past images from clipboard into org-mode
   (defun org-screenshot ()
-    "Take a screenshot into a time stamped unique-named file in the same 
+    "Take a screenshot into a time stamped unique-named file in the same
   directory as the org-buffer and insert
   a link to this file."
     (interactive)
-    (setq tilde-buffer-filename (buffer-file-name))
+    (setq tilde-buffer-filename
+          (if (eq system-type 'gnu/linux)
+              buffer-file-name
+            (replace-regexp-in-string "/" "\\" (buffer-file-name) t t)))
     (unless (file-exists-p (concat tilde-buffer-filename ".img"))
       (make-directory (concat tilde-buffer-filename ".img")))
     (setq filename
           (concat
            (make-temp-name
             (concat tilde-buffer-filename
-                    ".img/org_"
+                    (if (eq system-type 'gnu/linux)
+                        ".img/org_"
+                      ".img\\org_")
                     (format-time-string "%Y%m%d_%H%M%S_")) ) ".jpg"))
     (if (eq system-type 'gnu/linux)
         ;; Linux: ImageMagick
@@ -164,8 +169,12 @@ file using the `org-babel-lob-ingest' function.
       ;; Windows: Irfanview
       (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
                     (concat "/clippaste /convert=" filename)))
-    (insert (concat "[[file:"   (file-relative-name filename
-                                                    (file-name-directory (buffer-file-name))) "]]"))
+    (insert (concat "[[file:"
+                    (file-relative-name
+                     (if (eq system-type 'gnu/linux)
+                         filename
+                       (replace-regexp-in-string "\\\\" "/" filename t t))
+                     (file-name-directory (buffer-file-name))) "]]"))
     (org-display-inline-images))
 #+end_src
 
