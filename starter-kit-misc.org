@@ -36,17 +36,24 @@ Things that don't fit anywhere else.
 ido-mode is like magic pixie dust!
 #+srcname: starter-kit-loves-ido-mode
 #+begin_src emacs-lisp 
-(when (> emacs-major-version 21)
-  (ido-mode t)
-  (setq 
-  ;; if t ido matches only if entered text is prefix of filename
-  ido-enable-prefix nil
-  ;; flexible matching
-  ido-enable-flex-matching t
-  ;; ask if new buffer should be created (prompt), dont ask (always), dont create buffers (never)
-  ;        ido-create-new-buffer 'always
-  ;; maximum number of matches
-  ido-max-prospects 10))
+  (when (> emacs-major-version 21)
+    (ido-mode t)
+    (setq 
+     ;; if t ido matches only if entered text is prefix of filename
+     ido-enable-prefix nil
+     ;; flexible matching
+     ido-enable-flex-matching t
+     ;; ask if new buffer should be created (prompt), dont ask (always), dont create buffers (never)
+                                          ;        ido-create-new-buffer 'always
+     ;; maximum number of matches
+     ido-max-prospects 10
+     ido-everywhere t))
+
+  (use-package ido-vertical-mode
+    :ensure t
+    :config
+    (ido-vertical-mode 1)
+    (setq ido-vertical-define-keys 'C-n-and-C-p-only))
 #+end_src
 
 ** Other, spell checking, tabs, imenu and a coding hook
@@ -182,7 +189,7 @@ Install the required dictionaries!
 #+BEGIN_SRC emacs-lisp
   (use-package workgroups2
     :ensure t
-;    :disabled t
+    :disabled t
     :config
     (setq wg-prefix-key (kbd "C-x w"))
     (setq wg-flag-modified t
@@ -210,6 +217,7 @@ Install the required dictionaries!
 
 ** Magit
 #+BEGIN_SRC emacs-lisp
-(use-package magit :ensure t
-:defer t)
+  (use-package magit 
+    :ensure t
+    :defer t)
 #+END_SRC

@@ -8,16 +8,18 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
     :ensure t
     :mode ("\\.js$" . js2-mode)
     :interpreter ("node" . js2-mode)
+    :init
+    (setq js2-basic-offset 2)
     :config
-    (add-hook 'js2-mode-hook (lambda () (setq js2-basic-offest 2)))
     (add-hook 'js2-mode-hook 'run-starter-kit-coding-hook)
     (add-hook 'js2-mode-hook
               '(lambda ()
-                 (define-key js2-mode-map "\C-ci" 'js-doc-insert-function-doc)
+                 (define-key js2-mode-map (kbd "C-c i") 'js-doc-insert-function-doc)
                  (define-key js2-mode-map "@" 'js-doc-insert-tag)))
     )
   (use-package js-doc
-    :ensure t)
+    :ensure t
+    :defer t)
 #+END_SRC
 
 #+begin_src emacs-lisp
@@ -35,9 +37,11 @@ Once in a while it can be usefull to restart tern.
   (add-hook 'js2-mode-hook (lambda ()
                              (auto-complete-mode)))
   (use-package tern-auto-complete
-    :ensure t)
+    :ensure t
+    :defer t)
 
   (use-package tern
+    :defer t
     :ensure t
     :config
     (eval-after-load 'tern
@@ -67,6 +71,15 @@ Once in a while it can be usefull to restart tern.
                                (setq web-mode-markup-indent-offset 2)
                                (setq web-mode-css-indent-offset 2)
                                (setq web-mode-code-indent-offset 2)
+                               (js2-minor-mode)
+                               (local-set-key (kbd "}") '(lambda ()
+                                                           (interactive)
+                                                           (insert "}")
+                                                           (indent-for-tab-command)))
+                               (local-set-key (kbd ";") '(lambda ()
+                                                           (interactive)
+                                                           (insert ";")
+                                                           (indent-for-tab-command)))
                                ))
     )
 
@@ -102,5 +115,20 @@ Once in a while it can be usefull to restart tern.
 * JSON
 #+BEGIN_SRC emacs-lisp
   (use-package json-mode
-    :ensure t)
+    :ensure t
+    :mode ("\\.json$" . json-mode))
+#+END_SRC
+
+* Hide/Show
+#+BEGIN_SRC emacs-lisp
+  (defun enable-hide-show-mode ()
+                (local-set-key (kbd "C-c s") 'hs-show-block)
+                (local-set-key (kbd "C-c a") 'hs-show-all)
+                (local-set-key (kbd "C-c h") 'hs-hide-block)
+                (local-set-key (kbd "C-c n") 'hs-hide-block)
+                (hs-minor-mode t))
+
+  (add-hook 'js2-mode-hook 'enable-hide-show-mode)
+  (add-hook 'web-mode-hook 'enable-hide-show-mode)
+  (add-hook 'json-mode-hook 'enable-hide-show-mode)
 #+END_SRC

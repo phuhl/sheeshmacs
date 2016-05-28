@@ -192,6 +192,7 @@ file using the `org-babel-lob-ingest' function.
 ** Publish
 #+begin_src emacs-lisp
   (use-package ox-publish
+    :defer t
     :config
     (setq org-publish-project-alist
           `(
