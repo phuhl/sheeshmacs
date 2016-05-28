@@ -4,9 +4,63 @@
 # Packaging
 .cask
 
-# Generated/Packages
-elpa/
-
 # Emacs
 *~
 *\#
+
+## misc
+loaddefs.el*
+auto-save-list
+places
+.svn
+.DS_Store
+tramp
+.smex-items
+ac-comphist.dat
+ido.last
+
+## directories
+backups/*
+thumbs/*
+oddmuse/*
+eshell/*
+image-dired/*
+elim/*
+doc/*
+elpa/*
+themes/*
+url/*
+
+## exported and encrypted files
+*gpg
+*el
+*elc
+*html
+*tex
+*pdf
+*txt
+
+## org stuff
+.org-id-locations
+
+## ignore mail/gnus cruft for those who keep mail in this directory
+drafts
+Mail
+mail
+.newsrc-dribble
+.nnmail-cache
+#.newsrc-dribble#
+*.SCORE
+marks
+.session
+abbrev_defs
+scratch
+secret.org
+.emacs.desktop*
+.*~
+agent/*
+
+## package directory
+!literate-starter-kit-pkg.el
+literate-starter-kit/
+literate-starter-kit.tar
