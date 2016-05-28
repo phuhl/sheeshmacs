@@ -72,17 +72,20 @@ ido-mode is like magic pixie dust!
   (random t)
 #+end_src
 
-** Browser/PDF Viewer
+** Browser (linux)/PDF Viewer (linux)/Git (windows)
 #+begin_src emacs-lisp
-  (when (eq system-type 'gnu/linux)
-    (setq browse-url-browser-function 'browse-url-generic
-          browse-url-generic-program "chromium")
-    (setq org-file-apps
-          (quote
-           ((auto-mode . emacs)
-            ("\\.mm\\'" . default)
-            ("\\.x?html?\\'" . "chromium %s")
-            ("\\.pdf\\'" . "evince %s")))))
+    (when (eq system-type 'gnu/linux)
+      (setq browse-url-browser-function 'browse-url-generic
+            browse-url-generic-program "chromium")
+      (setq org-file-apps
+            (quote
+             ((auto-mode . emacs)
+              ("\\.mm\\'" . default)
+              ("\\.x?html?\\'" . "chromium %s")
+              ("\\.pdf\\'" . "evince %s")))))
+
+    (when (eq system-type 'windows-nt)
+      (add-to-list 'exec-path "C:/Program Files/Git/bin"))
 #+end_src
 
 ** Killring backwards
