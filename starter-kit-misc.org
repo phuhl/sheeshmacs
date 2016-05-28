@@ -90,12 +90,12 @@ ido-mode is like magic pixie dust!
 
 ** Killring backwards
 #+begin_src emacs-lisp
-; Killring backwards
-(defun yank-pop-forwards (arg)
-  (interactive "p")
-  (yank-pop (- arg)))
+  ;; Killring backwards
+  (defun yank-pop-forwards (arg)
+    (interactive "p")
+    (yank-pop (- arg)))
 
-(global-set-key "\M-Y" 'yank-pop-forwards) ; M-Y (M-Shift-y), Killring rückwärts drehen
+  (global-set-key "\M-Y" 'yank-pop-forwards) ; M-Y (M-Shift-y), Killring rückwärts drehen
 #+end_src
 
 ** Multiple Cursors
