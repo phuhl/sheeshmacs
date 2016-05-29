@@ -9,30 +9,53 @@ interested in the actual code implementing the starter kit.
 ** Pathes
 Pathes, potentially different on every system
 #+begin_src emacs-lisp
-(setq org-link-abbrev-alist
-      '(("dropboxpath" . "~/Dropbox")
-        ("cloudpath" . "~/")
-        ("imgpath" . "~/images")
-        ))
+  (let ((pathes-file (expand-file-name "pathes.el" starter-kit-dir)))
+    (if (file-exists-p pathes-file)
+        (load-file pathes-file)
+      (progn
+        (switch-to-buffer (find-file-noselect pathes-file))
+        (insert ";;
+  ;; This is your pathes.el file. You have to set it up only once.
+  ;; This file must be saved in your emacs-starter-kit folder with
+  ;; the name pathes.el. Everything is setup for you, just edit the
+  ;; pathes and hit C-x C-s.
+  ;;
 
-(defvar org-base-dir "~/todo")
-(defvar org-exp-dir "~/todo_html")
+  ;; Path-abbreviations for org-mode
+  ;; ===============================
+  ;; You can use them in links like this:
+  ;; [[gitpath:myproject/.gitignore][.gitignore of myproject]]
+  (setq org-link-abbrev-alist
+        '((\"dropboxpath\" . \"~/Dropbox\")
+          (\"cloudpath\" . \"~/\")
+          (\"imgpath\" . \"~/images\")
+          (\"gitpath\" . \"~/git\")
+          ))
+
+  ;; Project-settings for org-mode
+  ;; =============================
+  ;; Defines where your org-mode project lives
+  (defvar org-base-dir \"~/todo\")
+  ;; Defines where to export your org-project to
+  (defvar org-exp-dir \"~/todo_html\")
+  "))
+      ))
 #+end_src
 
 ** Starter kit basics
 - Load path (=src= + subdirs, =elpa= for packages) and custom-file (=custom.el=)
   #+name: starter-kit-load-paths
   #+begin_src emacs-lisp
-    (let ((elisp-dir (expand-file-name "src" starter-kit-dir)))
-      ;; add the src directory to the load path
-      (add-to-list 'load-path elisp-dir)
-      ;; load specific files
-      (when (file-exists-p elisp-dir)
-        (let ((default-directory elisp-dir))
-          (normal-top-level-add-subdirs-to-load-path))))
-	  ;    (setq autoload-file (concat starter-kit-dir "loaddefs.el"))
-    (setq package-user-dir (concat starter-kit-dir "elpa"))
-    (setq custom-file (concat starter-kit-dir "custom.el"))
+      (let ((elisp-dir (expand-file-name "src" starter-kit-dir)))
+        ;; add the src directory to the load path
+        (add-to-list 'load-path elisp-dir)
+        ;; load specific files
+        (when (file-exists-p elisp-dir)
+          (let ((default-directory elisp-dir))
+            (normal-top-level-add-subdirs-to-load-path))))
+                                            ; (setq autoload-file (concat starter-kit-dir "loaddefs.el"))
+      (setq package-user-dir (concat starter-kit-dir "elpa"))
+      (setq custom-file (concat starter-kit-dir "custom.el"))
   #+end_src
 
 - Ubiquitous Packages which should be loaded on startup rather than
@@ -55,8 +78,8 @@ Pathes, potentially different on every system
               '(("gnu"         . "https://elpa.gnu.org/packages/")
                 ("org"         . "http://orgmode.org/elpa/")
                 ("melpa"       . "https://melpa.org/packages/")
-		;                ("marmalade"   . "http://marmalade-repo.org/packages/")
-		))
+    ;                ("marmalade"   . "http://marmalade-repo.org/packages/")
+    ))
         (package-initialize)
   #+end_src
 
@@ -69,10 +92,10 @@ Pathes, potentially different on every system
     configuration from within that subtree will be loaded.  If it is
     not an id then it will be interpreted as a tag, and only subtrees
     marked with the given tag will be loaded.
-    
+
     For example, to load all of starter-kit-lisp.org simply
     add (starter-kit-load \"lisp\") to your configuration.
-    
+
     To load only the 'window-system' config from
     starter-kit-misc-recommended.org add
      (starter-kit-load \"misc-recommended\" \"window-system\")
@@ -160,13 +183,14 @@ everyone using the starter kit.
   #+end_src
 
 - Further stuff ([[file:starter-kit-haskell.org][starter-kit-haskell]], [[file:starter-kit-org.org][starter-kit-org]],
-  [[file:starter-kit-yasnippet.org][starter-kit-yasnippet]], [[file:starter-kit-lisp.org][starter-kit-lisp]], [[file:starter-kit-js.org][starter-kit-js]])
+  [[file:starter-kit-yasnippet.org][starter-kit-yasnippet]], [[file:starter-kit-lisp.org][starter-kit-lisp]], [[file:starter-kit-js.org][starter-kit-js]], [[file:starter-kit-java.org][starter-kit-java]])
   #+begin_src emacs-lisp
   (starter-kit-load "haskell")
   (starter-kit-load "org")
   (starter-kit-load "yasnippet")
   (starter-kit-load "lisp")
   (starter-kit-load "js")
+  (starter-kit-load "java")
   #+end_src
   
 ** Settings from M-x customize
@@ -175,11 +199,3 @@ everyone using the starter kit.
   (load custom-file 'noerror)
 #+end_src
 
-** Variables
-#+begin_src emacs-lisp
-(setq column-number-mode t)
-#+end_src
-** TODO Stuff
-  #+begin_src emacs-lisp
-;    (load-file "~/.emacs.d/src/beautify-java.el")
-  #+end_src

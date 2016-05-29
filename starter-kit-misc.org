@@ -13,17 +13,27 @@ Things that don't fit anywhere else.
   (set-keyboard-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
 
-  (setq visible-bell t
-        font-lock-maximum-decoration t
-        inhibit-startup-message t
-        transient-mark-mode t
-        shift-select-mode nil
-        ;; uniquify-buffer-name-style 'forward
-        whitespace-style '(trailing lines tabs lines-tail indentation face)
-        whitespace-line-column 80
-        whitespace-global-modes '(not org-mode)
-        ;; ediff-window-setup-function 'ediff-setup-windows-plain
-        )
+  (custom-set-variables
+   ;; Bars + scrolling
+   '(menu-bar-mode nil)
+   '(scroll-bar-mode nil)
+   '(scroll-error-top-bottom t)
+   '(tool-bar-mode nil)
+   ;; Theme
+   '(custom-enabled-themes (quote (tsdh-dark))))
+
+   (setq visible-bell t
+         font-lock-maximum-decoration t
+         inhibit-startup-message t
+         transient-mark-mode t
+         shift-select-mode nil
+         column-number-mode t
+         ;; uniquify-buffer-name-style 'forward
+         whitespace-style '(trailing tabs lines-tail indentation face)
+         whitespace-line-column 80
+         whitespace-global-modes '(not org-mode)
+         ;; ediff-window-setup-function 'ediff-setup-windows-plain
+         )
 #+end_src
 
 ** Highlight matching parentheses when the point is on them.

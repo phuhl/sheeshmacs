@@ -24,7 +24,7 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
 #+begin_src emacs-lisp
 (font-lock-add-keywords 'js2-mode
-                        '(("\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\)"
+                        '(("\\(FIX\\|TODO\\|BUG\\|HACK\\|REFACTOR\\)"
                            1 font-lock-warning-face t)))
 #+end_src
 
