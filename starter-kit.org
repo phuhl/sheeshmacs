@@ -38,6 +38,12 @@ Pathes, potentially different on every system
   (defvar org-base-dir \"~/todo\")
   ;; Defines where to export your org-project to
   (defvar org-exp-dir \"~/todo_html\")
+
+  ;; Plantuml .jar path
+  ;; ==================
+  ;; If you do not have plantuml installed, you do not have to set this
+  ;; variable to a valid path, but you will not be able to use plantuml.
+  (defvar plantuml-dir \"/usr/share/plantuml/plantuml.jar\")
   "))
       ))
 #+end_src
