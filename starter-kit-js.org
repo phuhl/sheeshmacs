@@ -124,13 +124,6 @@ Once in a while it can be usefull to restart tern.
 
 * Hide/Show
 #+BEGIN_SRC emacs-lisp
-  (defun enable-hide-show-mode ()
-                (local-set-key (kbd "C-c s") 'hs-show-block)
-                (local-set-key (kbd "C-c a") 'hs-show-all)
-                (local-set-key (kbd "C-c h") 'hs-hide-block)
-                (local-set-key (kbd "C-c n") 'hs-hide-block)
-                (hs-minor-mode t))
-
   (add-hook 'js2-mode-hook 'enable-hide-show-mode)
   (add-hook 'web-mode-hook 'enable-hide-show-mode)
   (add-hook 'json-mode-hook 'enable-hide-show-mode)

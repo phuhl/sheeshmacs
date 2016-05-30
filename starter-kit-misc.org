@@ -71,6 +71,7 @@ ido-mode is like magic pixie dust!
   (set-default 'indent-tabs-mode nil)
   (set-default 'indicate-empty-lines t)
   (set-default 'tab-width 2)
+  (set-default 'c-basic-offset 2)
 
 ;  (set-default 'imenu-auto-rescan t)
 

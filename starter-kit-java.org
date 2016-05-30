@@ -14,6 +14,7 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
 #+begin_src emacs-lisp
   (add-hook 'java-mode-hook 'run-starter-kit-coding-hook)
+  (add-hook 'java-mode-hook 'enable-hide-show-mode)
 #+end_src
 
 ** Java-beautifier
