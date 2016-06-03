@@ -30,6 +30,7 @@ doc/*
 elpa/*
 themes/*
 url/*
+server/*
 
 ## exported and encrypted files
 *gpg
