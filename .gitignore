@@ -31,6 +31,7 @@ elpa/*
 themes/*
 url/*
 server/*
+src/beautify-java.el
 
 ## exported and encrypted files
 *gpg
