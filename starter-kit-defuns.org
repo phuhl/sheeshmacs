@@ -49,3 +49,13 @@ a lambda doesn't already exist in the list.
   "Enable things that are convenient across all coding buffers."
   (run-hooks 'starter-kit-coding-hook))
 #+end_src
+
+* HS-Minor-Mode
+#+BEGIN_SRC emacs-lisp
+  (defun enable-hide-show-mode ()
+                (local-set-key (kbd "C-c s") 'hs-show-block)
+                (local-set-key (kbd "C-c a") 'hs-show-all)
+                (local-set-key (kbd "C-c h") 'hs-hide-block)
+                (local-set-key (kbd "C-c n") 'hs-hide-block)
+                (hs-minor-mode t))
+#+END_SRC
