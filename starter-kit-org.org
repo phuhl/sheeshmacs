@@ -28,6 +28,7 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
               (local-set-key "\M-\C-w" 'org-table-copy-region)
               (local-set-key "\M-\C-y" 'org-table-paste-rectangle)
               (local-set-key "\M-\C-l" 'org-table-sort-lines)
+              (local-set-key (kbd "C-c $") 'org-advertized-archive-subtree)
               (local-set-key (kbd "C-c i") 'org-screenshot)
               (local-set-key (kbd "M-a") 'org-agenda-list)
               (local-set-key (kbd "M-t") 'org-todo-list)
