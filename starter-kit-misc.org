@@ -19,6 +19,7 @@ Things that don't fit anywhere else.
    '(scroll-bar-mode nil)
    '(scroll-error-top-bottom t)
    '(tool-bar-mode nil)
+   '(c-basic-offset 2)
    ;; Theme
    '(custom-enabled-themes (quote (tsdh-dark))))
 
@@ -85,18 +86,22 @@ ido-mode is like magic pixie dust!
 
 ** Browser (linux)/PDF Viewer (linux)/Git (windows)
 #+begin_src emacs-lisp
-  (when (eq system-type 'gnu/linux)
-    (setq browse-url-browser-function 'browse-url-generic
-          browse-url-generic-program "chromium")
-    (setq org-file-apps
-          (quote
-           ((auto-mode . emacs)
-            ("\\.mm\\'" . default)
-            ("\\.x?html?\\'" . "chromium %s")
-            ("\\.pdf\\'" . "evince %s")))))
+      (when (eq system-type 'gnu/linux)
+        (setq browse-url-browser-function 'browse-url-generic
+              browse-url-generic-program "chromium")
+        (setq org-file-apps
+              (quote
+               ((auto-mode . emacs)
+                ("\\.mm\\'" . default)
+                ("\\.x?html?\\'" . "chromium %s")
+                ("\\.pdf\\'" . "evince %s")))))
 
-  (when (eq system-type 'windows-nt)
-    (add-to-list 'exec-path "C:/Program Files/Git/bin"))
+      (when (eq system-type 'windows-nt)
+        (add-to-list 'exec-path "C:/Program Files/Git/bin")
+        (setq org-file-apps
+              (quote
+               ((directory . emacs)
+                (auto-mode . emacs)))))
 #+end_src
 
 ** Killring backwards
@@ -158,7 +163,7 @@ ido-mode is like magic pixie dust!
       (define-key flyspell-mode-map (kbd "C-,") nil)
       (define-key flyspell-mode-map (kbd "C-;") nil)
       (with-eval-after-load "ispell"
-        (setq ispell-program-name "hunspell")
+;        (setq ispell-program-name "hunspell")
         (setq ispell-directory "en_US,de_DE")
         (ispell-set-spellchecker-params)
         (when (> emacs-major-version 24)
@@ -231,7 +236,7 @@ Install the required dictionaries!
 
 ** Magit
 #+BEGIN_SRC emacs-lisp
-  (use-package magit 
+  (use-package magit
     :ensure t
     :defer t)
 #+END_SRC

@@ -13,7 +13,12 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 ** Java Mode
 
 #+begin_src emacs-lisp
+  (defun my-indent-setup ()
+    (c-set-offset 'arglist-intro '++)
+    (c-set-offset 'arglist-cont '0)
+    (c-set-offset 'arglist-cont-nonempty 'c-lineup-arglist))
   (add-hook 'java-mode-hook 'run-starter-kit-coding-hook)
+  (add-hook 'java-mode-hook 'my-indent-setup)
   (add-hook 'java-mode-hook 'enable-hide-show-mode)
 #+end_src
 
