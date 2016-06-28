@@ -105,8 +105,9 @@ Reloads images if neccessary after the execution of a code-block
 *** Plantuml
 Setting the plantuml.jar
 #+begin_src emacs-lisp
-  (setq org-plantuml-jar-path
-        (expand-file-name plantuml-dir))
+  (if (boundp 'plantuml-dir)
+      (setq org-plantuml-jar-path
+            (expand-file-name plantuml-dir)))
 #+end_src
 
 ** Code block fontification
