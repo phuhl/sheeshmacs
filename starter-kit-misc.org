@@ -97,7 +97,6 @@ ido-mode is like magic pixie dust!
                 ("\\.pdf\\'" . "evince %s")))))
 
       (when (eq system-type 'windows-nt)
-        (add-to-list 'exec-path "C:/Program Files/Git/bin")
         (setq org-file-apps
               (quote
                ((directory . emacs)
