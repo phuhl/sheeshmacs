@@ -247,3 +247,11 @@ Install the required dictionaries!
     (when (eq system-type 'windows-nt)
       (start-ssh-agency)))
 #+END_SRC
+
+** Dired
+#+begin_src emacs-lisp
+  (add-hook 'dired-mode-hook
+            (lambda ()
+              (local-set-key (kbd "b") 'dired-up-directory)))
+#+end_src
+
