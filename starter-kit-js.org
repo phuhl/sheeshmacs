@@ -51,51 +51,6 @@ Once in a while it can be usefull to restart tern.
     )
 #+END_SRC
 
-* Web-mode
-#+BEGIN_SRC emacs-lisp
-  (use-package web-mode
-    :ensure t
-    :mode (
-           ("\\.phtml\\'" . web-mode)
-           ("\\.tpl\\.php\\'" . web-mode)
-           ("\\.[agj]sp\\'" . web-mode)
-           ("\\.as[cp]x\\'" . web-mode)
-           ("\\.erb\\'" . web-mode)
-           ("\\.mustache\\'" . web-mode)
-           ("\\.djhtml\\'" . web-mode)
-           ("\\.html?\\'" . web-mode)
-           ("\\.jsx\\'" . web-mode))
-    :config
-    (add-hook 'web-mode-hook 'run-starter-kit-coding-hook)
-    (add-hook 'web-mode-hook (lambda ()
-                               (setq web-mode-markup-indent-offset 2)
-                               (setq web-mode-css-indent-offset 2)
-                               (setq web-mode-code-indent-offset 2)
-                               (js2-minor-mode)
-                               (local-set-key (kbd "}") '(lambda ()
-                                                           (interactive)
-                                                           (insert "}")
-                                                           (indent-for-tab-command)))
-                               (local-set-key (kbd ";") '(lambda ()
-                                                           (interactive)
-                                                           (insert ";")
-                                                           (indent-for-tab-command)))
-                               ))
-    )
-
-  (font-lock-add-keywords 'web-mode
-                          '(("\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\)"
-                             1 font-lock-warning-face t)))
-  ;; for better jsx syntax-highlighting in web-mode
-  ;; - courtesy of Patrick @halbtuerke
-  (defadvice web-mode-highlight-part (around tweak-jsx activate)
-    (if (equal web-mode-content-type "jsx")
-        (let ((web-mode-enable-part-face nil))
-          ad-do-it)
-      ad-do-it))
-
-#+END_SRC
-
 * Spell checking
  :PROPERTIES:
  :tangle:  no
