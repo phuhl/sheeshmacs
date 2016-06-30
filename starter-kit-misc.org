@@ -84,7 +84,7 @@ ido-mode is like magic pixie dust!
   (random t)
 #+end_src
 
-** Browser (linux)/PDF Viewer (linux)/Git (windows)
+** Browser (linux)/PDF Viewer (linux)
 #+begin_src emacs-lisp
       (when (eq system-type 'gnu/linux)
         (setq browse-url-browser-function 'browse-url-generic
@@ -237,5 +237,13 @@ Install the required dictionaries!
 #+BEGIN_SRC emacs-lisp
   (use-package magit
     :ensure t
-    :defer t)
+    :defer t
+    :init
+    (defun start-ssh-agency ()
+      (require 'ssh-agency)
+      (ssh-agency-add-keys my-ssh-agency-key-list)
+      (ssh-agency-ensure))
+    :config
+    (when (eq system-type 'windows-nt)
+      (start-ssh-agency)))
 #+END_SRC
