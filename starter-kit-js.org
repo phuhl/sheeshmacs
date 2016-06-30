@@ -80,6 +80,5 @@ Once in a while it can be usefull to restart tern.
 * Hide/Show
 #+BEGIN_SRC emacs-lisp
   (add-hook 'js2-mode-hook 'enable-hide-show-mode)
-  (add-hook 'web-mode-hook 'enable-hide-show-mode)
   (add-hook 'json-mode-hook 'enable-hide-show-mode)
 #+END_SRC
