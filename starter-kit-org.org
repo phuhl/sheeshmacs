@@ -31,6 +31,7 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
               (local-set-key (kbd "C-c $") 'org-advertized-archive-subtree)
               (local-set-key (kbd "C-c i") 'org-screenshot)
               (local-set-key (kbd "M-t") 'org-todo-list)
+              (local-set-key (kbd "M-a") 'org-agenda-list-priv)
               ))
   (define-key global-map "\C-cc" 'org-capture)
   (defun org-agenda-list-priv (pre)

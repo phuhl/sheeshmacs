@@ -34,7 +34,7 @@ If FILEXT is provided, return files with extension FILEXT instead."
     (erase-buffer)
     (org-mode)
     (org-file-list-mode)
-    (insert (mapconcat '(lambda (x)
+    (insert (mapconcat #'(lambda (x)
                           (concat "[[" x "][" (cl-subseq x (length org-base-dir)) "]]")) 
                        orgfiles "\n"))
     (goto-char 0)
