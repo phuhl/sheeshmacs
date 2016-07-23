@@ -3,6 +3,27 @@
 
 This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
+
+* Hex-color-mode
+#+begin_src emacs-lisp
+  (defvar hexcolour-keywords
+          '(("#[abcdefABCDEF[:digit:]]\\{3,6\\}"
+             (0 (let ((colour (match-string-no-properties 0)))
+                  (if (or (= (length colour) 4)
+                          (= (length colour) 7))
+                      (put-text-property
+                       (match-beginning 0)
+                       (match-end 0)
+                       'face (list :background (match-string-no-properties 0)
+                                   :foreground (if (>= (apply '+ (x-color-values 
+                                                                  (match-string-no-properties 0)))
+                                                       (* (apply '+ (x-color-values "white")) .6))
+                                                   "black" ;; light bg, dark text
+                                                 "white" ;; dark bg, light text
+                                                )))))
+                append))))
+#+end_src
+
 * The starter-kit-coding-hook:
 A single hook holding those functions which should be run in *every*
 code buffer.
@@ -33,6 +54,9 @@ a lambda doesn't already exist in the list.
 
 (defun starter-kit-turn-on-whitespace ()
   (whitespace-mode t))
+
+(defun stater-kit-turn-on-hex-color-mode ()
+  (font-lock-add-keywords nil hexcolour-keywords t))
 #+end_src
 
 
@@ -41,6 +65,7 @@ a lambda doesn't already exist in the list.
 (add-hook 'starter-kit-coding-hook 'starter-kit-local-comment-auto-fill)
 (add-hook 'starter-kit-coding-hook 'starter-kit-local-linum-mode)
 (add-hook 'starter-kit-coding-hook 'starter-kit-turn-on-whitespace)
+(add-hook 'starter-kit-coding-hook 'stater-kit-turn-on-hex-color-mode)
 #+end_src
 
 #+name: starter-kit-run-starter-kit-coding-hook

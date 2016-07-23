@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: uml
+# key: uml
+# --
+#+BEGIN_SRC plantuml :file ./${1:`(file-relative-name (buffer-file-name) (file-name-directory (buffer-file-name)))`}.img/$2.png
+$0
+#+END_SRC

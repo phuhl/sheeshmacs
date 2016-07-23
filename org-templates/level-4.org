@@ -1,0 +1,3 @@
+#+STARTUP:inlineimages
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../../../static/solarized-light.css" />
+#+INFOJS_OPT: view:overview toc:t ltoc:nil mouse:#DDD9BB buttons:nil path:../../../../static/org-info-src.js
