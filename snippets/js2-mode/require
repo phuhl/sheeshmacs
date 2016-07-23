@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: require
+# key: require
+# --
+var ${3:${2:$(capitalize yas-text)}} = require('.$1/$2.js');
+$0

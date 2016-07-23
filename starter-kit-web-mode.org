@@ -55,3 +55,8 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 #+BEGIN_SRC emacs-lisp
   (add-hook 'web-mode-hook 'enable-hide-show-mode)
 #+END_SRC
+
+* CSS-mode
+#+begin_src emacs-lisp
+  (add-hook 'css-mode-hook 'run-starter-kit-coding-hook)
+#+end_src
