@@ -209,7 +209,8 @@ everyone using the starter kit.
   #+end_src
 
 - Further stuff ([[file:starter-kit-haskell.org][starter-kit-haskell]], [[file:starter-kit-org.org][starter-kit-org]],
-  [[file:starter-kit-yasnippet.org][starter-kit-yasnippet]], [[file:starter-kit-lisp.org][starter-kit-lisp]], [[file:starter-kit-js.org][starter-kit-js]], [[file:starter-kit-java.org][starter-kit-java]])
+  [[file:starter-kit-yasnippet.org][starter-kit-yasnippet]], [[file:starter-kit-lisp.org][starter-kit-lisp]], [[file:starter-kit-js.org][starter-kit-js]],
+  [[file:starter-kit-java.org][starter-kit-java]], [[file:starter-kit-web-mode.org][starter-kit-web-mode]])
   #+begin_src emacs-lisp
   (starter-kit-load "haskell")
   (starter-kit-load "org")
@@ -217,6 +218,7 @@ everyone using the starter kit.
   (starter-kit-load "lisp")
   (starter-kit-load "js")
   (starter-kit-load "java")
+  (starter-kit-load "web-mode")
   #+end_src
   
 ** Settings from M-x customize
