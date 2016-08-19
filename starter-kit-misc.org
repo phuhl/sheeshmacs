@@ -290,3 +290,19 @@ TransposeWindows. There may well be better ways to write this."
     (select-window first-win)
     (if this-win-2nd (other-window 1))))))
 #+end_src
+
+** Ask before closing emacs
+#+begin_src emacs-lisp
+  (defun close-ask-if-many-buffers ()
+    "Asks if you really want to close emacs if more than 30 buffers are open.
+   Otherwise closes emacs without asking."
+    (interactive)
+    (if (> (length (buffer-list)) 20)
+        (progn
+          (message "Really close? Many buffers are open. (y/n) ")
+          (if (eq (read-char) 121)
+              (save-buffers-kill-terminal)))
+      (save-buffers-kill-terminal)))
+
+  (global-set-key (kbd "C-x C-c") 'close-ask-if-many-buffers)
+#+end_src

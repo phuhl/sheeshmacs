@@ -48,10 +48,11 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
 
 ** Variables
 #+begin_src emacs-lisp
-  (setq org-enforce-todo-checkbox-dependencies t)
+  ;;  (setq org-enforce-todo-checkbox-dependencies t)
   (setq org-startup-indented t)
   (setq org-startup-with-inline-images t)
-  (add-hook 'org-mode-hook 
+  (setq org-enforce-todo-dependencies t)
+  (add-hook 'org-mode-hook
             (lambda ()
               (setq truncate-lines t)
               (setq word-wrap t)
