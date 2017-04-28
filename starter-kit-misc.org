@@ -147,26 +147,28 @@ ido-mode is like magic pixie dust!
 
 ** Flyspell
 #+BEGIN_SRC emacs-lisp
-  (when (eq system-type 'gnu/linux)
-    (use-package flyspell
-      :ensure t
-      :init
-      (add-hook 'org-mode-hook 'flyspell-mode)
-      (add-hook 'text-mode-hook 'flyspell-mode)
-      :bind
-      (("C-; ," . flyspell-goto-next-error)
-       ("C-; ." . flyspell-auto-correct-word))
-      :config
-      (setq flyspell-issue-message-flag nil)
-      (define-key flyspell-mode-map (kbd "C-.") nil)
-      (define-key flyspell-mode-map (kbd "C-,") nil)
-      (define-key flyspell-mode-map (kbd "C-;") nil)
-      (with-eval-after-load "ispell"
-;        (setq ispell-program-name "hunspell")
-        (setq ispell-directory "en_US,de_DE")
-        (ispell-set-spellchecker-params)
-        (when (> emacs-major-version 24)
-          (ispell-hunspell-add-multi-dic '(("en_US", "de_DE")))))))
+    (when (eq system-type 'gnu/linux)
+      (use-package flyspell
+        :ensure t
+        :init
+        (add-hook 'org-mode-hook 'flyspell-mode)
+        (add-hook 'text-mode-hook 'flyspell-mode)
+        :bind
+        (("C-; ," . flyspell-goto-next-error)
+         ("C-; ." . flyspell-auto-correct-word))
+        :config
+        (setq flyspell-issue-message-flag nil)
+        (define-key flyspell-mode-map (kbd "C-.") nil)
+        (define-key flyspell-mode-map (kbd "C-,") nil)
+        (define-key flyspell-mode-map (kbd "C-;") nil)
+        ;(with-eval-after-load "ispell"
+        ;  (setq ispell-program-name "hunspell")
+        ;  (setq ispell-directory "en_US,de_DE")
+        ;  (setq ispell-directory "en_US")
+        ;  (ispell-set-spellchecker-params)
+        ;  (when (> emacs-major-version 24)
+        ;    (ispell-hunspell-add-multi-dic '(("en_US", "de_DE")))))
+        ))
 #+END_SRC
 
 Install the required dictionaries!

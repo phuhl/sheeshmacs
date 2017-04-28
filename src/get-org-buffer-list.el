@@ -6,21 +6,21 @@
 If FILEXT is provided, return files with extension FILEXT instead."
   (interactive "DDirectory: ")
   (let* (org-file-list
-	 (case-fold-search t)	      ; filesystems are case sensitive
-	 (file-name-regex "^[^.#].*") ; exclude dot, autosave, and backup files
-	 (filext (or filext "org$\\\|org_archive"))
-	 (fileregex (format "%s\\.\\(%s$\\)" file-name-regex filext))
-	 (cur-dir-list (directory-files directory t file-name-regex)))
+   (case-fold-search t)       ; filesystems are case sensitive
+   (file-name-regex "^[^.#].*") ; exclude dot, autosave, and backup files
+   (filext (or filext "org$\\\|"))
+   (fileregex (format "%s\\.\\(%s$\\)" file-name-regex filext))
+   (cur-dir-list (directory-files directory t file-name-regex)))
     ;; loop over directory listing
     (dolist (file-or-dir cur-dir-list org-file-list) ; returns org-file-list
       (cond
        ((file-regular-p file-or-dir) ; regular files
-	(if (string-match fileregex file-or-dir) ; org files
-	    (add-to-list 'org-file-list file-or-dir)))
+  (if (string-match fileregex file-or-dir) ; org files
+      (add-to-list 'org-file-list file-or-dir)))
        ((file-directory-p file-or-dir)
-	(dolist (org-file (sa-find-org-file-recursively file-or-dir filext)
-			  org-file-list) ; add files found to result
-	  (add-to-list 'org-file-list org-file)))))))
+  (dolist (org-file (sa-find-org-file-recursively file-or-dir filext)
+        org-file-list) ; add files found to result
+    (add-to-list 'org-file-list org-file)))))))
 
 (defun show-org-file-list ()
   "Opens buffer that shows all .org and .org_archive files in the
@@ -47,11 +47,11 @@ If FILEXT is provided, return files with extension FILEXT instead."
   :init-value nil
   :keymap
   '(
-    ((kbd "q") 
+    ((kbd "q")
      . (lambda ()
          (interactive)
          (kill-buffer (current-buffer))))
-    ((kbd "o") 
+    ((kbd "o")
      . (lambda ()
          (interactive)
          (org-open-at-point)

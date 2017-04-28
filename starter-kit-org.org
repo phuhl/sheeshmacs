@@ -207,8 +207,8 @@ file using the `org-babel-lob-ingest' function.
         `(("t" "Tasks" entry
            (file+headline "~/org/notes.org" "Tasks")
            ,my/org-basic-task-template)
-          ("k" "Key Binding" table-line 
-           (file "~/org/notes.org") "| | | |") 
+          ("k" "Key Binding" table-line
+           (file "~/org/notes.org") "| | | |")
           ))
 #+end_src
 
@@ -258,4 +258,10 @@ file using the `org-babel-lob-ingest' function.
   (use-package get-org-buffer-list
     :load-path "src"
     :bind ("C-; C-o" . show-org-file-list))
+#+end_src
+
+** Scrap Agenda-files from org-base-directory
+#+begin_src emacs-lisp
+(setq org-agenda-files
+      (sa-find-org-file-recursively org-base-dir))
 #+end_src
