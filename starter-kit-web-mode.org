@@ -23,7 +23,7 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
                                (setq web-mode-markup-indent-offset 2)
                                (setq web-mode-css-indent-offset 2)
                                (setq web-mode-code-indent-offset 2)
-                               (js2-minor-mode)
+;                               (js2-minor-mode)
                                (local-set-key (kbd "}") '(lambda ()
                                                            (interactive)
                                                            (insert "}")
