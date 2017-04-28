@@ -188,6 +188,12 @@ automatically regenerated when you next start emacs.
     (require 'diminish)                ;; if you use :diminish
     (require 'bind-key)                ;; if you use any :bind variant
   #+end_src
+  
+** Settings from M-x customize
+#+name: m-x-customize-customizations
+#+begin_src emacs-lisp
+  (load custom-file 'noerror)
+#+end_src
 ** Starter kit core
 The following files contain the remainder of the core of the Emacs
 Starter Kit.  All of the code in this section should be loaded by
@@ -220,10 +226,4 @@ everyone using the starter kit.
   (starter-kit-load "java")
   (starter-kit-load "web-mode")
   #+end_src
-  
-** Settings from M-x customize
-#+name: m-x-customize-customizations
-#+begin_src emacs-lisp
-  (load custom-file 'noerror)
-#+end_src
 

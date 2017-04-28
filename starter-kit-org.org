@@ -30,8 +30,8 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
               (local-set-key "\M-\C-l" 'org-table-sort-lines)
               (local-set-key (kbd "C-c $") 'org-advertized-archive-subtree)
               (local-set-key (kbd "C-c i") 'org-screenshot)
-              (local-set-key (kbd "M-t") 'org-todo-list)
-              (local-set-key (kbd "M-a") 'org-agenda-list-priv)
+;              (local-set-key (kbd "M-t") 'org-todo-list)
+;              (local-set-key (kbd "M-a") 'org-agenda-list-priv)
               ))
   (define-key global-map "\C-cc" 'org-capture)
   (defun org-agenda-list-priv (pre)
@@ -43,7 +43,7 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
           (org-agenda-list)
           (org-agenda-filter-by-tag t ?p))
       (org-agenda-list)))
-  (define-key global-map (kbd "M-a") 'org-agenda-list-priv)
+;  (define-key global-map (kbd "M-a") 'org-agenda-list-priv)
 #+end_src
 
 ** Variables
@@ -253,15 +253,12 @@ file using the `org-babel-lob-ingest' function.
   (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
 #+end_src
 
-** Quickjump to org-files
+** Quickjump to org-files + Agenda files
 #+begin_src emacs-lisp
-  (use-package get-org-buffer-list
-    :load-path "src"
-    :bind ("C-; C-o" . show-org-file-list))
-#+end_src
-
-** Scrap Agenda-files from org-base-directory
-#+begin_src emacs-lisp
-(setq org-agenda-files
-      (sa-find-org-file-recursively org-base-dir))
+    (use-package get-org-buffer-list
+      :load-path "src"
+      :bind (("C-; C-o" . show-org-file-list)
+             ("M-a" . run-agenda-with-agenda-files)
+             ("M-t" . run-todo-with-agenda-files))
+  )
 #+end_src

@@ -67,3 +67,19 @@ If FILEXT is provided, return files with extension FILEXT instead."
          (kill-buffer (current-buffer))))
     map))
 (add-to-list 'minor-mode-map-alist `(org-file-list-mode . ,org-file-list-map) t)
+
+(defun run-agenda-with-agenda-files (pre)
+  (interactive "P")
+  (progn
+    (setq org-agenda-files
+          (sa-find-org-file-recursively org-base-dir))
+    (org-agenda-list-priv pre)))
+
+
+
+(defun run-todo-with-agenda-files (pre)
+  (interactive "P")
+  (progn
+    (setq org-agenda-files
+          (sa-find-org-file-recursively org-base-dir))
+    (org-todo-list pre)))
