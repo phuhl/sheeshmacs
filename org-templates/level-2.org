@@ -1,3 +1,5 @@
 #+STARTUP:inlineimages
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../static/solarized-light.css" />
 #+INFOJS_OPT: view:overview toc:t ltoc:nil mouse:#DDD9BB buttons:nil path:../../static/org-info-src.js
+#+HTML_HEAD_EXTRA: <meta charset="utf-8">
+#+HTML_HEAD_EXTRA: <script async type="text/javascript" src="https://cdn.rawgit.com/mathjax/MathJax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>

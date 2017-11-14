@@ -237,17 +237,18 @@ Install the required dictionaries!
 
 ** Magit
 #+BEGIN_SRC emacs-lisp
-  (use-package ssh-agency
-    :ensure t
-    :defer t)
+    (use-package ssh-agency
+      :ensure t
+      :defer t)
 
-  (use-package magit
-    :ensure t
-    :defer t
-    :config
-    (when (eq system-type 'windows-nt)
-      (ssh-agency-add-keys my-ssh-agency-key-list)
-      (ssh-agency-ensure)))
+    (use-package magit
+      :ensure t
+      :defer t
+      :config
+      (when (eq system-type 'windows-nt)
+        (require 'ssh-agency)
+        (ssh-agency-add-keys my-ssh-agency-key-list)
+        (ssh-agency-ensure)))
 #+END_SRC
 
 ** Dired

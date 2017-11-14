@@ -84,3 +84,21 @@ a lambda doesn't already exist in the list.
                 (local-set-key (kbd "C-c n") 'hs-hide-block)
                 (hs-minor-mode t))
 #+END_SRC
+
+* Unique error names
+Inserts a unique error name at place. Names are saved in the first
+file named "errornames" found down the file-path.
+
+#+begin_src emacs-lisp
+(defun uerror ()
+  (interactive)
+
+  (setq target-file (concat (locate-dominating-file buffer-file-name "errornames") "errornames"))
+  (setq line-count (length (with-temp-buffer
+    (insert-file-contents target-file)
+    (split-string (buffer-string) "\n" t))))
+
+  (let ((error-name (concat "E" (number-to-string line-count))))
+       (insert error-name)
+       (write-region (concat error-name "\n") nil target-file 'append)))
+#+end_src
