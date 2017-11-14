@@ -18,8 +18,8 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
              ("\\.jsx\\'" . web-mode)
              ("\\.ftl\\'" . web-mode))
       :config
-      (add-hook 'web-mode-hook 'run-starter-kit-coding-hook)
       (add-hook 'web-mode-hook (lambda ()
+                                 (run-starter-kit-coding-hook)
                                  (setq web-mode-markup-indent-offset 2)
                                  (setq web-mode-css-indent-offset 2)
                                  (setq web-mode-code-indent-offset 2)
@@ -32,6 +32,8 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
                                                              (interactive)
                                                              (insert ";")
                                                              (indent-for-tab-command)))
+                                 (set (make-local-variable 'comment-auto-fill-only-comments) nil)
+                                 (auto-fill-mode t)
                                  ))
       :init
       (setq web-mode-engines-alist

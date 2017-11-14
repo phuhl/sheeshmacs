@@ -69,6 +69,13 @@ automatically regenerated when you next start emacs.
 #+end_src
 
 ** Starter kit basics
+- Org mode
+#+begin_src emacs-lisp
+(require 'cl)
+(setq load-path (remove-if (lambda (x) (string-match-p "org$" x)) load-path))
+(use-package org :ensure t)
+#+end_src
+
 - Load path (=src= + subdirs, =elpa= for packages) and custom-file (=custom.el=)
   #+name: starter-kit-load-paths
   #+begin_src emacs-lisp

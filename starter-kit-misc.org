@@ -309,3 +309,11 @@ TransposeWindows. There may well be better ways to write this."
 
   (global-set-key (kbd "C-x C-c") 'close-ask-if-many-buffers)
 #+end_src
+
+** Prolog
+#+begin_src emacs-lisp
+  (add-hook 'prolog-mode-hook
+            (lambda ()
+              (local-set-key (kbd "C-c C-c") 'ediprolog-dwim)
+              (run-starter-kit-coding-hook)))
+#+end_src

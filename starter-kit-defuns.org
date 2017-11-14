@@ -101,4 +101,17 @@ file named "errornames" found down the file-path.
   (let ((error-name (concat "E" (number-to-string line-count))))
        (insert error-name)
        (write-region (concat error-name "\n") nil target-file 'append)))
+
+* Origami-Mode
+More functions at: https://github.com/gregsexton/origami.el
+
+#+begin_src emacs-lisp
+  (defun enable-origami ()
+    (use-package origami
+      :ensure t
+      :bind (
+           ("C-; TAB" . origami-recursively-toggle-node)
+           ("C-; <C-tab>" . origami-show-only-node))
+    )
+    (origami-mode))
 #+end_src
