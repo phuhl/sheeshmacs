@@ -4,18 +4,18 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
 * Starter Kit JS
 #+BEGIN_SRC emacs-lisp
-  (use-package js2-mode
+  (use-package rjsx-mode
     :ensure t
-    :mode ("\\.js$" . js2-mode)
-    :interpreter ("node" . js2-mode)
+    :mode ("\\.js$" . rjsx-mode)
+    :interpreter ("node" . rjsx-mode)
     :init
-    (setq js2-basic-offset 2)
+    (setq rjsx-basic-offset 2)
     :config
-    (add-hook 'js2-mode-hook 'run-starter-kit-coding-hook)
-    (add-hook 'js2-mode-hook
+    (add-hook 'rjsx-mode-hook 'run-starter-kit-coding-hook)
+    (add-hook 'rjsx-mode-hook
               '(lambda ()
-                 (define-key js2-mode-map (kbd "C-c i") 'js-doc-insert-function-doc)
-                 (define-key js2-mode-map "@" 'js-doc-insert-tag)))
+                 (define-key rjsx-mode-map (kbd "C-c i") 'js-doc-insert-function-doc)
+                 (define-key rjsx-mode-map "@" 'js-doc-insert-tag)))
     )
   (use-package js-doc
     :ensure t
@@ -23,7 +23,7 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 #+END_SRC
 
 #+begin_src emacs-lisp
-(font-lock-add-keywords 'js2-mode
+(font-lock-add-keywords 'rjsx-mode
                         '(("\\(FIX\\|TODO\\|BUG\\|HACK\\|REFACTOR\\)"
                            1 font-lock-warning-face t)))
 #+end_src
@@ -31,24 +31,40 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 * Tern
 Once in a while it can be usefull to restart tern.
 #+BEGIN_SRC emacs-lisp
-  (defun delete-tern-process ()
-    (interactive)
-    (delete-process "Tern"))
-  (add-hook 'js2-mode-hook (lambda ()
-                             (auto-complete-mode)))
-  (use-package tern-auto-complete
-    :ensure t
-    :defer t)
+    (use-package company-tern
+        :ensure t
+        :defer t
+        :config
+        (add-to-list 'company-backends 'company-tern))
 
-  (use-package tern
-    :defer t
-    :ensure t
-    :config
-    (eval-after-load 'tern
-      '(progn
-         (require 'tern-auto-complete)
-         (tern-ac-setup)))
-    )
+
+
+      (defun delete-tern-process ()
+        (interactive)
+        (delete-process "Tern"))
+
+  ;    (add-hook 'rjsx-mode-hook (lambda ()
+  ;                               (auto-complete-mode)))
+  (add-hook 'rjsx-mode-hook (lambda ()
+                              (company-mode)))
+  (add-hook 'rjsx-mode-hook (lambda ()
+                              (tern-mode)))
+
+  ;    (use-package tern-auto-complete
+  ;      :ensure t
+  ;      :defer t)
+
+      (use-package tern
+        :defer t
+        :ensure t
+        :config
+        (eval-after-load 'tern
+          '(progn
+   ;          (require 'tern-auto-complete)
+            (require 'company-tern)
+  ;           (tern-ac-setup)
+            ))
+        )
 #+END_SRC
 
 * Spell checking
@@ -79,6 +95,7 @@ Once in a while it can be usefull to restart tern.
 
 * Hide/Show
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'js2-mode-hook 'enable-hide-show-mode)
+  ;  (add-hook 'rjsx-mode-hook 'enable-hide-show-mode)
+  (add-hook 'rjsx-mode-hook 'enable-origami)
   (add-hook 'json-mode-hook 'enable-hide-show-mode)
 #+END_SRC

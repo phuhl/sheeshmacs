@@ -84,3 +84,17 @@ a lambda doesn't already exist in the list.
                 (local-set-key (kbd "C-c n") 'hs-hide-block)
                 (hs-minor-mode t))
 #+END_SRC
+
+* Origami-Mode
+More functions at: https://github.com/gregsexton/origami.el
+
+#+begin_src emacs-lisp
+  (defun enable-origami ()
+    (use-package origami
+      :ensure t
+      :bind (
+           ("C-; TAB" . origami-recursively-toggle-node)
+           ("C-; <C-tab>" . origami-show-only-node))
+    )
+    (origami-mode))
+#+end_src
