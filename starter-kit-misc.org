@@ -317,3 +317,14 @@ TransposeWindows. There may well be better ways to write this."
               (local-set-key (kbd "C-c C-c") 'ediprolog-dwim)
               (run-starter-kit-coding-hook)))
 #+end_src
+
+** Circadian (theme switching based on time)
+
+#+begin_src emacs-lisp
+  (use-package circadian
+    :ensure t
+    :config
+    (setq circadian-themes '((:sunrise . whiteboard)
+                             (:sunset . tsdh-dark)))
+    (circadian-setup))
+#+end_src
