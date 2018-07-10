@@ -101,6 +101,7 @@ file named "errornames" found down the file-path.
   (let ((error-name (concat "E" (number-to-string line-count))))
        (insert error-name)
        (write-region (concat error-name "\n") nil target-file 'append)))
+#+end_src
 
 * Origami-Mode
 More functions at: https://github.com/gregsexton/origami.el
