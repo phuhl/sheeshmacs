@@ -123,6 +123,17 @@ Setting the plantuml.jar
             (expand-file-name plantuml-dir)))
 #+end_src
 
+*** Execute Code Blocks Asynchronously
+
+[[https://github.com/astahlman/ob-async][{github} ob-async]]
+
+Usage: add =:async= to the babel properties of the code block.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ob-async
+    :ensure t)
+#+END_SRC
+
 ** Code block fontification
    :PROPERTIES:
    :CUSTOM_ID: code-block-fontification
