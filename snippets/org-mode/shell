@@ -2,6 +2,6 @@
 # name: shell-script
 # key: shell
 # --
-#+BEGIN_SRC shell-script
+#+BEGIN_SRC sh
 $0
 #+END_SRC

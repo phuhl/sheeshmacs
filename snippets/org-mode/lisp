@@ -2,6 +2,6 @@
 # name: lisp
 # key: lisp
 # --
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 $0
-#+end_src
+#+END_SRC

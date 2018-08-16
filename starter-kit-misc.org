@@ -82,13 +82,15 @@ ido-mode is like magic pixie dust!
   (defalias 'yes-or-no-p 'y-or-n-p)
   ;; Seed the random-number generator
   (random t)
+
+  (global-set-key "\C-x\ \M-\C-e" 'eval-and-replace)
 #+end_src
 
 ** Browser (linux)/PDF Viewer (linux)
 #+begin_src emacs-lisp
       (when (eq system-type 'gnu/linux)
         (setq browse-url-browser-function 'browse-url-generic
-              browse-url-generic-program "chromium")
+              browse-url-generic-program "firefox")
         (setq org-file-apps
               (quote
                ((auto-mode . emacs)
@@ -140,10 +142,30 @@ ido-mode is like magic pixie dust!
 
 ** Ace-Jump-Mode
 #+BEGIN_SRC emacs-lisp
-  (use-package ace-jump-mode
+  (use-package ace-isearch
     :ensure t
-    :bind ("C-c SPC" . ace-jump-mode))
+    :config (progn
+              (global-ace-isearch-mode +1)
+              (setq ace-isearch-use-jump nil)))
+
+  ;;    (use-package ace-jump-mode
+  ;;      :ensure t
+  ;;      :bind ("C-c SPC" . ace-jump-mode))
 #+END_SRC
+
+** Ivy
+
+#+begin_src emacs-lisp
+  (use-package swiper
+    :ensure t)
+  (use-package ivy
+    :ensure t
+    :config (progn
+              (ivy-mode 1)
+
+              (setq ivy-use-virtual-buffers t)
+              (setq ivy-count-format "(%d/%d) ")))
+#+end_src
 
 ** Flyspell
 #+BEGIN_SRC emacs-lisp

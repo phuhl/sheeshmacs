@@ -93,7 +93,9 @@ contains an up to date list of the currently supported languages.
    'org-babel-load-languages
    '((emacs-lisp . t)
      (shell . t)
-     (plantuml . t)))
+     (restclient . t)
+     (plantuml . t)
+     (python . t)))
 #+end_src
 
 You are encouraged to add the following to your personal configuration
@@ -262,3 +264,34 @@ file using the `org-babel-lob-ingest' function.
              ("M-t" . run-todo-with-agenda-files))
   )
 #+end_src
+
+** Org-Bullets Mode
+
+#+begin_src emacs-lisp
+    (use-package org-bullets
+      :ensure t
+      :init (add-hook 'org-mode-hook 'org-bullets-mode)
+      :config (setq org-bullets-bullet-list (quote ("●" "◉" "◎" "○" "◌"))))
+#+end_src
+
+** Lists with unicode bullets
+
+#+begin_src emacs-lisp
+    (use-package org
+      :init
+      (progn
+      (font-lock-add-keywords 'org-mode
+       '(("^ +\\([*]\\) "
+              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+      (font-lock-add-keywords 'org-mode
+       '(("^ *\\([+]\\) "
+          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "◦"))))))))
+#+end_src
+
+** Org-sub-Theme
+
+#+begin_src emacs-lisp
+  (use-package org-beautify-theme
+    :ensure t)
+#+end_src
+
