@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: noweb
+# key: noweb
+# --
+:noweb yes$0

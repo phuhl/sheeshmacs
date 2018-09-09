@@ -293,10 +293,13 @@ file using the `org-babel-lob-ingest' function.
       (progn
       (font-lock-add-keywords 'org-mode
        '(("^ +\\([*]\\) "
-              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "◦"))))))
       (font-lock-add-keywords 'org-mode
        '(("^ *\\([+]\\) "
-          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "◦"))))))))
+          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "✧"))))))
+      (font-lock-add-keywords 'org-mode
+       '(("^ *\\([-]\\) "
+          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))))
 #+end_src
 
 ** Org-sub-Theme

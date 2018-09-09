@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: resout
+# key: resout
+# --
+:results output$0
