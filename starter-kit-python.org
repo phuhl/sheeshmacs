@@ -1,0 +1,24 @@
+#+TITLE: Starter Kit Python
+#+DATE: [2018-11-21 Wed]
+#+AUTHOR: Philipp Uhl
+
+* Starter Kit Python
+
+#+BEGIN_SRC emacs-lisp
+(use-package python
+  :ensure t
+  :defer t
+  :mode ("\\.py\\'" . python-mode))
+
+(use-package elpy
+  :ensure t
+  :after python
+  :config
+  (elpy-enable)
+  (add-hook 'elpy-mode-hook 'run-starter-kit-coding-hook)
+  (setq indent-tabs-mode nil
+        tab-width 4
+        python-indent-offset 4)
+  (setq-default python-indent 4))
+
+#+END_SRC

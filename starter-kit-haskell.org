@@ -88,3 +88,13 @@ pretty lambdas in Haskell code
     ;; Ignore compiled Haskell files in filename completions
     (add-to-list 'completion-ignored-extensions ".hi")
 #+end_src
+
+** Intero Mode
+
+#+BEGIN_SRC emacs-lisp
+(use-package intero
+  :ensure t
+  :defer t
+  :init
+  (add-hook 'haskell-mode-hook 'intero-mode))
+#+END_SRC

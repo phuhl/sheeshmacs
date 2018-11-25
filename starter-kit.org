@@ -232,5 +232,6 @@ everyone using the starter kit.
   (starter-kit-load "js")
   (starter-kit-load "java")
   (starter-kit-load "web-mode")
+  (starter-kit-load "python")
   #+end_src
 
