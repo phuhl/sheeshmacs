@@ -353,3 +353,9 @@ TransposeWindows. There may well be better ways to write this."
 #+BEGIN_SRC emacs-lisp
 (set-frame-parameter (selected-frame) 'alpha '(95 . 85))
 #+END_SRC
+
+** Themes
+
+#+BEGIN_SRC emacs-lisp
+;;(load-file "~/.emacs.d/src/at-day-theme.el")
+#+END_SRC
