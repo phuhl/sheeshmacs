@@ -9,7 +9,12 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
     :mode ("\\.js$" . rjsx-mode)
     :interpreter ("node" . rjsx-mode)
     :init
+
+    ;; Set indentation to 2 spaces
     (setq rjsx-basic-offset 2)
+    (custom-set-variables
+     '(js-indent-level 2))
+
     :config
     (add-hook 'rjsx-mode-hook 'run-starter-kit-coding-hook)
     (add-hook 'rjsx-mode-hook
