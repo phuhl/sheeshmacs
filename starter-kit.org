@@ -235,3 +235,13 @@ everyone using the starter kit.
   (starter-kit-load "python")
   #+end_src
 
+** Startup buffer
+
+#+BEGIN_SRC emacs-lisp
+(find-file "~/.emacs.d/tmp/scratch")
+(org-mode)
+(erase-buffer)
+(insert initial-scratch-message)
+(save-buffer)
+#+END_SRC
+
