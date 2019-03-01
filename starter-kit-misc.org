@@ -396,7 +396,7 @@ https://github.com/mrkkrp/vimish-fold
 
 #+BEGIN_SRC emacs-lisp
   (when (< emacs-major-version 27)
-    (load "~/.emacs.d/src/gamegrid.el")))
+    (load "~/.emacs.d/src/gamegrid.el"))
   (setq gamegrid-glyph-height-mm 8.0)
 #+END_SRC
 
