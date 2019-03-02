@@ -34,6 +34,7 @@ Once in a while it can be usefull to restart tern.
     (use-package company-tern
         :ensure t
         :defer t
+        :bind (("<C-return>" . company-tern))
         :config
         (add-to-list 'company-backends 'company-tern))
 
@@ -73,9 +74,9 @@ Once in a while it can be usefull to restart tern.
  :END:
 #+BEGIN_SRC emacs-lisp
   ;; disable jshint since we prefer eslint checking
-  (setq-default flycheck-disabled-checkers
-    (append flycheck-disabled-checkers
-      '(javascript-jshint)))
+;  (setq-default flycheck-disabled-checkers
+;    (append flycheck-disabled-checkers
+;      '(javascript-jshint)))
 
   ;; use eslint with web-mode for jsx files
   (flycheck-add-mode 'javascript-eslint 'web-mode)
