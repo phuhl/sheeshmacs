@@ -1,5 +1,11 @@
 * Sheesh Emacs
-Sheesh Emacs - The sheeshmost editor
+
+:     ________  __  ____  ____  ________  __     ____________________________________
+:    / ____  /_/ /_/ __/ / __/ / ____  /_/ /    / __/  _____      _      ____   / __/
+:    \ \  / __  __  _/  / _/   \ \  / __  /    / _/   /     \    / \    / __/   \ \   
+:  __/ / / / / / / /__ / /_____/ / / / / /    / /__  / _  _  \  / _ \  / /__  __/ /   
+: /___/ /_/ /_/ /_______________/ /_/ /_/    /____/ /_/ \/ \_/ /_/ \_\ \___/ /___/     
+:                                the sheeshmost editor                        
 
 Just clone to your =.emacs.d= and restart your Emacs (maybe a few times) until everything is installed. 
 Get started at sheeshing your base.
