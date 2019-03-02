@@ -32,6 +32,7 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
                 (local-set-key (kbd "C-c i") 'org-screenshot)
                 (local-set-key (kbd "M-t") 'run-todo-with-agenda-files)
                 (local-set-key (kbd "M-a") 'run-agenda-with-agenda-files)
+                (local-set-key (kbd "C-c C-s") 'org-schedule-effort-new)
                 ))
     (define-key global-map "\C-cc" 'org-capture)
     (defun org-agenda-list-priv (pre)
@@ -48,18 +49,96 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
 
 ** Variables
 #+begin_src emacs-lisp
-  ;;  (setq org-enforce-todo-checkbox-dependencies t)
+  ;; Indents all content according to the corresponding headline.
+  ;; Has slight issues with scrolling the buffer horizontally sometimes,
+  ;; is it worth it in terms of estetics anyways (my opinion).
   (setq org-startup-indented t)
-  (setq org-startup-with-inline-images t)
+
+  ;; Enforces that you can not set an entry to DONE if it has children with TODO
   (setq org-enforce-todo-dependencies t)
+
+  ;; Enforces that you can not set an entry to DONE if it has unchecked
+  ;; checkboxes, quite annoying.
+  ;;  (setq org-enforce-todo-checkbox-dependencies t)
+
+  ;; sets the time (minutes) until the org clock asks if the time should be kept
+  (setq org-clock-idle-time 15)
+
+  ;; langauge of timestamps
+  (setq system-time-locale "C")
+
+  ;; Sets image width to 300px if no #+ATTR_HTML: :width ..px is found
+  (setq org-image-actual-width '(300))
+
+  ;; Makes ord-mode inline all images by default
+  (setq org-startup-with-inline-images t)
+
   (add-hook 'org-mode-hook
             (lambda ()
+              ;; Don't wrap long lines and wrap them at words if you wrap (whut?)
               (setq truncate-lines t)
               (setq word-wrap t)
               (global-whitespace-mode 0)
               (local-set-key (kbd "C-,") 'previous-multiframe-window)
               ))
+
+  ;; Sets the default values for effort estimates
+  (setq org-global-properties
+         '(("Effort_ALL" . "0 0:10 0:20 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")))
+  ;;                        | |    |    |    |    |    |    |    |    |
+  ;; Shortcuts              1 2    3    4    5    6    7    8    9    10
+
+  ;; Sets default clock report table properties
+  (setq org-clock-clocktable-default-properties
+        '(:maxlevel 10 :scope tree :properties ("Effort") :compact t))
 #+end_src
+
+** Schedule Effort
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-schedule-effort ()
+  (interactive)
+    (save-excursion
+      (org-back-to-heading t)
+      (let* (
+          (element (org-element-at-point))
+          (effort (org-element-property :EFFORT element))
+          (scheduled (org-element-property :scheduled element))
+          (ts-year-start (org-element-property :year-start scheduled))
+          (ts-month-start (org-element-property :month-start scheduled))
+          (ts-day-start (org-element-property :day-start scheduled))
+          (ts-hour-start (org-element-property :hour-start scheduled))
+          (ts-minute-start (org-element-property :minute-start scheduled)) )
+        (if (and (not (eq scheduled nil))
+                 (not (eq effort nil))
+                 (not (eq ts-hour-start nil)))
+            (org-schedule nil (concat
+                               (format "%s" ts-year-start)
+                               "-"
+                               (if (< ts-month-start 10)
+                                   (concat "0" (format "%s" ts-month-start))
+                                 (format "%s" ts-month-start))
+                               "-"
+                               (if (< ts-day-start 10)
+                                   (concat "0" (format "%s" ts-day-start))
+                                 (format "%s" ts-day-start))
+                               " "
+                               (if (< ts-hour-start 10)
+                                   (concat "0" (format "%s" ts-hour-start))
+                                 (format "%s" ts-hour-start))
+                               ":"
+                               (if (< ts-minute-start 10)
+                                   (concat "0" (format "%s" ts-minute-start))
+                                 (format "%s" ts-minute-start))
+                               "+"
+                               effort)) ))))
+
+  (defun org-schedule-effort-new ()
+    (interactive)
+    (call-interactively 'org-schedule)
+    (org-schedule-effort)
+    )
+#+END_SRC
 
 ** Speed keys
    :PROPERTIES:
@@ -93,12 +172,15 @@ contains an up to date list of the currently supported languages.
    'org-babel-load-languages
    '((emacs-lisp . t)
      (shell . t)
-     (plantuml . t)))
+     (restclient . t)
+     (plantuml . t)
+     (js . t)
+     (python . t)))
 #+end_src
 
 You are encouraged to add the following to your personal configuration
 although it is not added by default as a security precaution.
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
   (setq org-confirm-babel-evaluate nil)
 #+end_src
 
@@ -120,6 +202,17 @@ Setting the plantuml.jar
       (setq org-plantuml-jar-path
             (expand-file-name plantuml-dir)))
 #+end_src
+
+*** Execute Code Blocks Asynchronously
+
+[[https://github.com/astahlman/ob-async][{github} ob-async]]
+
+Usage: add =:async= to the babel properties of the code block.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ob-async
+    :ensure t)
+#+END_SRC
 
 ** Code block fontification
    :PROPERTIES:
@@ -262,3 +355,59 @@ file using the `org-babel-lob-ingest' function.
              ("M-t" . run-todo-with-agenda-files))
   )
 #+end_src
+
+** Org-Bullets Mode
+
+#+begin_src emacs-lisp
+    (use-package org-bullets
+      :ensure t
+      :init (add-hook 'org-mode-hook 'org-bullets-mode)
+      :config (setq org-bullets-bullet-list (quote ("●" "◉" "◎" "○" "◌"))))
+#+end_src
+
+** Lists with unicode bullets
+
+#+begin_src emacs-lisp
+    (use-package org
+      :init
+      (progn
+      (font-lock-add-keywords 'org-mode
+       '(("^ +\\([*]\\) "
+              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "◦"))))))
+      (font-lock-add-keywords 'org-mode
+       '(("^ *\\([+]\\) "
+          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "✧"))))))
+      (font-lock-add-keywords 'org-mode
+       '(("^ *\\([-]\\) "
+          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))))
+#+end_src
+
+** Org-sub-Theme
+
+#+begin_src emacs-lisp
+   (when window-system
+     (use-package org-beautify-theme
+       :ensure t
+       :config
+       (deftheme org-beautify-mods "Sub-sub-theme to beautify org-beautify.... ahhh god damnit")
+       (let* ((base-font-color (face-foreground 'default  nil 'default))
+              (base3-font-color (face-foreground 'org-agenda-structure  nil 'default))
+              (background-color (face-background 'default nil 'default))
+              (background2-color (face-background 'org-verbatim nil 'default))
+              (background3-color (face-background 'org-agenda-structure nil 'default))
+              (background4-color (face-foreground 'org-agenda-done nil 'default)))
+         (custom-theme-set-faces 'org-beautify-mods
+                                 `(org-block-begin-line ((t :foreground ,base-font-color :background, background-color)))
+                                 `(org-block-end-line ((t :foreground ,base-font-color :background, background-color)))
+                                 `(org-block ((t (:foreground ,base-font-color :background ,background2-color :box nil))))
+                                 `(org-agenda-date ((t (:inherit org-agenda-structure :foreground "#666666" :height 0.8))))
+                                 `(org-agenda-date-today ((t (:inherit org-agenda-date :background ,background4-color :foreground "#000000" :box nil :underline nil :weight bold :height 1.1))))
+                                 `(org-agenda-structure ((t (:inherit default :background ,background3-color :foreground ,base3-font-color :box nil :underline nil :weight bold :height 1.2 :family "Sans Serif"))))))
+       (provide-theme 'org-beautify-mods)
+
+   ))
+
+#+end_src
+
+
+

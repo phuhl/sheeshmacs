@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: fcomp
+# key: fcomp
+# --
+const $1 = ({ $2 }) =>
+      (
+        $0
+      );

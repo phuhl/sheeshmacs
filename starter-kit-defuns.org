@@ -35,28 +35,32 @@ a lambda doesn't already exist in the list.
 
 #+name: starter-kit-hook-functions
 #+begin_src emacs-lisp
-(defvar starter-kit-coding-hook nil
-"Hook that gets run on activation of any programming mode.")
+  (defvar starter-kit-coding-hook nil
+  "Hook that gets run on activation of any programming mode.")
 
-(defun starter-kit-local-column-number-mode ()
-  (make-local-variable 'column-number-mode)
-  (column-number-mode t))
+  (defun starter-kit-local-column-number-mode ()
+    (make-local-variable 'column-number-mode)
+    (column-number-mode t))
 
-(defun starter-kit-local-comment-auto-fill ()
-  (set (make-local-variable 'comment-auto-fill-only-comments) t)
-  (auto-fill-mode t))
+  (defun starter-kit-local-comment-auto-fill ()
+    (set (make-local-variable 'comment-auto-fill-only-comments) t)
+    (auto-fill-mode t))
 
-(defun starter-kit-local-linum-mode ()
-  (linum-mode t))
+  (defun starter-kit-local-linum-mode ()
+    (linum-mode t))
 
-(defun starter-kit-turn-on-save-place-mode ()
-  (setq save-place t))
+  (defun starter-kit-turn-on-save-place-mode ()
+    (setq save-place t))
 
-(defun starter-kit-turn-on-whitespace ()
-  (whitespace-mode t))
+  (defun starter-kit-turn-on-whitespace ()
+    (whitespace-mode t))
 
-(defun stater-kit-turn-on-hex-color-mode ()
-  (font-lock-add-keywords nil hexcolour-keywords t))
+  (defun stater-kit-turn-on-hex-color-mode ()
+    (rainbow-mode t))
+
+  (defun stater-kit-dont-brake-long-lines ()
+    (setq truncate-lines t))
+
 #+end_src
 
 
@@ -66,6 +70,7 @@ a lambda doesn't already exist in the list.
 (add-hook 'starter-kit-coding-hook 'starter-kit-local-linum-mode)
 (add-hook 'starter-kit-coding-hook 'starter-kit-turn-on-whitespace)
 (add-hook 'starter-kit-coding-hook 'stater-kit-turn-on-hex-color-mode)
+(add-hook 'starter-kit-coding-hook 'stater-kit-dont-brake-long-lines)
 #+end_src
 
 #+name: starter-kit-run-starter-kit-coding-hook
@@ -116,3 +121,12 @@ More functions at: https://github.com/gregsexton/origami.el
     )
     (origami-mode))
 #+end_src
+* Rainbow-mode
+
+#+begin_src emacs-lisp
+  (use-package rainbow-mode
+    :ensure t
+    :config
+    (setq rainbow-html-colors t))
+#+end_src
+

@@ -2,3 +2,6 @@
 #contributor : Rick Moynihan <rick@sourcesmouth.co.uk>
 # --
 #+TITLE: ${1:title}
+#+DATE: $2
+#+AUTHOR: Philipp Uhl
+$0

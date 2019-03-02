@@ -1,4 +1,4 @@
-#+TITLE: Starter Kit Web-mode
+#+TITLE: Starter Kit Web-Mode
 
 This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
@@ -62,3 +62,50 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 #+begin_src emacs-lisp
   (add-hook 'css-mode-hook 'run-starter-kit-coding-hook)
 #+end_src
+
+* Emmet mode
+
+[[https://github.com/smihica/emmet-mode][Emmet-Mode]] is pretty sweet, but need to hook it up to both SGML (which
+includes HTML) and CSS.
+
+Use =C-j= to expand emmet-code to html/css code.
+
+#+BEGIN_SRC emacs-lisp
+(use-package emmet-mode
+  :ensure t
+  :commands emmet-mode
+  :init
+  (setq emmet-indentation 2)
+  (setq emmet-move-cursor-between-quotes t)
+  :config
+  (add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
+  (add-hook 'css-mode-hook  'emmet-mode)) ;; enable Emmet's css abbreviation.
+#+END_SRC
+
+* Skewer (not tangled, not tested)
+
+Config taken from [[https://github.com/howardabrams/dot-files/blob/master/emacs-web.org][here]].
+
+Live coding for HTML/CSS/JavaScript with a [[https://github.com/skeeto/skewer-mode][Skewer]] server running in Emacs.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package skewer-mode
+  :ensure t
+  :commands skewer-mode run-skewer
+  :config (skewer-setup))
+#+END_SRC
+
+Useful key-bindings with the =skewer-setup=:
+
+=C-x C-e=
+    Evaluate the form before the point and display the result in the
+
+    - minibuffer. If given a prefix argument, insert the result into the current
+    - buffer.
+
+=C-M-x=
+    Evaluate the top-level form around the point.
+=C-c C-k=
+    Load the current buffer.
+=C-c C-z=
+    Select the REPL buffer. 

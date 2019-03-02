@@ -1,40 +1,64 @@
 #+TITLE: Starter Kit Misc
-
 This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
 * Starter Kit Misc
 Things that don't fit anywhere else.
 
+** Startup message
+
+#+NAME: startup-message-template
+#+BEGIN_EXAMPLE
+
+:     ____________________________________
+:    / __/  _____      _      ____   / __/
+:   / _/   /     \    / \    / __/   \ \
+:  / /__  / _  _  \  / _ \  / /__  __/ /
+: /____/ /_/ \/ \_/ /_/ \_\ \___/ /___/
+:
+
+#+END_EXAMPLE
 
 ** Window systems
 #+srcname: starter-kit-window-view-stuff
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp :var startup-message-template=startup-message-template
+  ;; Use UTF-8
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
 
   (custom-set-variables
-   ;; Bars + scrolling
+   ;; Bars + scrolling bars hidden
    '(menu-bar-mode nil)
    '(scroll-bar-mode nil)
-   '(scroll-error-top-bottom t)
    '(tool-bar-mode nil)
-   '(c-basic-offset 2)
-   ;; Theme
-   '(custom-enabled-themes (quote (tsdh-dark))))
 
-   (setq visible-bell t
-         font-lock-maximum-decoration t
-         inhibit-startup-message t
-         transient-mark-mode t
-         shift-select-mode nil
-         column-number-mode t
-         ;; uniquify-buffer-name-style 'forward
-         whitespace-style '(trailing tabs lines-tail indentation face)
-         whitespace-line-column 80
-         whitespace-global-modes '(not org-mode)
-         ;; ediff-window-setup-function 'ediff-setup-windows-plain
-         )
+   ;; Disable bell when top or bottom is reached
+   '(scroll-error-top-bottom t)
+
+   ;; Use native mail client
+   '(send-mail-function (quote mailclient-send-it))
+
+   '(c-basic-offset 2) )
+
+   (setq
+    visible-bell t
+    font-lock-maximum-decoration t
+    inhibit-startup-message t
+    initial-major-mode 'org-mode
+    initial-scratch-message (if (file-exists-p "~/.emacs.d/startupbuffer.org")
+                                (with-temp-buffer
+                                  (insert-file-contents "~/.emacs.d/startupbuffer.org")
+                                  (buffer-string))
+                              startup-message-template)
+    transient-mark-mode t
+    shift-select-mode nil
+    column-number-mode t
+    ;; uniquify-buffer-name-style 'forward
+    whitespace-style '(trailing tabs lines-tail indentation face)
+    whitespace-line-column 80
+    whitespace-global-modes '(not org-mode)
+    ;; ediff-window-setup-function 'ediff-setup-windows-plain
+    )
 #+end_src
 
 ** Highlight matching parentheses when the point is on them.
@@ -82,13 +106,15 @@ ido-mode is like magic pixie dust!
   (defalias 'yes-or-no-p 'y-or-n-p)
   ;; Seed the random-number generator
   (random t)
+
+  (global-set-key "\C-x\ \M-\C-e" 'eval-and-replace)
 #+end_src
 
 ** Browser (linux)/PDF Viewer (linux)
 #+begin_src emacs-lisp
       (when (eq system-type 'gnu/linux)
         (setq browse-url-browser-function 'browse-url-generic
-              browse-url-generic-program "chromium")
+              browse-url-generic-program "firefox")
         (setq org-file-apps
               (quote
                ((auto-mode . emacs)
@@ -140,10 +166,30 @@ ido-mode is like magic pixie dust!
 
 ** Ace-Jump-Mode
 #+BEGIN_SRC emacs-lisp
-  (use-package ace-jump-mode
+  (use-package ace-isearch
     :ensure t
-    :bind ("C-c SPC" . ace-jump-mode))
+    :config (progn
+              (global-ace-isearch-mode +1)
+              (setq ace-isearch-use-jump nil)))
+
+  ;;    (use-package ace-jump-mode
+  ;;      :ensure t
+  ;;      :bind ("C-c SPC" . ace-jump-mode))
 #+END_SRC
+
+** Ivy
+
+#+begin_src emacs-lisp
+  (use-package swiper
+    :ensure t)
+  (use-package ivy
+    :ensure t
+    :config (progn
+              (ivy-mode 1)
+
+              (setq ivy-use-virtual-buffers t)
+              (setq ivy-count-format "(%d/%d) ")))
+#+end_src
 
 ** Flyspell
 #+BEGIN_SRC emacs-lisp
@@ -161,13 +207,12 @@ ido-mode is like magic pixie dust!
         (define-key flyspell-mode-map (kbd "C-.") nil)
         (define-key flyspell-mode-map (kbd "C-,") nil)
         (define-key flyspell-mode-map (kbd "C-;") nil)
-        ;(with-eval-after-load "ispell"
-        ;  (setq ispell-program-name "hunspell")
-        ;  (setq ispell-directory "en_US,de_DE")
-        ;  (setq ispell-directory "en_US")
-        ;  (ispell-set-spellchecker-params)
-        ;  (when (> emacs-major-version 24)
-        ;    (ispell-hunspell-add-multi-dic '(("en_US", "de_DE")))))
+        (with-eval-after-load "ispell"
+          (setq ispell-program-name "hunspell")
+          (setq ispell-dictionary "en_US,de_DE")
+          (ispell-set-spellchecker-params)
+          (when (> emacs-major-version 24)
+            (ispell-hunspell-add-multi-dic "en_US,de_DE")))
         ))
 #+END_SRC
 
@@ -331,3 +376,41 @@ TransposeWindows. There may well be better ways to write this."
 ;;                             (:sunset . tsdh-dark)))
 
 #+end_src
+
+** Transparency
+
+#+BEGIN_SRC emacs-lisp
+(set-frame-parameter (selected-frame) 'alpha '(95 . 85))
+#+END_SRC
+
+** Themes
+
+#+BEGIN_SRC emacs-lisp
+;; Theme
+;; (custom-set-variables
+;;  '(custom-enabled-themes (quote (tsdh-dark))))
+;; (load-file "~/.emacs.d/src/at-day-theme.el")
+#+END_SRC
+
+** Vimish-folds
+https://github.com/mrkkrp/vimish-fold
+
+#+BEGIN_SRC emacs-lisp
+    (use-package vimish-fold
+      :ensure t
+      :init (vimish-fold-global-mode 1)
+      :config
+      (global-set-key (kbd "C-; f") #'vimish-fold)
+      (global-set-key (kbd "C-; d") #'vimish-fold-delete)
+      (global-set-key (kbd "C-`") #'vimish-fold-toggle))
+
+#+END_SRC
+
+** Tetris
+
+#+BEGIN_SRC emacs-lisp
+  (when (< emacs-major-version 27)
+    (load "~/.emacs.d/src/gamegrid.el"))
+  (setq gamegrid-glyph-height-mm 8.0)
+#+END_SRC
+
