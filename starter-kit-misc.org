@@ -237,18 +237,19 @@ Install the required dictionaries!
 
 ** Magit
 #+BEGIN_SRC emacs-lisp
+  (when (eq system-type 'windows-nt)
     (use-package ssh-agency
       :ensure t
-      :defer t)
+      :defer t))
 
-    (use-package magit
-      :ensure t
-      :defer t
-      :config
-      (when (eq system-type 'windows-nt)
-        (require 'ssh-agency)
-        (ssh-agency-add-keys my-ssh-agency-key-list)
-        (ssh-agency-ensure)))
+  (use-package magit
+    :ensure t
+    :defer t
+    :config
+    (when (eq system-type 'windows-nt)
+      (require 'ssh-agency)
+      (ssh-agency-add-keys my-ssh-agency-key-list)
+      (ssh-agency-ensure)))
 #+END_SRC
 
 ** Dired
@@ -325,6 +326,8 @@ TransposeWindows. There may well be better ways to write this."
     :ensure t
     :config
     (setq circadian-themes '((:sunrise . whiteboard)
-                             (:sunset . tsdh-dark)))
+                             (:sunset . labburn)))
     (circadian-setup))
+;;                             (:sunset . tsdh-dark)))
+
 #+end_src
