@@ -370,7 +370,7 @@ TransposeWindows. There may well be better ways to write this."
   (use-package circadian
     :ensure t
     :config
-    (setq circadian-themes '((:sunrise . whiteboard)
+    (setq circadian-themes '((:sunrise . at-day)
                              (:sunset . labburn)))
     (circadian-setup))
 ;;                             (:sunset . tsdh-dark)))
@@ -383,6 +383,7 @@ TransposeWindows. There may well be better ways to write this."
     (when (not (eq system-type 'windows-nt))
       (set-frame-parameter (selected-frame) 'alpha '(95 . 85)))
 #+END_SRC
+
 
 ** Themes
 
