@@ -5,8 +5,16 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 Things that don't fit anywhere else.
 
 ** Startup message
-
 #+NAME: startup-message-template
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+
+#+NAME: startup-header-bar
+#+BEGIN_EXAMPLE
+[[elisp:(run-agenda-with-agenda-files%20())][Agenda]] | [[elisp:(lisp-interaction-mode)][Lisp-mode]] | [[~/.emacs.d/startupbuffer.org][Edit me]]
+#+END_EXAMPLE
+
 #+BEGIN_EXAMPLE
 
 :     ________  __  ____  ____  ________  _____________________________ 
@@ -18,9 +26,31 @@ Things that don't fit anywhere else.
 
 #+END_EXAMPLE
 
+#+BEGIN_SRC emacs-lisp
+(defun get-img-size (ext)
+  (car (image-size (create-image (expand-file-name (concat "sheeshmacs" ext)
+                                                   user-emacs-directory)))))
+(defun fancy-splash-head ()
+  (interactive)
+  "Insert the head part of the splash screen into the current buffer."
+  (let* ( (window-width (window-width))
+          (image-file-ext (if (>= window-width (get-img-size ".svg")) ".svg"
+                            (if (>= window-width   (get-img-size "_1.svg")) "_1.svg"
+                              (if (>= window-width   (get-img-size "_2.svg")) "_2.svg" "_3.svg"))))
+          (image-file (expand-file-name (concat "sheeshmacs" image-file-ext)
+                                        user-emacs-directory))
+          (img (create-image image-file))
+          (image-width (and img (car (image-size img)))))
+    (insert "\n\n\n\n")
+    ;; Center the image in the window.
+    (insert (propertize " " 'display `(space :align-to (+ center (-0.5 . ,img)))))
+    (insert-image img)
+    (insert "\n\n\n")))
+#+END_SRC
+
 ** Window systems
 #+srcname: starter-kit-window-view-stuff
-#+begin_src emacs-lisp :var startup-message-template=startup-message-template
+#+begin_src emacs-lisp :var startup-message-template=startup-message-template :var startup-header-bar=startup-header-bar
   ;; Use UTF-8
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
@@ -40,25 +70,31 @@ Things that don't fit anywhere else.
 
    '(c-basic-offset 2) )
 
-   (setq
-    visible-bell t
-    font-lock-maximum-decoration t
-    inhibit-startup-message t
-    initial-major-mode 'org-mode
-    initial-scratch-message (if (file-exists-p "~/.emacs.d/startupbuffer.org")
-                                (with-temp-buffer
-                                  (insert-file-contents "~/.emacs.d/startupbuffer.org")
-                                  (buffer-string))
-                              startup-message-template)
-    transient-mark-mode t
-    shift-select-mode nil
-    column-number-mode t
-    ;; uniquify-buffer-name-style 'forward
-    whitespace-style '(trailing tabs lines-tail indentation face)
-    whitespace-line-column 80
-    whitespace-global-modes '(not org-mode)
-    ;; ediff-window-setup-function 'ediff-setup-windows-plain
-    )
+
+  (setq
+   visible-bell t
+   font-lock-maximum-decoration t
+   inhibit-startup-message t
+   initial-major-mode 'org-mode
+   initial-scratch-message (if (file-exists-p "~/.emacs.d/startupbuffer.org")
+                               (with-temp-buffer
+                               (let (top-text )
+                                 (insert (propertize " " 'display `(space :align-to (+ center (-300)))))
+                                 (insert startup-header-bar)
+
+                                 (fancy-splash-head)
+                                 (insert-file-contents "~/.emacs.d/startupbuffer.org")
+                                 (buffer-string)))
+                             startup-message-template)
+   transient-mark-mode t
+   shift-select-mode nil
+   column-number-mode t
+   ;; uniquify-buffer-name-style 'forward
+   whitespace-style '(trailing tabs lines-tail indentation face)
+   whitespace-line-column 80
+   whitespace-global-modes '(not org-mode)
+   ;; ediff-window-setup-function 'ediff-setup-windows-plain
+   )
 #+end_src
 
 ** Highlight matching parentheses when the point is on them.
@@ -373,9 +409,12 @@ TransposeWindows. There may well be better ways to write this."
     (setq circadian-themes '((:sunrise . at-day)
                              (:sunset . labburn)))
     (circadian-setup))
-;;                             (:sunset . tsdh-dark)))
+  ;;                             (:sunset . tsdh-dark)))
 
 #+end_src
+
+#+RESULTS:
+: t
 
 ** Transparency
 
@@ -383,7 +422,6 @@ TransposeWindows. There may well be better ways to write this."
     (when (not (eq system-type 'windows-nt))
       (set-frame-parameter (selected-frame) 'alpha '(95 . 85)))
 #+END_SRC
-
 
 ** Themes
 
