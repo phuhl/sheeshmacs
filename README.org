@@ -1,4 +1,3 @@
-* Sheesh Emacs
 [[./sheeshmacs.svg]]
 
 Just clone to your =.emacs.d= and restart your Emacs (maybe a few times) until everything is installed. 
