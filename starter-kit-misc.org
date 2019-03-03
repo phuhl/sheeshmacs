@@ -380,7 +380,8 @@ TransposeWindows. There may well be better ways to write this."
 ** Transparency
 
 #+BEGIN_SRC emacs-lisp
-(set-frame-parameter (selected-frame) 'alpha '(95 . 85))
+    (when (not (eq system-type 'windows-nt))
+      (set-frame-parameter (selected-frame) 'alpha '(95 . 85)))
 #+END_SRC
 
 ** Themes
@@ -389,7 +390,7 @@ TransposeWindows. There may well be better ways to write this."
 ;; Theme
 ;; (custom-set-variables
 ;;  '(custom-enabled-themes (quote (tsdh-dark))))
-;; (load-file "~/.emacs.d/src/at-day-theme.el")
+(load-file "~/.emacs.d/src/theme.el")
 #+END_SRC
 
 ** Vimish-folds
@@ -409,8 +410,17 @@ https://github.com/mrkkrp/vimish-fold
 ** Tetris
 
 #+BEGIN_SRC emacs-lisp
-  (when (< emacs-major-version 27)
-    (load "~/.emacs.d/src/gamegrid.el"))
-  (setq gamegrid-glyph-height-mm 8.0)
+  (when (not (eq system-type 'windows-nt))
+    (when (< emacs-major-version 27)
+      (load "~/.emacs.d/src/gamegrid.el"))
+    (setq gamegrid-glyph-height-mm 8.0))
 #+END_SRC
 
+** Restclient
+
+#+BEGIN_SRC emacs-lisp
+  (use-package restclient
+    :ensure t)
+  (use-package ob-restclient
+    :ensure t)
+#+END_SRC
