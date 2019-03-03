@@ -8,8 +8,8 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="425.0108"
-   height="70.008217"
+   width="1655.2563"
+   height="302.59857"
    id="svg4753"
    version="1.1"
    inkscape:version="0.91 r13725"
@@ -22,7 +22,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -61,7 +61,7 @@
        x2="178.04791"
        y2="30"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-20.999583,9.9997295)" />
+       gradientTransform="matrix(0.26281438,0,0,0.26281438,-14.585119,8.3062962)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient7894"
@@ -71,47 +71,41 @@
        x2="318.04791"
        y2="30"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-20.999583,9.9997295)" />
+       gradientTransform="matrix(0.26281438,0,0,0.26281438,-14.585119,8.3062962)" />
   </defs>
   <sodipodi:namedview
-     pagecolor="#ffffff"
+     pagecolor="#f5f5ed"
      bordercolor="#666666"
      borderopacity="1"
      objecttolerance="10"
      gridtolerance="10"
      guidetolerance="10"
-     inkscape:pageopacity="0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
      id="namedview5227"
      showgrid="false"
-     inkscape:zoom="2.3333333"
-     inkscape:cx="166.69614"
-     inkscape:cy="46.47592"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="946.03199"
+     inkscape:cy="136.92921"
      inkscape:window-x="1912"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer3"
-     fit-margin-top="5"
-     fit-margin-left="5"
-     fit-margin-right="5"
-     fit-margin-bottom="8" />
+     fit-margin-top="40"
+     fit-margin-left="40"
+     fit-margin-right="40"
+     fit-margin-bottom="40" />
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Layer 1"
      style="display:inline"
-     transform="translate(5.5036881,-14.493886)">
-    <rect
-       style="opacity:1;fill:#f5f5ed;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect9723"
-       width="445.00104"
-       height="90.910164"
-       x="-15.500519"
-       y="2.3802724" />
+     transform="translate(-3.478442,-29.422753)">
     <g
-       id="g9725">
+       id="g9725"
+       transform="matrix(3.8049669,0,0,3.8049669,43.478442,-6.6765852)">
       <path
          sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccc"
          inkscape:connector-curvature="0"
@@ -139,23 +133,23 @@
     </g>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#300a5f;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
-       x="96.399345"
-       y="78.220123"
+       style="font-style:normal;font-weight:normal;font-size:152.19866943px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#300a5f;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="410.27475"
+       y="290.94839"
        id="text7902"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan7904"
-         x="96.399345"
-         y="78.220123"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.5px;font-family:monospace;-inkscape-font-specification:monospace;fill:#300a5f;fill-opacity:1;">the sheeshmost editor</tspan></text>
+         x="410.27475"
+         y="290.94839"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:66.58692169px;font-family:monospace;-inkscape-font-specification:monospace;fill:#300a5f;fill-opacity:1">the sheeshmost editor</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="Layer 2"
      style="display:none"
-     transform="translate(5.5036881,-14.493886)"
+     transform="translate(-3.478442,-29.422753)"
      sodipodi:insensitive="true">
     <line
        x1="30"
