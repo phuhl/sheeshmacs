@@ -51,50 +51,49 @@ Things that don't fit anywhere else.
 ** Window systems
 #+srcname: starter-kit-window-view-stuff
 #+begin_src emacs-lisp :var startup-message-template=startup-message-template :var startup-header-bar=startup-header-bar
-  ;; Use UTF-8
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (prefer-coding-system 'utf-8)
+    ;; Use UTF-8
+    (set-terminal-coding-system 'utf-8)
+    (set-keyboard-coding-system 'utf-8)
+    (prefer-coding-system 'utf-8)
 
-  (custom-set-variables
-   ;; Bars + scrolling bars hidden
-   '(menu-bar-mode nil)
-   '(scroll-bar-mode nil)
-   '(tool-bar-mode nil)
+    (custom-set-variables
+     ;; Bars + scrolling bars hidden
+     '(menu-bar-mode nil)
+     '(scroll-bar-mode nil)
+     '(tool-bar-mode nil)
 
-   ;; Disable bell when top or bottom is reached
-   '(scroll-error-top-bottom t)
+     ;; Disable bell when top or bottom is reached
+     '(scroll-error-top-bottom t)
 
-   ;; Use native mail client
-   '(send-mail-function (quote mailclient-send-it))
+     ;; Use native mail client
+     '(send-mail-function (quote mailclient-send-it))
 
-   '(c-basic-offset 2) )
+     '(c-basic-offset 2) )
 
 
-  (setq
-   visible-bell t
-   font-lock-maximum-decoration t
-   inhibit-startup-message t
-   initial-major-mode 'org-mode
-   initial-scratch-message (if (file-exists-p "~/.emacs.d/startupbuffer.org")
-                               (with-temp-buffer
-                               (let (top-text )
-                                 (insert (propertize " " 'display `(space :align-to (+ center (-300)))))
-                                 (insert startup-header-bar)
+    (setq
+     visible-bell t
+     font-lock-maximum-decoration t
+     inhibit-startup-message t
+     initial-major-mode 'org-mode
+     initial-scratch-message (with-temp-buffer
+                               (insert (propertize " " 'display `(space :align-to (+ center (-300)))))
+                               (insert startup-header-bar)
 
-                                 (fancy-splash-head)
-                                 (insert-file-contents "~/.emacs.d/startupbuffer.org")
-                                 (buffer-string)))
-                             startup-message-template)
-   transient-mark-mode t
-   shift-select-mode nil
-   column-number-mode t
-   ;; uniquify-buffer-name-style 'forward
-   whitespace-style '(trailing tabs lines-tail indentation face)
-   whitespace-line-column 80
-   whitespace-global-modes '(not org-mode)
-   ;; ediff-window-setup-function 'ediff-setup-windows-plain
-   )
+                               (fancy-splash-head)
+                               (if (file-exists-p "~/.emacs.d/startupbuffer.org")
+                                   (insert-file-contents "~/.emacs.d/startupbuffer.org")
+                                   startup-message-template)
+                               (buffer-string))
+     transient-mark-mode t
+     shift-select-mode nil
+     column-number-mode t
+     ;; uniquify-buffer-name-style 'forward
+     whitespace-style '(trailing tabs lines-tail indentation face)
+     whitespace-line-column 80
+     whitespace-global-modes '(not org-mode)
+     ;; ediff-window-setup-function 'ediff-setup-windows-plain
+     )
 #+end_src
 
 ** Highlight matching parentheses when the point is on them.
