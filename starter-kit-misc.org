@@ -9,12 +9,12 @@ Things that don't fit anywhere else.
 #+NAME: startup-message-template
 #+BEGIN_EXAMPLE
 
-:     ____________________________________
-:    / __/  _____      _      ____   / __/
-:   / _/   /     \    / \    / __/   \ \
-:  / /__  / _  _  \  / _ \  / /__  __/ /
-: /____/ /_/ \/ \_/ /_/ \_\ \___/ /___/
-:
+:     ________  __  ____  ____  ________  _____________________________ 
+:    / ____  /_/ /_/ __/ / __/ / ____  /_/ / _____     _     ____ / __/
+:    \ \  / __  __  _/  / _/   \ \  / __  / /     \   / \   / __/ \ \ 
+:  __/ / / / / / / /__ / /_____/ / / / / /_/ _  _  \_/ _ \_/ /____/ /
+: /___/ /_/ /_/  \_____\________/ /_/ /____\/ \/ \____/ \__\_______/
+:                        the sheeshmost editor                        
 
 #+END_EXAMPLE
 
@@ -375,7 +375,7 @@ TransposeWindows. There may well be better ways to write this."
 ;; Theme
 ;; (custom-set-variables
 ;;  '(custom-enabled-themes (quote (tsdh-dark))))
-(load-file "~/.emacs.d/src/at-day-theme.el")
+(load-file "~/.emacs.d/src/theme.el")
 #+END_SRC
 
 ** Vimish-folds
