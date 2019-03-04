@@ -1,4 +1,17 @@
 
+
+
+;;; at-night-theme.el --- Emacs theme with a dark background.
+
+;; Copyright (C) 2014 , Philipp Uhl
+
+;; Author: Philipp Uhl
+;; https://emacsthemes.com/assets/local-src/colorsarenice-themes-source-code.el
+;; Version: 0.1
+;; Package-Requires: ((emacs "24"))
+;; Created with emacs-theme-generator, https://github.com/mswift42/theme-creator.
+
+
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or

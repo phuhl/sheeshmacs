@@ -399,29 +399,6 @@ TransposeWindows. There may well be better ways to write this."
               (run-starter-kit-coding-hook)))
 #+end_src
 
-** Circadian (theme switching based on time)
-
-#+begin_src emacs-lisp
-  (use-package circadian
-    :ensure t
-    :config
-    (setq circadian-themes '((:sunrise . at-day)
-                             (:sunset . labburn)))
-    (circadian-setup))
-  ;;                             (:sunset . tsdh-dark)))
-
-#+end_src
-
-#+RESULTS:
-: t
-
-** Transparency
-
-#+BEGIN_SRC emacs-lisp
-    (when (not (eq system-type 'windows-nt))
-      (set-frame-parameter (selected-frame) 'alpha '(95 . 85)))
-#+END_SRC
-
 ** Themes
 
 #+BEGIN_SRC emacs-lisp
@@ -429,6 +406,27 @@ TransposeWindows. There may well be better ways to write this."
 ;; (custom-set-variables
 ;;  '(custom-enabled-themes (quote (tsdh-dark))))
 (load-file "~/.emacs.d/src/theme.el")
+;(load-file "~/.emacs.d/src/at-night.el")
+#+END_SRC
+
+** Circadian (theme switching based on time)
+
+#+begin_src emacs-lisp
+;  (use-package circadian
+;    :ensure t
+;    :config
+;    (setq circadian-themes '((:sunrise . at-day)
+;                             (:sunset . at-night))
+;    (circadian-setup))
+  ;;                             (:sunset . tsdh-dark)))
+
+#+end_src
+
+** Transparency
+
+#+BEGIN_SRC emacs-lisp
+    (when (not (eq system-type 'windows-nt))
+      (set-frame-parameter (selected-frame) 'alpha '(95 . 85)))
 #+END_SRC
 
 ** Vimish-folds
