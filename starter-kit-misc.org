@@ -460,3 +460,18 @@ https://github.com/mrkkrp/vimish-fold
   (use-package ob-restclient
     :ensure t)
 #+END_SRC
+
+** Control Emacs Garbage collection
+
+On Windows Emacs 25 turned out to be unbearibly slow, especially with
+certain elements (as code elements, org-bullets, etc.) in
+org-mode. The reason seems to be a too agressive garbage
+collection ([[https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/][compare here]]). This code snippet fixes that issue.
+
+#+BEGIN_SRC emacs-lisp
+  (when (eq system-type 'windows-nt)
+    (setq gc-cons-threshold (* 511 1024 1024))
+    (setq gc-cons-percentage 0.5)
+    (run-with-idle-timer 5 t #'garbage-collect)
+    )
+#+END_SRC
