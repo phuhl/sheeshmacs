@@ -64,6 +64,13 @@ automatically regenerated when you next start emacs.
   ;; ssh-keys for magit than here is the place to specify them.
   (setq my-ssh-agency-key-list (list ""))
 
+  ;; Latitude and logitude
+  ;; =====================
+  ;; This is needed for circadian to provide use the correct time to switch
+  ;; from the day to the night theme
+  (setq calendar-latidute 50.783333333333)
+  (setq calendar-longitude 5.0833333333333)
+  (setq calendar-location-name \"Aachen, DE\")
   "))
       ))
 #+end_src
