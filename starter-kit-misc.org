@@ -77,14 +77,13 @@ Things that don't fit anywhere else.
    inhibit-startup-message t
    initial-major-mode 'org-mode
    initial-scratch-message (if (file-exists-p "~/.emacs.d/startupbuffer.org")
-                               (with-temp-buffer
-                               (let (top-text )
-                                 (insert (propertize " " 'display `(space :align-to (+ center (-300)))))
-                                 (insert startup-header-bar)
-
-                                 (fancy-splash-head)
-                                 (insert-file-contents "~/.emacs.d/startupbuffer.org")
-                                 (buffer-string)))
+                                 (with-temp-buffer
+                                   (insert (propertize " " 'display `(space :align-to (+ center (-300)))))
+                                   (insert startup-header-bar)
+                                   (when (and (image-type-available-p 'imagemagick)  window-system )
+                                     (fancy-splash-head))
+                                   (insert-file-contents "~/.emacs.d/startupbuffer.org")
+                                   (buffer-string))
                              startup-message-template)
    transient-mark-mode t
    shift-select-mode nil
@@ -202,11 +201,11 @@ ido-mode is like magic pixie dust!
 
 ** Ace-Jump-Mode
 #+BEGIN_SRC emacs-lisp
-  (use-package ace-isearch
-    :ensure t
-    :config (progn
-              (global-ace-isearch-mode +1)
-              (setq ace-isearch-use-jump nil)))
+;;  (use-package ace-isearch
+;;    :ensure t
+;;    :config (progn
+;;              (global-ace-isearch-mode +1)
+;;              (setq ace-isearch-use-jump nil)))
 
   ;;    (use-package ace-jump-mode
   ;;      :ensure t
@@ -217,39 +216,47 @@ ido-mode is like magic pixie dust!
 
 #+begin_src emacs-lisp
   (use-package swiper
-    :ensure t)
+    :ensure t
+    :config
+    (global-set-key (kbd "C-M-s") 'swiper))
   (use-package ivy
     :ensure t
     :config (progn
               (ivy-mode 1)
 
               (setq ivy-use-virtual-buffers t)
+              (setq enable-recursive-minibuffers t)
               (setq ivy-count-format "(%d/%d) ")))
+  (use-package counsel
+    :ensure t
+    :config
+    (global-set-key (kbd "M-x") 'counsel-M-x)
+    (global-set-key (kbd "C-x C-f") 'counsel-find-file))
 #+end_src
 
 ** Flyspell
 #+BEGIN_SRC emacs-lisp
-    (when (eq system-type 'gnu/linux)
-      (use-package flyspell
-        :ensure t
-        :init
-        (add-hook 'org-mode-hook 'flyspell-mode)
-        (add-hook 'text-mode-hook 'flyspell-mode)
-        :bind
-        (("C-; ," . flyspell-goto-next-error)
-         ("C-; ." . flyspell-auto-correct-word))
-        :config
-        (setq flyspell-issue-message-flag nil)
-        (define-key flyspell-mode-map (kbd "C-.") nil)
-        (define-key flyspell-mode-map (kbd "C-,") nil)
-        (define-key flyspell-mode-map (kbd "C-;") nil)
-        (with-eval-after-load "ispell"
-          (setq ispell-program-name "hunspell")
-          (setq ispell-dictionary "en_US,de_DE")
-          (ispell-set-spellchecker-params)
-          (when (> emacs-major-version 24)
-            (ispell-hunspell-add-multi-dic "en_US,de_DE")))
-        ))
+  (when (eq system-type 'gnu/linux)
+    (use-package flyspell
+      :ensure t
+      :init
+      (add-hook 'org-mode-hook 'flyspell-mode)
+      (add-hook 'text-mode-hook 'flyspell-mode)
+      :bind
+      (("C-; ," . flyspell-goto-next-error)
+       ("C-; ." . flyspell-auto-correct-word))
+      :config
+      (setq flyspell-issue-message-flag nil)
+      (define-key flyspell-mode-map (kbd "C-.") nil)
+      (define-key flyspell-mode-map (kbd "C-,") nil)
+      (define-key flyspell-mode-map (kbd "C-;") nil)
+         (with-eval-after-load "ispell"
+           (setq ispell-program-name "hunspell")
+           (setq ispell-dictionary "en_US,de_DE")
+           (ispell-set-spellchecker-params)
+           (when (> emacs-major-version 24)
+             (ispell-hunspell-add-multi-dic "en_US,de_DE")))
+      ))
 #+END_SRC
 
 Install the required dictionaries!
