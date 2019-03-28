@@ -76,15 +76,16 @@ Things that don't fit anywhere else.
    font-lock-maximum-decoration t
    inhibit-startup-message t
    initial-major-mode 'org-mode
-   initial-scratch-message (if (file-exists-p "~/.emacs.d/startupbuffer.org")
-                                 (with-temp-buffer
-                                   (insert (propertize " " 'display `(space :align-to (+ center (-300)))))
-                                   (insert startup-header-bar)
-                                   (when (and (image-type-available-p 'imagemagick)  window-system )
-                                     (fancy-splash-head))
-                                   (insert-file-contents "~/.emacs.d/startupbuffer.org")
-                                   (buffer-string))
-                             startup-message-template)
+   initial-scratch-message (with-temp-buffer
+                             (insert (propertize " " 'display `(space :align-to (+ center (-300)))))
+                             (insert startup-header-bar)
+                             (when ( window-system )
+                               (fancy-splash-head))
+                             (if (file-exists-p "~/.emacs.d/startupbuffer.org")
+                                 (insert-file-contents "~/.emacs.d/startupbuffer.org")
+                               startup-message-template)
+                             (buffer-string))
+
    transient-mark-mode t
    shift-select-mode nil
    column-number-mode t

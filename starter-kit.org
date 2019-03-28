@@ -196,6 +196,10 @@ automatically regenerated when you next start emacs.
       (package-refresh-contents)
       (package-install 'use-package))
 
+    (unless (package-installed-p 'diminish)
+      (package-refresh-contents)
+      (package-install 'diminish))
+
     ;; Enable use-package
     (eval-when-compile
       (require 'use-package))
@@ -245,10 +249,10 @@ everyone using the starter kit.
 ** Startup buffer
 
 #+BEGIN_SRC emacs-lisp
-(find-file "~/.emacs.d/tmp/scratch")
-(org-mode)
-(erase-buffer)
-(insert initial-scratch-message)
-(save-buffer)
+;;(find-file "~/.emacs.d/tmp/scratch")
+;;(org-mode)
+;;(erase-buffer)
+;;(insert initial-scratch-message)
+;;(save-buffer)
 #+END_SRC
 
