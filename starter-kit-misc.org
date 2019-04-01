@@ -12,7 +12,7 @@ Things that don't fit anywhere else.
 
 #+NAME: startup-header-bar
 #+BEGIN_EXAMPLE
-[[elisp:(run-agenda-with-agenda-files%20())][Agenda]] | [[elisp:(lisp-interaction-mode)][Lisp-mode]] | [[~/.emacs.d/startupbuffer.org][Edit me]]
+| [[elisp:(run-agenda-with-agenda-files%20())][Agenda]] | [[elisp:(lisp-interaction-mode)][Lisp-mode]] | [[~/.emacs.d/startupbuffer.org][Edit me]] |
 #+END_EXAMPLE
 
 #+BEGIN_EXAMPLE
@@ -77,7 +77,6 @@ Things that don't fit anywhere else.
    inhibit-startup-message t
    initial-major-mode 'org-mode
    initial-scratch-message (with-temp-buffer
-                             (insert (propertize " " 'display `(space :align-to (+ center (-300)))))
                              (insert startup-header-bar)
                              (when ( window-system )
                                (fancy-splash-head))
