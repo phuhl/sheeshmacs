@@ -76,6 +76,17 @@ automatically regenerated when you next start emacs.
 #+end_src
 
 ** Starter kit basics
+- ELPA archive repositories
+  #+begin_src emacs-lisp
+        (setq package-archives
+              '(("gnu"         . "https://elpa.gnu.org/packages/")
+                ("org"         . "http://orgmode.org/elpa/")
+                ("melpa"       . "https://melpa.org/packages/")
+    ;                ("marmalade"   . "http://marmalade-repo.org/packages/")
+    ))
+        (package-initialize)
+  #+end_src
+
 - Installing/Loading use-package
   #+begin_src emacs-lisp
     (require 'package)
@@ -132,17 +143,6 @@ automatically regenerated when you next start emacs.
   ;    (require 'uniquify)
   ;    (require 'ansi-color)
   ;    (require 'recentf)
-  #+end_src
-
-- ELPA archive repositories
-  #+begin_src emacs-lisp
-        (setq package-archives
-              '(("gnu"         . "https://elpa.gnu.org/packages/")
-                ("org"         . "http://orgmode.org/elpa/")
-                ("melpa"       . "https://melpa.org/packages/")
-    ;                ("marmalade"   . "http://marmalade-repo.org/packages/")
-    ))
-        (package-initialize)
   #+end_src
 
 - Function for loading other parts of the starter kit
