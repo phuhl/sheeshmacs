@@ -52,7 +52,8 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
   ;; Indents all content according to the corresponding headline.
   ;; Has slight issues with scrolling the buffer horizontally sometimes,
   ;; is it worth it in terms of estetics anyways (my opinion).
-  (setq org-startup-indented t)
+  ;; Seems to not be nessecary anymore since the use of org-beautify-theme
+  ;  (setq org-startup-indented t)
 
   ;; Enforces that you can not set an entry to DONE if it has children with TODO
   (setq org-enforce-todo-dependencies t)
