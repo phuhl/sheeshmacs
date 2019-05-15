@@ -456,6 +456,7 @@ https://github.com/mrkkrp/vimish-fold
 #+BEGIN_SRC emacs-lisp
   (when (>= emacs-major-version 27)
     (setq gamegrid-glyph-height-mm 8.0))
+  (setq tetris-score-file "~/.emacs.d/scores/tetris-scores")
 #+END_SRC
 
 ** Restclient
