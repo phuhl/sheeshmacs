@@ -129,4 +129,13 @@ More functions at: https://github.com/gregsexton/origami.el
     :config
     (setq rainbow-html-colors t))
 #+end_src
+* Insert Week of Calendar
+
+#+BEGIN_SRC emacs-lisp
+  (defun kw-insert ()
+      (interactive)
+      (insert (concat "KW "
+                      (number-to-string
+                       (+ 1 (string-to-number (format-time-string "%W")))))))
+#+END_SRC
 
