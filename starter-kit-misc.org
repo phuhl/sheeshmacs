@@ -284,12 +284,12 @@ Install the required dictionaries!
 ;; 3 Lines at once
 (global-set-key "\M-n" '(lambda ()
                           (interactive)
-                          (forward-line 3)
+                          (next-line 3)
                           ))
 
 (global-set-key "\M-p" '(lambda ()
                           (interactive)
-                          (forward-line -3)
+                          (next-line -3)
                           ))
 #+END_SRC
 
