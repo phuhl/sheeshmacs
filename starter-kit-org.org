@@ -49,9 +49,11 @@ which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
 
 ** Variables
 #+begin_src emacs-lisp
-  ;; Indents all content according to the corresponding headline.
-  ;; Has slight issues with scrolling the buffer horizontally sometimes,
-  ;; is it worth it in terms of estetics anyways (my opinion).
+  ;; Indents all content according to the corresponding headline. Has
+  ;; slight issues with scrolling the buffer horizontally sometimes, is
+  ;; it worth it in terms of estetics anyways (my opinion).
+  ;; Seems to not be nessecary anymore since the use of
+  ;; org-beautify-theme (EDIT: untrue?!)
   (setq org-startup-indented t)
 
   ;; Enforces that you can not set an entry to DONE if it has children with TODO

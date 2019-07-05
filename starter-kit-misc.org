@@ -284,12 +284,12 @@ Install the required dictionaries!
 ;; 3 Lines at once
 (global-set-key "\M-n" '(lambda ()
                           (interactive)
-                          (forward-line 3)
+                          (next-line 3)
                           ))
 
 (global-set-key "\M-p" '(lambda ()
                           (interactive)
-                          (forward-line -3)
+                          (next-line -3)
                           ))
 #+END_SRC
 
@@ -434,8 +434,7 @@ TransposeWindows. There may well be better ways to write this."
 ** Transparency
 
 #+BEGIN_SRC emacs-lisp
-    (when (not (eq system-type 'windows-nt))
-      (set-frame-parameter (selected-frame) 'alpha '(95 . 85)))
+;  (set-frame-parameter (selected-frame) 'alpha '(95 . 85))
 #+END_SRC
 
 ** Vimish-folds
@@ -455,10 +454,9 @@ https://github.com/mrkkrp/vimish-fold
 ** Tetris
 
 #+BEGIN_SRC emacs-lisp
-  (when (not (eq system-type 'windows-nt))
-    (when (< emacs-major-version 27)
-      (load "~/.emacs.d/src/gamegrid.el"))
+  (when (>= emacs-major-version 27)
     (setq gamegrid-glyph-height-mm 8.0))
+  (setq tetris-score-file "~/.emacs.d/scores/tetris-scores")
 #+END_SRC
 
 ** Restclient
@@ -483,4 +481,26 @@ collection ([[https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_notice
     (setq gc-cons-percentage 0.5)
     (run-with-idle-timer 5 t #'garbage-collect)
     )
+#+END_SRC
+
+** Openwith mode
+
+#+BEGIN_SRC emacs-lisp
+  (when (eq system-type 'windows-nt)
+    (use-package openwith
+      :ensure t
+      :defer nil
+      :config
+      (openwith-mode t)
+      ;; Prevent org-mode from opening inline images externally
+      (defadvice org-display-inline-images
+          (around handle-openwith
+                  (&optional include-linked refresh beg end) activate compile)
+        (if openwith-mode
+            (progn
+              (openwith-mode -1)
+              ad-do-it
+              (openwith-mode 1))
+          ad-do-it))))
+
 #+END_SRC

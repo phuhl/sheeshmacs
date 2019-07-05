@@ -76,12 +76,45 @@ automatically regenerated when you next start emacs.
 #+end_src
 
 ** Starter kit basics
+- ELPA archive repositories
+  #+begin_src emacs-lisp
+        (setq package-archives
+              '(("gnu"         . "https://elpa.gnu.org/packages/")
+                ("org"         . "http://orgmode.org/elpa/")
+                ("melpa"       . "https://melpa.org/packages/")
+    ;                ("marmalade"   . "http://marmalade-repo.org/packages/")
+    ))
+        (package-initialize)
+  #+end_src
+
+- Installing/Loading use-package
+  #+begin_src emacs-lisp
+    (require 'package)
+    (setq package-enable-at-startup nil)
+    (package-initialize)
+
+    ;; Install 'use-package' if necessary
+    (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package))
+
+    (unless (package-installed-p 'diminish)
+      (package-refresh-contents)
+      (package-install 'diminish))
+
+    ;; Enable use-package
+    (eval-when-compile
+      (require 'use-package))
+    (require 'diminish)                ;; if you use :diminish
+    (require 'bind-key)                ;; if you use any :bind variant
+  #+end_src
+
 - Org mode
-#+begin_src emacs-lisp
-(require 'cl)
-(setq load-path (remove-if (lambda (x) (string-match-p "org$" x)) load-path))
-(use-package org :ensure t)
-#+end_src
+  #+begin_src emacs-lisp
+  (require 'cl)
+  (setq load-path (remove-if (lambda (x) (string-match-p "org$" x)) load-path))
+  (use-package org :ensure t)
+  #+end_src
 
 - Load path (=src= + subdirs, =elpa= for packages) and custom-file (=custom.el=)
   #+name: starter-kit-load-paths
@@ -110,17 +143,6 @@ automatically regenerated when you next start emacs.
   ;    (require 'uniquify)
   ;    (require 'ansi-color)
   ;    (require 'recentf)
-  #+end_src
-
-- ELPA archive repositories
-  #+begin_src emacs-lisp
-        (setq package-archives
-              '(("gnu"         . "https://elpa.gnu.org/packages/")
-                ("org"         . "http://orgmode.org/elpa/")
-                ("melpa"       . "https://melpa.org/packages/")
-    ;                ("marmalade"   . "http://marmalade-repo.org/packages/")
-    ))
-        (package-initialize)
   #+end_src
 
 - Function for loading other parts of the starter kit
@@ -184,28 +206,6 @@ automatically regenerated when you next start emacs.
         (eq system-type 'berkeley-unix))
         (setq system-name (car (split-string system-name "\\."))))
   #+end_src
-
-- Installing/Loading use-package
-  #+begin_src emacs-lisp
-    (require 'package)
-    (setq package-enable-at-startup nil)
-    (package-initialize)
-
-    ;; Install 'use-package' if necessary
-    (unless (package-installed-p 'use-package)
-      (package-refresh-contents)
-      (package-install 'use-package))
-
-    (unless (package-installed-p 'diminish)
-      (package-refresh-contents)
-      (package-install 'diminish))
-
-    ;; Enable use-package
-    (eval-when-compile
-      (require 'use-package))
-    (require 'diminish)                ;; if you use :diminish
-    (require 'bind-key)                ;; if you use any :bind variant
-  #+end_src
   
 ** Settings from M-x customize
 #+name: m-x-customize-customizations
@@ -237,13 +237,13 @@ everyone using the starter kit.
   [[file:starter-kit-java.org][starter-kit-java]], [[file:starter-kit-web-mode.org][starter-kit-web-mode]])
   #+begin_src emacs-lisp
   (starter-kit-load "haskell")
-  (starter-kit-load "org")
   (starter-kit-load "yasnippet")
   (starter-kit-load "lisp")
   (starter-kit-load "js")
   (starter-kit-load "java")
   (starter-kit-load "web-mode")
   (starter-kit-load "python")
+  (starter-kit-load "org")
   #+end_src
 
 ** Startup buffer
