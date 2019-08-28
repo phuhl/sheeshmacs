@@ -5,14 +5,18 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 Things that don't fit anywhere else.
 
 ** Startup message
+
+#+BEGIN_SRC emacs-lisp
+  (defvar startup-buffer-location
+        (if (and (boundp 'custom-startup-buffer-location)
+                 (file-exists-p custom-startup-buffer-location))
+            custom-startup-buffer-location
+          "~/.emacs.d/startupbuffer.org"))
+#+END_SRC
+
 #+NAME: startup-message-template
 #+BEGIN_EXAMPLE
 
-#+END_EXAMPLE
-
-#+NAME: startup-header-bar
-#+BEGIN_EXAMPLE
-| [[elisp:(run-agenda-with-agenda-files%20())][Agenda]] | [[elisp:(lisp-interaction-mode)][Lisp-mode]] | [[~/.emacs.d/startupbuffer.org][Edit me]] |
 #+END_EXAMPLE
 
 #+BEGIN_EXAMPLE
@@ -47,10 +51,9 @@ Things that don't fit anywhere else.
     (insert-image img)
     (insert "\n\n\n")))
 #+END_SRC
-
 ** Window systems
 #+srcname: starter-kit-window-view-stuff
-#+begin_src emacs-lisp :var startup-message-template=startup-message-template :var startup-header-bar=startup-header-bar
+#+begin_src emacs-lisp :var startup-message-template=startup-message-template
   ;; Use UTF-8
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
@@ -77,16 +80,13 @@ Things that don't fit anywhere else.
    inhibit-startup-message t
    initial-major-mode 'org-mode
    initial-scratch-message (with-temp-buffer
-                             (insert startup-header-bar)
+                             (insert (concat "[[" startup-buffer-location "][Edit me]]"))
                              (when ( window-system )
                                (fancy-splash-head))
-                             (if (and (boundp 'custom-startup-buffer-location)
-                                      (file-exists-p custom-startup-buffer-location))
-                                (insert-file-contents custom-startup-buffer-location)
-                             (if (file-exists-p "~/.emacs.d/startupbuffer.org")
-                                 (insert-file-contents "~/.emacs.d/startupbuffer.org")
-                               startup-message-template))
-                           (buffer-string))
+                             (if (file-exists-p startup-buffer-location)
+                                 (insert-file-contents startup-buffer-location)
+                               startup-message-template)
+                             (buffer-string))
 
    transient-mark-mode t
    shift-select-mode nil
