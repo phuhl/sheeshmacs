@@ -99,22 +99,23 @@ Things that don't fit anywhere else.
 ** Modeline
 
 #+BEGIN_SRC emacs-lisp
-(setq-default mode-line-format '("%e"
-                         mode-line-front-space
-;                         mode-line-mule-info
-;                         mode-line-client
-                         mode-line-modified
-;                         mode-line-remote
-                         mode-line-frame-identification
-                         mode-line-buffer-identification
-                         "   "
-                         mode-line-position
-                         (vc-mode vc-mode)
-                         "  "
-                         mode-line-misc-info
-                         "  "
-                         mode-line-modes
-                         mode-line-end-spaces))
+  (setq-default mode-line-format '("%e"
+                           mode-line-front-space
+  ;                         mode-line-mule-info
+  ;                         mode-line-client
+                           mode-line-modified
+  ;                         mode-line-remote
+                           mode-line-frame-identification
+                           mode-line-buffer-identification
+                           " | "
+                           mode-line-position
+
+                           (vc-mode vc-mode)
+                           " |"
+                           mode-line-misc-info
+                           "| "
+                           mode-line-modes
+                           mode-line-end-spaces))
 #+END_SRC
 
 ** Highlight matching parentheses when the point is on them.
