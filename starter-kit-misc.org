@@ -99,6 +99,27 @@ Things that don't fit anywhere else.
    )
 #+end_src
 
+** Modeline
+
+#+BEGIN_SRC emacs-lisp
+(setq-default mode-line-format '("%e"
+                         mode-line-front-space
+;                         mode-line-mule-info
+;                         mode-line-client
+                         mode-line-modified
+;                         mode-line-remote
+                         mode-line-frame-identification
+                         mode-line-buffer-identification
+                         "   "
+                         mode-line-position
+                         (vc-mode vc-mode)
+                         "  "
+                         mode-line-misc-info
+                         "  "
+                         mode-line-modes
+                         mode-line-end-spaces))
+#+END_SRC
+
 ** Highlight matching parentheses when the point is on them.
 #+srcname: starter-kit-match-parens
 #+begin_src emacs-lisp 
@@ -506,4 +527,18 @@ collection ([[https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_notice
               (openwith-mode 1))
           ad-do-it))))
 
+#+END_SRC
+
+** VTL mode
+
+
+#+BEGIN_SRC emacs-lisp
+  (autoload 'vtl-mode "vtl" "VTL Mode" t)
+#+END_SRC
+
+** Graphql mode
+
+#+BEGIN_SRC emacs-lisp
+  (use-package graphql-mode
+    :ensure t)
 #+END_SRC

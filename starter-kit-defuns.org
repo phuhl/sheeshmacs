@@ -141,3 +141,14 @@ More functions at: https://github.com/gregsexton/origami.el
                        )))
 #+END_SRC
 
+* Set default fontsizes
+
+#+BEGIN_SRC emacs-lisp
+  (defun fullHD ()
+    (interactive)
+    (set-face-attribute 'default nil :height 50))
+
+  (defun hdpi ()
+    (interactive)
+    (set-face-attribute 'default nil :height 100))
+#+END_SRC
