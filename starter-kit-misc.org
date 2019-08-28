@@ -80,10 +80,13 @@ Things that don't fit anywhere else.
                              (insert startup-header-bar)
                              (when ( window-system )
                                (fancy-splash-head))
+                             (if (and (boundp 'custom-startup-buffer-location)
+                                      (file-exists-p custom-startup-buffer-location))
+                                (insert-file-contents custom-startup-buffer-location)
                              (if (file-exists-p "~/.emacs.d/startupbuffer.org")
                                  (insert-file-contents "~/.emacs.d/startupbuffer.org")
-                               startup-message-template)
-                             (buffer-string))
+                               startup-message-template))
+                           (buffer-string))
 
    transient-mark-mode t
    shift-select-mode nil

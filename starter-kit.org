@@ -71,6 +71,13 @@ automatically regenerated when you next start emacs.
   (setq calendar-latidute 50.783333333333)
   (setq calendar-longitude 5.0833333333333)
   (setq calendar-location-name \"Aachen, DE\")
+
+
+  ;; Startupbuffer location
+  ;; ======================
+  ;; This can be used for synchronizing the startup-buffer between
+  ;; different devices. Comment in, if you want to use it.
+  ; (defvar custom-startup-buffer-location \"~/startupbuffer.org\")
   "))
       ))
 #+end_src
