@@ -260,28 +260,46 @@ ido-mode is like magic pixie dust!
 #+end_src
 
 ** Flyspell
+Requires installing hunspell and the dictionaries of your desire (in
+this case en_US and de_DE on your system.
+
+On windows, download hunspell (e.g. from [[https://sourceforge.net/projects/ezwinports/][here]]) and put the extracted
+folders it in a directory of your choice. Add 
+: (setq exec-path (append exec-path '("C:/Program Files/hunspell/bin")))=
+(with your correct path) to your [[file:pathes.el][pathes]] file in the section
+"PATH-Variable". Download the required dictionaries from [[https://github.com/wooorm/dictionaries][here]] (you
+will need the =.dic= and =.aff= files and if you want more than one,
+you might need to rename them from =index.dic= to e.g. =de_DE.dic= and
+the =.aff= respectively) and put them in the folder
+=<pathtohunspell>/hunspell/share/hunspell=.
+
+More information [[https://lists.gnu.org/archive/html/help-gnu-emacs/2014-04/msg00030.html][here]].
+
 #+BEGIN_SRC emacs-lisp
-  (when (eq system-type 'gnu/linux)
-    (use-package flyspell
-      :ensure t
-      :init
-      (add-hook 'org-mode-hook 'flyspell-mode)
-      (add-hook 'text-mode-hook 'flyspell-mode)
-      :bind
-      (("C-; ," . flyspell-goto-next-error)
-       ("C-; ." . flyspell-auto-correct-word))
-      :config
-      (setq flyspell-issue-message-flag nil)
-      (define-key flyspell-mode-map (kbd "C-.") nil)
-      (define-key flyspell-mode-map (kbd "C-,") nil)
-      (define-key flyspell-mode-map (kbd "C-;") nil)
-         (with-eval-after-load "ispell"
-           (setq ispell-program-name "hunspell")
-           (setq ispell-dictionary "en_US,de_DE")
-           (ispell-set-spellchecker-params)
-           (when (> emacs-major-version 24)
-             (ispell-hunspell-add-multi-dic "en_US,de_DE")))
-      ))
+  (use-package flyspell
+    :ensure t
+    :init
+    (add-hook 'org-mode-hook 'flyspell-mode)
+    (add-hook 'text-mode-hook 'flyspell-mode)
+    :bind
+    (("C-; ," . flyspell-goto-next-error)
+     ("C-; ." . flyspell-auto-correct-word))
+    :config
+    (setq flyspell-issue-message-flag nil)
+    (define-key flyspell-mode-map (kbd "C-.") nil)
+    (define-key flyspell-mode-map (kbd "C-,") nil)
+    (define-key flyspell-mode-map (kbd "C-;") nil)
+    (with-eval-after-load "ispell"
+      (setq ispell-program-name
+            (if (eq system-type 'gnu/linux)
+                "hunspell"
+              (when (eq system-type 'windows-nt)
+                (locate-file "hunspell"
+                             exec-path exec-suffixes 'file-executable-p))))
+      (setq ispell-dictionary "en_US,de_DE")
+      (ispell-set-spellchecker-params)
+      (when (> emacs-major-version 24)
+        (ispell-hunspell-add-multi-dic "en_US,de_DE"))))
 #+END_SRC
 
 Install the required dictionaries!
