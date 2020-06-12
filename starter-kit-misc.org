@@ -59,6 +59,9 @@ Things that don't fit anywhere else.
   (set-keyboard-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
 
+  ;; Set font size
+  (set-face-attribute 'default nil :height 80)
+
   (custom-set-variables
    ;; Bars + scrolling bars hidden
    '(menu-bar-mode nil)
