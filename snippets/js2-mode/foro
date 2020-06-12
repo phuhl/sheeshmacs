@@ -2,9 +2,7 @@
 # name: foro
 # key: foro
 # --
-for(var $1Id in $2){
-  if($2.hasOwnProperty($1Id)){
-    var $1 = $2[$1Id];
-    $0
-  }
+for (const $1 in $2){
+  const $1 = $2[$1];
+  $0
 }
