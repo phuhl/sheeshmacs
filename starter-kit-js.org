@@ -4,12 +4,32 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
 * Starter Kit JS
 #+BEGIN_SRC emacs-lisp
+  (use-package js-doc
+    :ensure t
+    :defer t)
+
+    (use-package lsp-mode
+    :ensure t
+    :commands lsp)
+
+  ;; for completions
+  (use-package company-lsp
+    :ensure t
+    :after lsp-mode
+    :config (push 'company-lsp company-backends))
+
+  (use-package vue-mode
+    :mode "\\.vue\\'"
+    :ensure t
+    :config
+    (add-hook 'vue-mode-hook #'lsp))
+
+
   (use-package rjsx-mode
     :ensure t
     :mode ("\\.js$" . rjsx-mode)
     :interpreter ("node" . rjsx-mode)
     :init
-
     ;; Set indentation to 2 spaces
     (setq rjsx-basic-offset 2)
     (custom-set-variables
@@ -23,9 +43,13 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
                  (define-key rjsx-mode-map (kbd "C-c i") 'js-doc-insert-function-doc)
                  (define-key rjsx-mode-map "@" 'js-doc-insert-tag)))
     )
-  (use-package js-doc
+
+  (use-package prettier-js
     :ensure t
-    :defer t)
+    :hook ((vue-mode rjsx-mode typescript-mode json-mode) . prettier-js-mode))
+
+
+
 #+END_SRC
 
 #+begin_src emacs-lisp
@@ -133,19 +157,34 @@ Once in a while it can be usefull to restart tern.
 * Typescript
 
 #+BEGIN_SRC emacs-lisp
-(defun setup-tide-mode ()
-  "Set up Tide mode."
-  (interactive)
-  (tide-setup)
-  (flycheck-mode +1)
-  (setq flycheck-check-syntax-automatically '(save-mode-enabled))
-  (eldoc-mode +1)
-  (tide-hl-identifier-mode +1)
-  (company-mode +1))
+  (use-package typescript-mode
+      :ensure t
+      :mode ("\\.ts\\'" . typescript-mode)
+      :init
+      ;; Set indentation to 2 spaces
+      (custom-set-variables
+       '(typescript-indent-level 2))
 
-(use-package tide
-  :ensure t
-  :config
-  (setq company-tooltip-align-annotations t)
-  (add-hook 'typescript-mode-hook #'setup-tide-mode))
+      :config
+      (add-hook 'typescript-mode-hook 'run-starter-kit-coding-hook)
+      (add-hook 'typescript-mode-hook 'flycheck-mode)
+      ;;    (add-hook 'typescript-mode-hook #'lsp)
+      )
+
+
+  (defun setup-tide-mode ()
+    "Set up Tide mode."
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save-mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1))
+
+  (use-package tide
+    :ensure t
+    :config
+    (setq company-tooltip-align-annotations t)
+    (add-hook 'typescript-mode-hook #'setup-tide-mode))
 #+END_SRC
