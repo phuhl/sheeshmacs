@@ -280,7 +280,15 @@ file using the `org-babel-lob-ingest' function.
                     (format-time-string "%Y%m%d_%H%M%S_")) ) ".jpg"))
     (if (eq system-type 'gnu/linux)
         ;; Linux: ImageMagick
-        (call-process "import" nil nil nil filename)
+        (progn
+          (message "3...")
+          (sleep-for 1)
+          (message "2..")
+          (sleep-for 1)
+          (message "1.")
+          (sleep-for 1)
+          (message "Snap!")
+          (call-process "import" nil nil nil filename))
       ;; Windows: Irfanview
       (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
                     (concat "/clippaste /convert=" filename)))
