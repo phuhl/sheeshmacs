@@ -197,6 +197,13 @@ Reloads images if neccessary after the execution of a code-block
                            'shk-fix-inline-images))
 #+end_src
 
+Fix issue with javascript output due to depricated use of "sys"
+package
+#+BEGIN_SRC emacs-lisp
+(setq org-babel-js-function-wrapper
+      "console.log(require('util').inspect(function(){\n%s\n}(), { depth: 1000, maxArrayLength: null }))")
+#+END_SRC
+
 *** Plantuml
 Setting the plantuml.jar
 #+begin_src emacs-lisp
@@ -273,7 +280,15 @@ file using the `org-babel-lob-ingest' function.
                     (format-time-string "%Y%m%d_%H%M%S_")) ) ".jpg"))
     (if (eq system-type 'gnu/linux)
         ;; Linux: ImageMagick
-        (call-process "import" nil nil nil filename)
+        (progn
+          (message "3...")
+          (sleep-for 1)
+          (message "2..")
+          (sleep-for 1)
+          (message "1.")
+          (sleep-for 1)
+          (message "Snap!")
+          (call-process "import" nil nil nil filename))
       ;; Windows: Irfanview
       (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
                     (concat "/clippaste /convert=" filename)))

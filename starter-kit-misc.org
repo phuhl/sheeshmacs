@@ -59,6 +59,9 @@ Things that don't fit anywhere else.
   (set-keyboard-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
 
+  ;; Set font size
+  (set-face-attribute 'default nil :height 80)
+
   (custom-set-variables
    ;; Bars + scrolling bars hidden
    '(menu-bar-mode nil)
@@ -240,23 +243,25 @@ ido-mode is like magic pixie dust!
 ** Ivy
 
 #+begin_src emacs-lisp
-  (use-package swiper
-    :ensure t
-    :config
-    (global-set-key (kbd "C-M-s") 'swiper))
-  (use-package ivy
-    :ensure t
-    :config (progn
-              (ivy-mode 1)
+      (use-package swiper
+        :ensure t
+        :config
+        (global-set-key (kbd "C-M-s") 'swiper)
+        :bind (:map swiper-map
+           ("C-M-s" . ivy-previous-history-element)))
+      (use-package ivy
+        :ensure t
+        :config (progn
+                  (ivy-mode 1)
 
-              (setq ivy-use-virtual-buffers t)
-              (setq enable-recursive-minibuffers t)
-              (setq ivy-count-format "(%d/%d) ")))
-  (use-package counsel
-    :ensure t
-    :config
-    (global-set-key (kbd "M-x") 'counsel-M-x)
-    (global-set-key (kbd "C-x C-f") 'counsel-find-file))
+                  (setq ivy-use-virtual-buffers t)
+                  (setq enable-recursive-minibuffers t)
+                  (setq ivy-count-format "(%d/%d) ")))
+      (use-package counsel
+        :ensure t
+        :config
+        (global-set-key (kbd "M-x") 'counsel-M-x)
+        (global-set-key (kbd "C-x C-f") 'counsel-find-file))
 #+end_src
 
 ** Flyspell
