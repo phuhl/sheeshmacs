@@ -8,7 +8,7 @@ This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
     :ensure t
     :defer t)
 
-    (use-package lsp-mode
+  (use-package lsp-mode
     :ensure t
     :commands lsp)
 
