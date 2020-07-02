@@ -477,7 +477,7 @@ https://github.com/mrkkrp/vimish-fold
       :config
       (global-set-key (kbd "C-; f") #'vimish-fold)
       (global-set-key (kbd "C-; d") #'vimish-fold-delete)
-      (global-set-key (kbd "C-`") #'vimish-fold-toggle))
+      (global-set-key (kbd "M-<tab>") #'vimish-fold-toggle))
 
 #+END_SRC
 
