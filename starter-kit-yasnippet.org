@@ -81,3 +81,17 @@ following function allows these two to play nicely together.
 
   (add-hook 'org-mode-hook #'yas/org-setup)
 #+end_src
+
+** Add custom yasnippet methods
+
+#+BEGIN_SRC emacs-lisp
+  (defun yas-delete (regexp)
+    (goto-char yas-snippet-beg)
+    (while (re-search-forward regexp yas-snippet-end t)
+      (replace-match "")))
+
+  (defun yas-delete-space ()
+    (goto-char yas-snippet-beg)
+    (delete-backward-char 1)
+    (goto-char (- yas-snippet-end 1)))
+#+END_SRC
