@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: pt
+# key: pt
+# expand-env: ((yas-after-exit-snippet-hook (lambda () (yas-delete-space)(backward-char 3)))))
+# --
+.propTypes = {
+  $0
+};

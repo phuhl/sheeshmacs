@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ptarray
+# key: ptarray
+# --
+PropTypes.array

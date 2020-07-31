@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ptobj
+# key: ptobj
+# --
+PropTypes.object$0

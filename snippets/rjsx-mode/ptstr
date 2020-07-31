@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ptstr
+# key: ptstr
+# --
+PropTypes.string$0

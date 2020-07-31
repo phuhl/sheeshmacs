@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ptfunc
+# key: ptfunc
+# --
+PropTypes.func
