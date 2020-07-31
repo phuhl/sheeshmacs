@@ -50,12 +50,13 @@ automatically regenerated when you next start emacs.
 
   ;; PATH-Variable
   ;; =============
-  ;; If you need git or ediff you can set the paths to the executables
-  ;; here. This setup is only required for windows systems.
+  ;; If you need git, ediff, hunspell, ... you can set the paths to the
+  ;; executables here. This setup is only required for windows systems.
   (when (eq system-type 'windows-nt)
     (setenv \"PATH\" (concat (getenv \"PATH\") \";C:/Program Files/diffutils/bin\"))
     (setq exec-path (append exec-path '(\"C:/Program Files/diffutils/bin\")))
     (setq exec-path (append exec-path '(\"C:/Program Files/Git/bin\")))
+    (setq exec-path (append exec-path '(\"C:/Program Files/hunspell/bin\")))
     )
 
   ;; SSH-Keys

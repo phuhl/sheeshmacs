@@ -201,7 +201,7 @@ Fix issue with javascript output due to depricated use of "sys"
 package
 #+BEGIN_SRC emacs-lisp
 (setq org-babel-js-function-wrapper
-      "console.log(require('util').inspect(function(){\n%s\n}(), { depth: 1000, maxArrayLength: null }))")
+      "process.stdout.write(require('util').inspect(function(){\n%s\n}(), { maxArrayLength: null, maxStringLength: null, breakLength: Infinity, compact: true }))")
 #+END_SRC
 
 *** Plantuml
