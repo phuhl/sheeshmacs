@@ -504,14 +504,20 @@ TransposeWindows. There may well be better ways to write this."
 https://github.com/mrkkrp/vimish-fold
 
 #+BEGIN_SRC emacs-lisp
-    (use-package vimish-fold
-      :ensure t
-      :init (vimish-fold-global-mode 1)
-      :config
-      (global-set-key (kbd "C-; f") #'vimish-fold)
-      (global-set-key (kbd "C-; F") #'vimish-fold-delete)
-      (global-set-key (kbd "M-<tab>") #'vimish-fold-toggle))
+  (use-package vimish-fold
+    :ensure t
+    :init (vimish-fold-global-mode 1)
+    :config
+    (global-set-key (kbd "C-; f") #'vimish-fold)
+    (global-set-key (kbd "C-; F") #'vimish-fold-delete)
+    (global-set-key (kbd "M-<tab>") #'vimish-fold-toggle)
+    (global-set-key (kbd "C-M-<tab>") #'vimish-fold-toggle-all)
 
+    (custom-set-variables '(vimish-fold-header-width 50))
+    (custom-set-faces
+     '(vimish-fold-fringe ((t (:inherit nil
+                                        :background "dark cyan"
+                                        :foreground "spring green"))))))
 #+END_SRC
 
 ** Tetris
