@@ -7,6 +7,10 @@
 # Emacs
 *~
 *\#
+transient/
+vimish-fold/
+.lsp-session-v1
+.cache/
 
 ## misc
 loaddefs.el*
