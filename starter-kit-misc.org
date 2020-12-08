@@ -478,6 +478,8 @@ TransposeWindows. There may well be better ways to write this."
 ;; (custom-set-variables
 ;;  '(custom-enabled-themes (quote (tsdh-dark))))
 (load-file "~/.emacs.d/src/theme.el")
+(custom-set-variables
+ '(custom-enabled-themes '(org-beautify-mods org-beautify at-day )))
 ;(load-file "~/.emacs.d/src/at-night.el")
 #+END_SRC
 
@@ -587,3 +589,23 @@ collection ([[https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_notice
   (use-package graphql-mode
     :ensure t)
 #+END_SRC
+
+** Uppercase first letter
+
+#+begin_src emacs-lisp
+    ;; Killring backwards
+    (defun capitalize-first-char (arg)
+      (interactive "p")
+      (forward-word 1)
+      (backward-word 1)
+      (forward-char 1)
+      (insert " ")
+      (backward-char 2)
+      (capitalize-word 1)
+      (delete-char 1)
+      (forward-word 1)
+  )
+
+    (global-set-key (kbd "M-C-c") 'capitalize-first-char)
+#+end_src
+
