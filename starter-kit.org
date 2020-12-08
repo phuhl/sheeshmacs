@@ -254,6 +254,11 @@ everyone using the starter kit.
   (starter-kit-load "org")
   #+end_src
 
+- Theme
+  #+BEGIN_SRC emacs-lisp
+    (load-file (concat starter-kit-dir "/src/elegant-light.el"))
+  #+END_SRC
+
 ** Startup buffer
 
 #+BEGIN_SRC emacs-lisp
