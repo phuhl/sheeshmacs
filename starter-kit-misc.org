@@ -126,13 +126,24 @@ Things that don't fit anywhere else.
                            mode-line-end-spaces))
 #+END_SRC
 
-** Highlight matching parentheses when the point is on them.
+** Parentheses
+
+*** Highlight matching parentheses when the point is on them.
 #+srcname: starter-kit-match-parens
 #+begin_src emacs-lisp 
 (show-paren-mode 1)
+(custom-set-faces
+ '(show-paren-match ((t (:inherit face-critical)))))
 #+end_src
 
-** ido mode
+*** Rainbow parenthesis
+
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+    :ensure t)
+#+END_SRC
+
+** Ido mode
 ido-mode is like magic pixie dust!
 #+srcname: starter-kit-loves-ido-mode
 #+begin_src emacs-lisp 
