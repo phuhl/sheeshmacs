@@ -166,7 +166,10 @@ background color that is barely perceptible."
 
 (defun mode-line-render (left middle right)
   "Function to render the modeline LEFT to RIGHT."
-  (let* ((ww (- (window-total-width) 4))
+  (let* ((ww (- (window-total-width)
+                2
+                (/ (* (window-right-divider-width) 1.0)
+                   (window-font-width nil 'header-line))))
          (available-width-left
           (- (/ ww 2) (length left) (/ (length middle) -2)))
          (available-width-right
