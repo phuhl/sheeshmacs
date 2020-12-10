@@ -100,13 +100,20 @@ a lambda doesn't already exist in the list.
 https://github.com/mrkkrp/vimish-fold
 
 #+BEGIN_SRC emacs-lisp
-    (use-package vimish-fold
-      :ensure t
-      :init (vimish-fold-global-mode 1)
-      :config
+  (use-package vimish-fold
+    :ensure t
+    :init (vimish-fold-global-mode 1)
+    :config
       (global-set-key (my-key "_Vimish_ - fold region") #'vimish-fold)
       (global-set-key (my-key "_Vimish_ - delete region") #'vimish-fold-delete)
-      (global-set-key (my-key "_Vimish_ - toggle region") #'vimish-fold-toggle))
+      (global-set-key (my-key "_Vimish_ - toggle region") #'vimish-fold-toggle)
+      (global-set-key (my-key "_Vimish_ - toggle all") #'vimish-fold-toggle-all)
+
+    (custom-set-variables '(vimish-fold-header-width 50))
+    (custom-set-faces
+     '(vimish-fold-fringe ((t (:inherit nil
+                                        :background "dark cyan"
+                                        :foreground "spring green"))))))
 #+END_SRC
 
 ** Colored Hex/color-named Colors
@@ -208,6 +215,13 @@ https://github.com/mrkkrp/vimish-fold
     (goto-char yas-snippet-beg)
     (delete-backward-char 1)
     (goto-char (- yas-snippet-end 1)))
+
+  (defun yas-capitalize-first-char (&optional string)
+    "Capitalize only the first character of the input STRING."
+    (when (and string (> (length string) 0))
+      (let ((first-char (substring string nil 1))
+            (rest-str   (substring string 1)))
+        (concat (capitalize first-char) rest-str))))
 #+END_SRC
 
 ** Magit

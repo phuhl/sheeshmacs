@@ -39,6 +39,7 @@ information.
 | C-; ,      | Go to next error with _Flyspell_             |
 | C-; .      | Autocorrect word with _Flyspell_             |
 | M-Q        | Unfill paragraph                           |
+| M-C-c      | Capitalize, modify first letter only       |
 |------------+--------------------------------------------|
 |            | *Search*                                     |
 |            |                                            |
@@ -78,6 +79,7 @@ information.
 | C-; f      | _Vimish_ - fold region                       |
 | C-; F      | _Vimish_ - delete region                     |
 | M-<tab>    | _Vimish_ - toggle region                     |
+| C-M-<tab>  | _Vimish_ - toggle all                        |
 |------------+--------------------------------------------|
 |            | *Yasnippet*                                  |
 |            |                                            |
@@ -137,9 +139,6 @@ information.
           (error (concat "Keybinding " term " not defined."))
         key)))
 #+END_SRC
-
-#+RESULTS:
-: my-bind
 
 * Emacs Appearance Settings and Configuration
 
@@ -779,3 +778,19 @@ Install the required dictionaries!
 #+END_SRC
 
 
+*** Uppercase first letter
+
+#+BEGIN_SRC emacs-lisp
+  (defun capitalize-first-char (arg)
+    (interactive "p")
+    (forward-word 1)
+    (backward-word 1)
+    (forward-char 1)
+    (insert " ")
+    (backward-char 2)
+    (capitalize-word 1)
+    (delete-char 1)
+    (forward-word 1))
+
+  (global-set-key (my-key "Capitalize, modify first letter only") 'capitalize-first-char)
+#+END_SRC
