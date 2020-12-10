@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ptnum
+# key: ptnum
+# --
+PropTypes.number
