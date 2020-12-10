@@ -1,0 +1,9 @@
+#+TITLE: Sheesh Theme Config
+#+DATE: [2020-12-09 Wed]
+#+AUTHOR: Philipp Uhl
+
+
+#+BEGIN_SRC emacs-lisp
+  (load-file "~/.emacs.d/src/theme.el")
+  (load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
+#+END_SRC

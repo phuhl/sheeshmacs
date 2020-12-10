@@ -29,27 +29,7 @@
 ;;; Code:
 
 
-;;; Font and frame size
-;;; -------------------------------------------------------------------
-(setq default-frame-alist
-      (append (list '(width  . 72) '(height . 40)
-                    '(vertical-scroll-bars . nil)
-                    '(internal-border-width . 24)
-                    '(font . "Roboto Mono 12"))))
-(set-frame-parameter (selected-frame)
-                     'internal-border-width 24)
-;;; -------------------------------------------------------------------
 
-;;; Line spacing, can be 0 for code and 1 or 2 for text
-;;; -------------------------------------------------------------------
-(setq-default line-spacing 0)
-(setq x-underline-at-descent-line t)
-(setq widget-image-enable nil)
-;;; -------------------------------------------------------------------
-
-;;; Line cursor and no blink
-;;; -------------------------------------------------------------------
-(blink-cursor-mode 0)
 ;;; -------------------------------------------------------------------
 
 
@@ -63,12 +43,6 @@
 ;;; No Tooltips
 ;;; -------------------------------------------------------------------
 (tooltip-mode 0)
-;;; -------------------------------------------------------------------
-
-
-;;; Paren mode is part of the theme
-;;; -------------------------------------------------------------------
-(show-paren-mode t)
 ;;; -------------------------------------------------------------------
 
 
@@ -141,133 +115,6 @@ information and this can be made by setting a very light
 background color that is barely perceptible."
 :group 'elegance)
 ;;; -------------------------------------------------------------------
-
-
-;;; Mode line rendering
-;;; -------------------------------------------------------------------
-;;; This line below makes things a bit faster
-(set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16")
-
-(define-key mode-line-major-mode-keymap [header-line]
-  (lookup-key mode-line-major-mode-keymap [mode-line]))
-
-(defvar ml-selected-window nil)
-
-(defun ml-record-selected-window ()
-  (setq ml-selected-window (selected-window)))
-
-(defun ml-update-all ()
-  (force-mode-line-update t))
-
-(add-hook 'post-command-hook 'ml-record-selected-window)
-
-(add-hook 'buffer-list-update-hook 'ml-update-all)
-
-
-(defun mode-line-render (left middle right)
-  "Function to render the modeline LEFT to RIGHT."
-  (let* ((ww (- (window-total-width)
-                2
-                (/ (* (window-right-divider-width) 1.0)
-                   (window-font-width nil 'header-line))))
-         (available-width-left
-          (- (/ ww 2) (length left) (/ (length middle) -2)))
-         (available-width-right
-          (- ww (length left) available-width-left)))
-    (format (format "%%s %%%ds %%%ds"
-                    available-width-left
-                    available-width-right)
-            left middle right)))
-(setq-default mode-line-format
-   '((:eval
-      (mode-line-render
-       (format-mode-line
-        (propertize "%m" 'face `(:inherit face-faded)))
-       (format-mode-line
-        (list
-         (if (and buffer-file-name (buffer-modified-p))
-             (propertize " *" 'face `(:inherit face-faded))
-           "")
-         (if (eq ml-selected-window (selected-window))
-             (propertize " %b " 'face `(:inherit face-strong))
-           (propertize " %b " 'face `(:inherit face-faded)))
-         (if (and buffer-file-name (buffer-modified-p))
-             (propertize "* " 'face `(:inherit face-faded)))))
-       (format-mode-line
-        (propertize "%4l:%2c" 'face `(:inherit face-faded)))))))
-;;; -------------------------------------------------------------------
-
-
-;;; Set modeline at the top
-;;; -------------------------------------------------------------------
-(setq-default header-line-format mode-line-format)
-(setq-default mode-line-format'(""))
-;;; -------------------------------------------------------------------
-
-
-;;; Vertical window divider
-;;; -------------------------------------------------------------------
-(setq window-divider-default-right-width 16)
-(setq window-divider-default-places 'right-only)
-(window-divider-mode)
-;;; -------------------------------------------------------------------
-
-
-;;; Modeline
-;;; -------------------------------------------------------------------
-(defun set-modeline-faces ()
-  "Mode line at top."
-  (set-face 'header-line                                 'face-strong)
-  (set-face-attribute 'header-line nil
-                                :underline (face-foreground 'default))
-  (set-face-attribute 'mode-line nil
-                      :height 10
-                      :underline (face-foreground 'default)
-                      :overline nil
-                      :box nil
-                      :foreground (face-background 'default)
-                      :background (face-background 'default))
-  (set-face 'mode-line-inactive                            'mode-line)
-  (set-face-attribute 'cursor nil
-                      :background (face-foreground 'default))
-  (set-face-attribute 'window-divider nil
-                      :foreground (face-background 'mode-line))
-  (set-face-attribute 'window-divider-first-pixel nil
-                      :foreground (face-background 'default))
-  (set-face-attribute 'window-divider-last-pixel nil
-                      :foreground (face-background 'default)))
-;;; -------------------------------------------------------------------
-
-
-;;; Buttons
-;;; -------------------------------------------------------------------
-(defun set-button-faces ()
-  "Set button faces."
-  (set-face-attribute 'custom-button nil
-                      :foreground (face-foreground 'face-faded)
-                      :background (face-background 'face-subtle)
-                      :box `(:line-width 1
-                             :color ,(face-foreground 'face-faded)
-                             :style nil))
-  (set-face-attribute 'custom-button-mouse nil
-                      :foreground (face-foreground 'default)
-                      ;;; :background (face-foreground 'face-faded)
-                      :inherit 'custom-button
-                      :box `(:line-width 1
-                             :color ,(face-foreground 'face-subtle)
-                             :style nil))
-  (set-face-attribute 'custom-button-pressed nil
-                      :foreground (face-background 'default)
-                      :background (face-foreground 'face-salient)
-                      :inherit 'face-salient
-                      :box `(:line-width 1
-                             :color ,(face-foreground 'face-salient)
-                             :style nil)
-                      :inverse-video nil))
-'(cus-edit (set-button-faces))
-;;; -------------------------------------------------------------------
-
-
 
 
 ;; Structural

@@ -1,0 +1,432 @@
+#+TITLE: Sheesh-Org Config
+#+DATE: [2020-12-10 Thu]
+#+AUTHOR: Philipp Uhl
+
+
+* Appearance
+
+#+BEGIN_SRC emacs-lisp
+   ;; Indents all content according to the corresponding headline. Has
+   ;; slight issues with scrolling the buffer horizontally sometimes, is
+   ;; it worth it in terms of estetics anyways (my opinion).
+   ;; Seems to not be nessecary anymore since the use of
+   ;; org-beautify-theme (EDIT: untrue?!)
+   (setq org-startup-indented t)
+
+   ;; langauge of timestamps
+   (setq system-time-locale "C")
+
+   ;; Sets image width to 300px if no #+ATTR_HTML: :width ..px is found
+   (setq org-image-actual-width '(300))
+
+   ;; Makes ord-mode inline all images by default
+   (setq org-startup-with-inline-images t)
+
+   (add-hook 'org-mode-hook
+             (lambda ()
+               ;; Don't wrap long lines and wrap them at words if you wrap (whut?)
+               (setq truncate-lines t)
+               (setq word-wrap t)
+               (global-whitespace-mode 0)
+               ))
+#+END_SRC
+** Code block fontification
+
+The following displays the contents of code blocks in Org-mode files
+using the major-mode of the code.  It also changes the behavior of
+=TAB= to as if it were used in the appropriate major mode.  This means
+that reading and editing code form inside of your Org-mode files is
+much more like reading and editing of code using its major mode.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-fontify-natively t)
+  (setq org-src-tab-acts-natively t)
+#+END_SRC
+
+** Lists with unicode bullets
+
+#+begin_src emacs-lisp
+    (use-package org
+      :init
+      (progn
+      (font-lock-add-keywords 'org-mode
+       '(("^ +\\([*]\\) "
+              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "◦"))))))
+      (font-lock-add-keywords 'org-mode
+       '(("^ *\\([+]\\) "
+          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "✧"))))))
+      (font-lock-add-keywords 'org-mode
+       '(("^ *\\([-]\\) "
+          (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))))
+#+end_src
+
+** Org-Bullets Mode
+
+#+begin_src emacs-lisp
+  (use-package org-bullets
+    :ensure t
+    :init (add-hook 'org-mode-hook 'org-bullets-mode)
+    :config (setq org-bullets-bullet-list (quote ("●" "◎" "○" "■" "□" "◆" "◇"))))
+#+end_src
+
+** Org-sub-Theme
+
+#+begin_src emacs-lisp
+   (when window-system
+     (use-package org-beautify-theme
+       :ensure t
+       :config
+       (deftheme org-beautify-mods "Sub-sub-theme to beautify org-beautify.... ahhh god damnit")
+       (let* ((base-font-color (face-foreground 'default  nil 'default))
+              (base3-font-color (face-foreground 'org-agenda-structure  nil 'default))
+              (background-color (face-background 'default nil 'default))
+              (background2-color (face-background 'org-verbatim nil 'default))
+              (background3-color (face-background 'org-agenda-structure nil 'default))
+              (background4-color (face-foreground 'org-agenda-done nil 'default)))
+         (custom-theme-set-faces 'org-beautify-mods
+                                 `(org-block-begin-line ((t :foreground ,base-font-color :background, background-color)))
+                                 `(org-block-end-line ((t :foreground ,base-font-color :background, background-color)))
+                                 `(org-block ((t (:foreground ,base-font-color :background ,background2-color :box nil))))
+                                 `(org-agenda-date ((t (:inherit org-agenda-structure :foreground "#666666" :height 0.8))))
+                                 `(org-agenda-date-today ((t (:inherit org-agenda-date :background ,background4-color :foreground "#000000" :box nil :underline nil :weight bold :height 1.1))))
+                                 `(org-agenda-structure ((t (:inherit default :background ,background3-color :foreground ,base3-font-color :box nil :underline nil :weight bold :height 1.2 :family "Sans Serif"))))))
+       (provide-theme 'org-beautify-mods)
+
+   ))
+
+#+end_src
+
+* Behavior
+
+#+BEGIN_SRC emacs-lisp
+  ;; Enforces that you can not set an entry to DONE if it has children with TODO
+  (setq org-enforce-todo-dependencies t)
+
+  ;; Enforces that you can not set an entry to DONE if it has unchecked
+  ;; checkboxes, quite annoying.
+  ;;  (setq org-enforce-todo-checkbox-dependencies t)
+
+  ;; sets the time (minutes) until the org clock asks if the time should be kept
+  (setq org-clock-idle-time 15)
+
+  ;; Sets the default values for effort estimates
+  (setq org-global-properties
+        '(("Effort_ALL" . "0 0:10 0:20 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")))
+  ;;                        | |    |    |    |    |    |    |    |    |
+  ;; Shortcuts              1 2    3    4    5    6    7    8    9    10
+
+  ;; Sets default clock report table properties
+  (setq org-clock-clocktable-default-properties
+        '(:maxlevel 10 :scope tree :properties ("Effort") :compact t))
+#+END_SRC
+
+** Keybindings
+
+#+BEGIN_SRC emacs-lisp
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (local-set-key (my-key "_Org Mode_ - Go to next heading")
+                               'outline-next-visible-heading)
+                (local-set-key (my-key "_Org Mode_ - Go to previous heading")
+                               'outline-previous-visible-heading)
+                (local-set-key (my-key "_Org Mode_ - Go one heading up")
+                               'outline-up-heading)
+                (local-set-key (my-key "_Org Mode_ - Copy table region")
+                               'org-table-copy-region)
+                (local-set-key (my-key "_Org Mode_ - Past rectangle")
+                               'org-table-paste-rectangle)
+                (local-set-key (my-key "_Org Mode_ - Sort table lines")
+                               'org-table-sort-lines)
+                (local-set-key (my-key "_Org Mode_ - Move current subtree to archive")
+                               'org-advertized-archive-subtree)
+                (local-set-key (my-key "_Org Mode_ - Insert screenshot")
+                               'org-screenshot)
+                (local-set-key (my-key "_Org Mode_ - Show all TODOs")
+                               'run-todo-with-agenda-files)
+                (local-set-key (my-key "_Org Mode_ - Show agenda")
+                               'run-agenda-with-agenda-files)
+                (local-set-key (my-key "_Org Mode_ - Create Schedule")
+                               'org-schedule-effort-new)
+                (local-set-key (my-key "Go to previous buffer")
+                               'previous-multiframe-window)
+                (local-set-key (kbd "C-;") nil)
+                (local-set-key (kbd "C-,") nil)))
+    (define-key global-map (my-key "_Org Mode_ - Org capture") 'org-capture)
+#+END_SRC
+** Behavior of Todo with lists
+
+Switches entry to DONE when all subentries are done, but only if cooky ([/]) is in headline
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-summary-todo (n-done n-not-done)
+    "Switch entry to DONE when all subentries are done, to TODO otherwise."
+    (let (org-log-done org-log-states)   ; turn off logging
+      (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+  (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+#+END_SRC
+
+** Speed keys
+
+Speed commands enable single-letter commands in Org-mode files when
+the point is at the beginning of a headline, or at the beginning of a
+code block.
+
+See the =org-speed-commands-default= variable for a list of the keys
+and commands enabled at the beginning of headlines.  All code blocks
+are available at the beginning of a code block, the following key
+sequence =C-c C-v h= (bound to `=org-babel-describe-bindings=') will
+display a list of the code blocks commands and their related keys.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-use-speed-commands t)
+#+END_SRC
+
+** Code blocks
+
+This activates a number of widely used languages, you are encouraged
+to activate more languages using the customize interface for the
+`=org-babel-load-languages=' variable, or with an elisp form like the
+one below.  The customize interface of `=org-babel-load-languages='
+contains an up to date list of the currently supported languages.
+
+#+BEGIN_SRC emacs-lisp
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (shell . t)
+     (restclient . t)
+     (plantuml . t)
+     (js . t)
+     (python . t)))
+#+END_SRC
+
+Disables confirmation for code evaluation in org-mode. Might be risky
+when executing org-files from unknown sources.
+#+BEGIN_SRC emacs-lisp
+  (setq org-confirm-babel-evaluate nil)
+#+END_SRC
+
+Reloads images if neccessary after the execution of a code-block
+#+BEGIN_SRC emacs-lisp
+  (defun  shk-fix-inline-images ()
+    (when org-inline-image-overlays
+      (org-redisplay-inline-images)))
+
+  (eval-after-load 'org
+                 (add-hook 'org-babel-after-execute-hook
+                           'shk-fix-inline-images))
+#+END_SRC
+
+Fix issue with javascript output due to depricated use of "sys"
+package, might be fixed some day?
+#+BEGIN_SRC emacs-lisp
+(setq org-babel-js-function-wrapper
+      "process.stdout.write(require('util').inspect(function(){\n%s\n}(), { maxArrayLength: null, maxStringLength: null, breakLength: Infinity, compact: true }))")
+#+END_SRC
+
+*** Plantuml
+Setting the plantuml.jar
+
+#+BEGIN_SRC emacs-lisp
+  (if (boundp 'plantuml-dir)
+      (setq org-plantuml-jar-path
+            (expand-file-name plantuml-dir)))
+#+END_SRC
+
+*** Execute Code Blocks Asynchronously
+
+[[https://github.com/astahlman/ob-async][{github} ob-async]]
+
+Usage: add =:async= to the babel properties of the code block.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ob-async
+    :ensure t)
+#+END_SRC
+
+** Exporting
+
+HTLM export with CSS
+
+#+BEGIN_SRC emacs-lisp
+(setq org-export-htmlize-output-type 'css)
+#+END_SRC
+
+** Publishing
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-publish
+    :defer t
+    :config
+    (setq org-publish-project-alist
+          `(
+            ("org-notes"
+             :base-directory ,org-base-dir
+             :base-extension "org"
+             :publishing-directory ,org-exp-dir
+             :recursive t
+             :publishing-function org-html-publish-to-html
+             :headline-levels 5             ; Just the default for this project.
+             :auto-preamble t
+             :auto-sitemap t                ; Generate sitemap.org automagically...
+             :sitemap-filename "sitemap.org"  ; ... call it sitemap.org (it's the default)...
+             :sitemap-title ""         ; ... with title 'Sitemap'.
+             )
+            ("org-static"
+             :base-directory ,org-base-dir
+             :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+             :publishing-directory ,org-exp-dir
+             :recursive t
+             :publishing-function org-publish-attachment
+             )
+            ("org" :components ("org-notes" "org-static"))
+            ))
+    )
+#+END_SRC
+
+* Features
+** Schedule Effort
+
+This helper function behaves lake the normal =org-schedule= function,
+but if an estimate is set, it will (if a start hour is present in the
+schedule) add a corresponding end-hour.
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-schedule-effort ()
+  (interactive)
+    (save-excursion
+      (org-back-to-heading t)
+      (let* (
+          (element (org-element-at-point))
+          (effort (org-element-property :EFFORT element))
+          (scheduled (org-element-property :scheduled element))
+          (ts-year-start (org-element-property :year-start scheduled))
+          (ts-month-start (org-element-property :month-start scheduled))
+          (ts-day-start (org-element-property :day-start scheduled))
+          (ts-hour-start (org-element-property :hour-start scheduled))
+          (ts-minute-start (org-element-property :minute-start scheduled)) )
+        (if (and (not (eq scheduled nil))
+                 (not (eq effort nil))
+                 (not (eq ts-hour-start nil)))
+            (org-schedule nil (concat
+                               (format "%s" ts-year-start)
+                               "-"
+                               (if (< ts-month-start 10)
+                                   (concat "0" (format "%s" ts-month-start))
+                                 (format "%s" ts-month-start))
+                               "-"
+                               (if (< ts-day-start 10)
+                                   (concat "0" (format "%s" ts-day-start))
+                                 (format "%s" ts-day-start))
+                               " "
+                               (if (< ts-hour-start 10)
+                                   (concat "0" (format "%s" ts-hour-start))
+                                 (format "%s" ts-hour-start))
+                               ":"
+                               (if (< ts-minute-start 10)
+                                   (concat "0" (format "%s" ts-minute-start))
+                                 (format "%s" ts-minute-start))
+                               "+"
+                               effort)) ))))
+
+  (defun org-schedule-effort-new ()
+    (interactive)
+    (call-interactively 'org-schedule)
+    (org-schedule-effort)
+    )
+#+END_SRC
+
+** SFW Agenda
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-agenda-list-priv (pre)
+    "Opens the org-agenda, if called with a prefix argument all
+  priv-tags will be filtered out (if #+TAGS: priv(p) set somewhere"
+    (interactive "P")
+    (if pre
+        (progn
+          (org-agenda-list)
+          (org-agenda-filter-by-tag t ?p))
+      (org-agenda-list)))
+#+END_SRC
+
+** Screenshots
+
+#+BEGIN_SRC emacs-lisp
+  ;; Past images from clipboard into org-mode
+  (defun org-screenshot ()
+    "Take a screenshot into a time stamped unique-named file in the same
+  directory as the org-buffer and insert
+  a link to this file."
+    (interactive)
+    (setq tilde-buffer-filename
+          (if (eq system-type 'gnu/linux)
+              buffer-file-name
+            (replace-regexp-in-string "/" "\\" (buffer-file-name) t t)))
+    (unless (file-exists-p (concat tilde-buffer-filename ".img"))
+      (make-directory (concat tilde-buffer-filename ".img")))
+    (setq filename
+          (concat
+           (make-temp-name
+            (concat tilde-buffer-filename
+                    (if (eq system-type 'gnu/linux)
+                        ".img/org_"
+                      ".img\\org_")
+                    (format-time-string "%Y%m%d_%H%M%S_")) ) ".jpg"))
+    (if (eq system-type 'gnu/linux)
+        ;; Linux: ImageMagick
+        (progn
+          (message "3...")
+          (sleep-for 1)
+          (message "2..")
+          (sleep-for 1)
+          (message "1.")
+          (sleep-for 1)
+          (message "Snap!")
+          (call-process "import" nil nil nil filename))
+      ;; Windows: Irfanview
+      (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
+                    (concat "/clippaste /convert=" filename)))
+    (insert (concat "[[file:"
+                    (file-relative-name
+                     (if (eq system-type 'gnu/linux)
+                         filename
+                       (replace-regexp-in-string "\\\\" "/" filename t t))
+                     (file-name-directory (buffer-file-name))) "]]"))
+    (org-display-inline-images))
+#+END_SRC
+
+** Capture
+
+#+BEGIN_SRC emacs-lisp
+  (defvar my/org-basic-task-template "* TODO %^{Task}
+  :PROPERTIES:
+  :Effort: %^{effort|1:00|0:05|0:15|0:30|2:00|4:00}
+  :END:
+  %<%Y-%m-%d %H:%M> %?
+  " "Basic task data")
+
+  (setq org-default-notes-file "~/org/notes.org")
+  (setq org-refile-targets '((org-agenda-files . (:maxlevel . 6))))
+
+  (setq org-capture-templates
+        `(("t" "Tasks" entry
+           (file+headline "~/org/notes.org" "Tasks")
+           ,my/org-basic-task-template)
+          ("k" "Key Binding" table-line
+           (file "~/org/notes.org") "| | | |")
+          ))
+#+END_SRC
+
+** Quick jump to Org-file overview
+
+#+BEGIN_SRC emacs-lisp
+  (eval
+   `(use-package get-org-buffer-list
+      :load-path "src"
+      :bind
+      (,(cons (my-bind "_Org Mode_ - Quick jump to Org-file") 'show-org-file-list)
+       ,(cons (my-bind "_Org Mode_ - Show agenda") 'run-agenda-with-agenda-files)
+       ,(cons (my-bind "_Org Mode_ - Show all TODOs") 'run-todo-with-agenda-files))))
+#+END_SRC
+

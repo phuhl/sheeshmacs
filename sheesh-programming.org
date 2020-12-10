@@ -1,0 +1,622 @@
+#+TITLE: Sheesh-Programming Config
+#+DATE: [2020-12-09 Wed]
+#+AUTHOR: Philipp Uhl
+
+
+* Setup for all Programming Modes
+
+#+BEGIN_SRC emacs-lisp
+  (set-default 'indent-tabs-mode nil)
+  (set-default 'indicate-empty-lines t)
+  (set-default 'tab-width 2)
+  (set-default 'c-basic-offset 2)
+#+END_SRC
+
+** All purpose Coding Hook
+
+A single hook holding those functions which should be run in *every*
+code buffer.
+
+We have a number of turn-on-* functions since it's advised that lambda
+functions not go in hooks. Repeatedly evaling an add-to-list with a
+hook value will repeatedly add it since there's no way to ensure that
+a lambda doesn't already exist in the list.
+
+#+BEGIN_SRC emacs-lisp
+  (defvar sheesh-coding-hook nil
+    "Hook that gets run on activation of any programming mode.")
+
+  (defun sheesh-local-column-number-mode ()
+    (make-local-variable 'column-number-mode)
+    (column-number-mode t))
+
+  (defun sheesh-local-comment-auto-fill ()
+    (set (make-local-variable 'comment-auto-fill-only-comments) t)
+    (auto-fill-mode t))
+
+  (defun sheesh-local-linum-mode ()
+    (linum-mode t))
+
+  (defun sheesh-turn-on-save-place-mode ()
+    (setq save-place t))
+
+  (defun sheesh-turn-on-whitespace ()
+    (whitespace-mode t))
+
+  (defun sheesh-turn-on-hex-color-mode ()
+    (rainbow-mode t))
+
+  (defun sheesh-dont-brake-long-lines ()
+    (setq truncate-lines t))
+
+  (defun sheesh-add-font-lock-keywords ()
+    (font-lock-add-keywords major-mode
+                            '(("\\(FIX\\|TODO\\|BUG\\|HACK\\|REFACTOR\\)"
+                               1 font-lock-warning-face t))))
+
+  (add-hook 'sheesh-coding-hook 'sheesh-local-column-number-mode)
+  (add-hook 'sheesh-coding-hook 'sheesh-local-comment-auto-fill)
+  (add-hook 'sheesh-coding-hook 'sheesh-local-linum-mode)
+  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-whitespace)
+  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-hex-color-mode)
+  (add-hook 'sheesh-coding-hook 'sheesh-dont-brake-long-lines)
+  (add-hook 'sheesh-coding-hook 'sheesh-add-font-lock-keywords)
+  (add-hook 'sheesh-coding-hook #'rainbow-delimiters-mode)
+
+  (defun run-sheesh-coding-hook ()
+    "Enable things that are convenient across all coding buffers."
+    (run-hooks 'sheesh-coding-hook))
+
+#+END_SRC
+
+** Whitespace mode
+
+#+BEGIN_SRC emacs-lisp
+  (setq
+   whitespace-style '(trailing tabs lines-tail indentation face)
+   whitespace-line-column 80
+   whitespace-global-modes '(not org-mode))
+#+END_SRC
+
+** Parentheses
+
+**** Highlight matching parentheses when the point is on them.
+#+srcname: sheesh-match-parens
+#+begin_src emacs-lisp 
+(show-paren-mode 1)
+(custom-set-faces
+ '(show-paren-match ((t (:inherit face-critical)))))
+#+end_src
+
+**** Rainbow parenthesis
+
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+    :ensure t)
+#+END_SRC
+
+** Vimish fold
+
+https://github.com/mrkkrp/vimish-fold
+
+#+BEGIN_SRC emacs-lisp
+    (use-package vimish-fold
+      :ensure t
+      :init (vimish-fold-global-mode 1)
+      :config
+      (global-set-key (my-key "_Vimish_ - fold region") #'vimish-fold)
+      (global-set-key (my-key "_Vimish_ - delete region") #'vimish-fold-delete)
+      (global-set-key (my-key "_Vimish_ - toggle region") #'vimish-fold-toggle))
+#+END_SRC
+
+** Colored Hex/color-named Colors
+
+*** Hex-color-mode
+#+BEGIN_SRC emacs-lisp
+  (defvar hexcolour-keywords
+    '(("#[abcdefABCDEF[:digit:]]\\{3,6\\}"
+       (0 (let ((colour (match-string-no-properties 0)))
+            (if (or (= (length colour) 4)
+                    (= (length colour) 7))
+                (put-text-property
+                 (match-beginning 0)
+                 (match-end 0)
+                 'face
+                 (list :background (match-string-no-properties 0)
+                       :foreground
+                       (if (>= (apply '+ (x-color-values
+                                          (match-string-no-properties 0)))
+                               (* (apply '+ (x-color-values "white")) .6))
+                           "black" ;; light bg, dark text
+                         "white" ;; dark bg, light text
+                         )))))
+          append))))
+#+END_SRC
+
+*** Rainbow-mode
+
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-mode
+    :ensure t
+    :config
+    (setq rainbow-html-colors t))
+#+END_SRC
+
+** Yasnippet
+
+#+BEGIN_SRC emacs-lisp
+    (use-package yasnippet
+      :ensure t
+      :init
+      (progn
+        (add-hook 'after-save-hook
+                  (lambda ()
+                    (when (eql major-mode 'snippet-mode)
+                      (yas-reload-all))))
+        (setq yas-snippet-dirs (list (expand-file-name "snippets" sheeshmacs-dir)))
+        (setq yas-prompt-functions '(yas/ido-prompt))
+        (yas-global-mode 1)
+        )
+      :mode
+      ("\\.yasnippet" . snippet-mode)
+      :config
+      (define-key yas-minor-mode-map (kbd "<tab>") nil)
+      (define-key yas-minor-mode-map (kbd "TAB") nil)
+      (define-key yas-minor-mode-map (kbd "<C-tab>")
+        '(lambda ()
+           (interactive)
+           (indent-for-tab-command)
+           (yas-expand)))
+
+      (define-key yas-keymap [(tab)]       nil)
+      (define-key yas-keymap (kbd "TAB")   nil)
+      (define-key yas-keymap [(shift tab)] nil)
+      (define-key yas-keymap [backtab]     nil)
+      (define-key yas-keymap (my-key "_Yasnippet_ - Go to next field or expand") 
+        'yas-next-field-or-maybe-expand)
+      (define-key yas-keymap (my-key "_Yasnippet_ - Go to previous field") 'yas-prev-field))
+#+END_SRC
+
+*** Yasnippet with Org Mode
+
+#+BEGIN_SRC emacs-lisp
+  (defun yas/org-very-safe-expand ()
+    (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+
+  (defun yas/org-setup ()
+    ;; yasnippet (using the new org-cycle hooks)
+    (make-variable-buffer-local 'yas/trigger-key)
+    (setq yas/trigger-key [tab])
+    (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+    (define-key yas/keymap [tab] 'yas/next-field))
+
+  ;; See https://github.com/eschulte/emacs24-starter-kit/issues/80.
+  (setq org-src-tab-acts-natively nil)
+
+  (add-hook 'org-mode-hook #'yas/org-setup)
+#+END_SRC
+
+*** Custom Yasnippet methods
+
+#+BEGIN_SRC emacs-lisp
+  (defun yas-delete (regexp)
+    (goto-char yas-snippet-beg)
+    (while (re-search-forward regexp yas-snippet-end t)
+      (replace-match "")))
+
+  (defun yas-delete-space ()
+    (goto-char yas-snippet-beg)
+    (delete-backward-char 1)
+    (goto-char (- yas-snippet-end 1)))
+#+END_SRC
+
+** Magit
+
+#+BEGIN_SRC emacs-lisp
+    (eval
+     `(use-package magit
+      :ensure t
+      :defer t
+      :bind
+      (,(cons (my-bind "_Magit_ status") 'magit-status))))
+#+END_SRC
+
+* Language Specific
+
+** Lisp
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (my-key "Run lisp and replace with result") 'eval-and-replace)
+#+END_SRC
+
+** Prolog
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'prolog-mode-hook
+            (lambda ()
+              (local-set-key (my-key "Prolog Dwim") 'ediprolog-dwim)
+              (run-sheesh-coding-hook)))
+#+END_SRC
+
+** Graphql mode
+
+#+BEGIN_SRC emacs-lisp
+  (use-package graphql-mode
+    :ensure t)
+#+END_SRC
+
+** Haskell
+
+- Pretty lambdas in Haskell code
+  #+BEGIN_SRC emacs-lisp
+    (defun pretty-lambdas-haskell ()
+      (font-lock-add-keywords
+       nil `((,(concat "(?\\(" (regexp-quote "\\") "\\)")
+              (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                        ,(make-char 'greek-iso8859-7 107))
+                        nil))))))
+  #+END_SRC
+
+*** Haskell Mode
+
+#+BEGIN_SRC emacs-lisp
+  (use-package haskell-mode
+    :ensure t
+    :defer t
+    :config
+    (add-hook 'haskell-mode-hook 'sheesh-coding-hook)
+    (when (window-system)
+      (add-hook 'haskell-mode-hook 'pretty-lambdas-haskell))
+    (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+    (add-hook 'haskell-mode-hook 'flyspell-prog-mode)
+    (add-hook 'haskell-mode-hook 'haskell-indentation-mode))
+
+    ;; Ignore compiled Haskell files in filename completions
+    (add-to-list 'completion-ignored-extensions ".hi")
+#+END_SRC
+
+*** Intero Mode
+
+#+BEGIN_SRC emacs-lisp
+(use-package intero
+  :ensure t
+  :defer t
+  :init
+  (add-hook 'haskell-mode-hook 'intero-mode))
+#+END_SRC
+
+** Java
+
+*** Java Mode
+
+#+BEGIN_SRC emacs-lisp
+  (defun my-indent-setup ()
+    (c-set-offset 'arglist-intro '++)
+    (c-set-offset 'arglist-cont '0)
+    (c-set-offset 'arglist-cont-nonempty 'c-lineup-arglist))
+  (add-hook 'java-mode-hook 'sheesh-coding-hook)
+  (add-hook 'java-mode-hook 'my-indent-setup)
+  (add-hook 'java-mode-hook 'enable-hide-show-mode)
+#+END_SRC
+
+*** Java-beautifier
+#+BEGIN_SRC emacs-lisp
+  (autoload 'beautify-java "beautify-java" "A java beautifier" t)
+#+END_SRC
+
+** Lisp
+
+*** Emacs Lisp
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+  (add-hook 'emacs-lisp-mode-hook 'sheesh-coding-hook)
+  (add-hook 'emacs-lisp-mode-hook 'starter-kit-remove-elc-on-save)
+  ;;  (add-hook 'emacs-lisp-mode-hook 'idle-highlight)
+  ;;  (add-hook 'emacs-lisp-mode-hook 'turn-on-paredit)
+  (define-key emacs-lisp-mode-map (kbd "C-c v") 'eval-buffer)
+
+  (defun starter-kit-remove-elc-on-save ()
+    "If you're saving an elisp file, likely the .elc is no longer valid."
+    (make-local-variable 'after-save-hook)
+    (add-hook 'after-save-hook
+              (lambda ()
+                (if (file-exists-p (concat buffer-file-name "c"))
+                    (delete-file (concat buffer-file-name "c"))))))
+
+#+END_SRC
+*** Eval and Replace
+
+#+BEGIN_SRC emacs-lisp
+  (defun eval-and-replace ()
+    "Replace the preceding sexp with its value."
+    (interactive)
+    (backward-kill-sexp)
+    (condition-case nil
+        (prin1 (eval (read (current-kill 0)))
+               (current-buffer))
+      (error (message "Invalid expression")
+             (insert (current-kill 0)))))
+
+  (global-set-key (my-key "Run lisp and replace with result") 'eval-and-replace)
+#+END_SRC
+
+*** Common Lisp
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'lisp-mode-hook 'sheesh-coding-hook)
+#+END_SRC
+** Python
+
+#+BEGIN_SRC emacs-lisp
+(use-package python
+  :ensure t
+  :defer t
+  :mode ("\\.py\\'" . python-mode))
+
+(use-package elpy
+  :ensure t
+  :after python
+  :config
+  (elpy-enable)
+  (add-hook 'elpy-mode-hook 'sheesh-coding-hook)
+  (setq indent-tabs-mode nil
+        tab-width 4
+        python-indent-offset 4)
+  (setq-default python-indent 4))
+#+END_SRC
+** CSS
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'css-mode-hook 'sheesh-coding-hook)
+#+END_SRC
+** HTML
+
+*** Emmet mode
+
+[[https://github.com/smihica/emmet-mode][Emmet-Mode]] is pretty sweet, but need to hook it up to both SGML (which
+includes HTML) and CSS.
+
+Use =C-j= to expand emmet-code to html/css code.
+
+#+BEGIN_SRC emacs-lisp
+(use-package emmet-mode
+  :ensure t
+  :commands emmet-mode
+  :init
+  (setq emmet-indentation 2)
+  (setq emmet-move-cursor-between-quotes t)
+  :config
+  (add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
+  (add-hook 'css-mode-hook  'emmet-mode)) ;; enable Emmet's css abbreviation.
+#+END_SRC
+
+*** Web mode
+
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :ensure t
+    :mode (
+           ("\\.phtml\\'" . web-mode)
+           ("\\.tpl\\.php\\'" . web-mode)
+           ("\\.[agj]sp\\'" . web-mode)
+           ("\\.as[cp]x\\'" . web-mode)
+           ("\\.erb\\'" . web-mode)
+           ("\\.mustache\\'" . web-mode)
+           ("\\.djhtml\\'" . web-mode)
+           ("\\.html?\\'" . web-mode)
+           ("\\.jsx\\'" . web-mode)
+           ("\\.ftl\\'" . web-mode))
+    :config
+    (add-hook 'web-mode-hook
+              (lambda ()
+                (sheesh-coding-hook)
+                (setq web-mode-markup-indent-offset 2)
+                (setq web-mode-css-indent-offset 2)
+                (setq web-mode-code-indent-offset 2)
+
+                ;; Auto indent on certain characters
+                (local-set-key (kbd "}") '(lambda ()
+                                            (interactive)
+                                            (insert "}")
+                                            (indent-for-tab-command)))
+                (local-set-key (kbd ";") '(lambda ()
+                                            (interactive)
+                                            (insert ";")
+                                            (indent-for-tab-command)))
+                (set (make-local-variable 'comment-auto-fill-only-comments) nil)
+                (auto-fill-mode t)))
+    :init
+    (setq web-mode-engines-alist
+          '(("freemarker" . "\\.ftl\\'")))
+    )
+
+  ;; for better jsx syntax-highlighting in web-mode
+  ;; - courtesy of Patrick @halbtuerke
+  (defadvice web-mode-highlight-part (around tweak-jsx activate)
+    (if (equal web-mode-content-type "jsx")
+        (let ((web-mode-enable-part-face nil))
+          ad-do-it)
+      ad-do-it))
+#+END_SRC
+
+** JS
+
+#+BEGIN_SRC emacs-lisp
+  (use-package js-doc
+    :ensure t
+    :defer t)
+
+
+
+#+END_SRC
+
+*** React
+
+#+BEGIN_SRC emacs-lisp
+  (use-package rjsx-mode
+    :ensure t
+    :mode ("\\.js$" . rjsx-mode)
+    :interpreter ("node" . rjsx-mode)
+    :init
+    ;; Set indentation to 2 spaces
+    (setq rjsx-basic-offset 2)
+    (custom-set-variables
+     '(js-indent-level 2))
+
+    :config
+    (add-hook 'rjsx-mode-hook 'sheesh-coding-hook)
+    (add-hook 'rjsx-mode-hook 'flycheck-mode)
+    (add-hook 'rjsx-mode-hook
+              '(lambda ()
+                 (define-key rjsx-mode-map (kbd "C-c i") 'js-doc-insert-function-doc)
+                 (define-key rjsx-mode-map "@" 'js-doc-insert-tag))))
+#+END_SRC
+
+*** Vue
+
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+      :ensure t
+      :commands lsp)
+
+    ;; for completions
+  (use-package company-lsp
+      :ensure t
+      :after lsp-mode
+      :config (push 'company-lsp company-backends))
+
+  (use-package vue-mode
+      :mode "\\.vue\\'"
+      :ensure t
+      :config
+      (add-hook 'vue-mode-hook #'lsp))
+#+END_SRC
+
+*** Prettier
+
+#+BEGIN_SRC emacs-lisp
+  (use-package prettier-js
+    :ensure t
+    :hook ((vue-mode rjsx-mode typescript-mode json-mode) . prettier-js-mode))
+#+END_SRC
+
+*** Tern
+
+Once in a while it can be usefull to restart tern.
+
+#+BEGIN_SRC emacs-lisp
+    (eval
+     `(use-package company-tern
+      :ensure t
+      :defer t
+      :bind
+      (,(cons (my-bind "Accept tern suggestion") 'company-tern))
+
+      :config
+      (add-to-list 'company-backends 'company-tern)))
+
+
+
+    (defun delete-tern-process ()
+      (interactive)
+      (delete-process "Tern"))
+
+    (add-hook 'rjsx-mode-hook (lambda ()
+                                (company-mode)))
+    (add-hook 'rjsx-mode-hook (lambda ()
+                                (tern-mode)))
+
+    (use-package tern
+      :defer t
+      :ensure t
+      :config
+      (eval-after-load 'tern
+        '(progn (require 'company-tern)))
+      )
+#+END_SRC
+
+**** Spellchecking
+
+#+BEGIN_SRC emacs-lisp
+  ;; disable jshint since we prefer eslint checking
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(javascript-jshint)))
+
+  ;; disable json-jsonlist checking for json files
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(json-jsonlist)))
+
+
+  ;; use eslint with web-mode for jsx files
+  (defun my/use-eslint-from-node-modules ()
+    (let* ((root (locate-dominating-file
+                  (or (buffer-file-name) default-directory)
+                  "node_modules"))
+           (eslint (and root
+                        (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                          root))))
+      (when (and eslint (file-executable-p eslint))
+        (setq-local flycheck-javascript-eslint-executable eslint))))
+  (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
+  (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
+
+#+END_SRC
+
+**** ESLint Fix
+
+#+BEGIN_SRC emacs-lisp
+  (use-package eslint-fix
+    :ensure t)
+  (defun js-fix ()
+    (interactive)
+    (setq eslint-fix-executable (my/use-eslint-from-node-modules))
+    (eslint-fix))
+#+END_SRC
+
+** JSON
+
+#+BEGIN_SRC emacs-lisp
+  (use-package json-mode
+    :ensure t
+    :mode ("\\.json$" . json-mode))
+#+END_SRC
+
+** Typescript
+
+#+BEGIN_SRC emacs-lisp
+  (use-package typescript-mode
+      :ensure t
+      :mode ("\\.ts\\'" . typescript-mode)
+      :init
+      ;; Set indentation to 2 spaces
+      (custom-set-variables
+       '(typescript-indent-level 2))
+
+      :config
+      (add-hook 'typescript-mode-hook 'sheesh-coding-hook)
+      (add-hook 'typescript-mode-hook 'flycheck-mode)
+      ;;    (add-hook 'typescript-mode-hook #'lsp)
+      )
+
+
+  (defun setup-tide-mode ()
+    "Set up Tide mode."
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save-mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1))
+
+  (use-package tide
+    :ensure t
+    :config
+    (setq company-tooltip-align-annotations t)
+    (add-hook 'typescript-mode-hook #'setup-tide-mode))
+#+END_SRC
+
+

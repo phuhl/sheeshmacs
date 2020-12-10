@@ -1,0 +1,781 @@
+#+TITLE: Sheesh-Emacs Config
+#+DATE: [2020-12-09 Wed]
+#+AUTHOR: Philipp Uhl
+
+* Keybindigns
+
+NOTE: inside strings, special keys like tab or F1-Fn have to be
+written inside angle brackets, e.g. =C-<up>=. Standalone special keys
+(and some combinations) can be written in square brackets, e.g. =[tab]=
+instead of =<tab>=. The syntax for the keybindings is similar to the =kbd=
+syntax: see [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-Rebinding.html][49.3.6 Rebinding Keys in Your Init File]] for more
+information.
+
+#+NAME: Keybindings
+|            |                                            |
+|            | *GLOBAL KEY BINDINGS*                        |
+|------------+--------------------------------------------|
+|            | *Basic stuff*                                |
+|            |                                            |
+| M-x        | M-x with _Counsel_                           |
+| C-x C-f    | Find file with _Counsel_                     |
+|------------+--------------------------------------------|
+|            | *Navigation*                                 |
+|            |                                            |
+| M-n        | Go 3 lines forward                         |
+| M-p        | Go 3 lines backward                        |
+|------------+--------------------------------------------|
+|            | *Manage buffers*                             |
+|            |                                            |
+| C-.        | Go to next buffer                          |
+| C-,        | Go to previous buffer                      |
+| C-M-,      | Rotate window layout                       |
+| C-x C-c    | Ask before closing emacs with many buffers |
+|------------+--------------------------------------------|
+|            | *Editing*                                    |
+|            |                                            |
+| M-Y        | Go forward in kill ring                    |
+| C-=        | Expend selection to region                 |
+| C-; ,      | Go to next error with _Flyspell_             |
+| C-; .      | Autocorrect word with _Flyspell_             |
+| M-Q        | Unfill paragraph                           |
+|------------+--------------------------------------------|
+|            | *Search*                                     |
+|            |                                            |
+| C-M-s      | Search with _Swiper_                         |
+|------------+--------------------------------------------|
+|            | *Multiple cursors*                           |
+|            |                                            |
+| C-c m r    | MC - By region                             |
+| C-c m n    | MC - Next line like this                   |
+| C-c m p    | MC - Next previous like this               |
+| C-c m a    | MC - Next all like this                    |
+| C-c m m    | MC - Mark pop                              |
+| C-c M-SPC  | Rectangular region                         |
+|------------+--------------------------------------------|
+|            | *Org Mode*                                   |
+| C-c c      | _Org Mode_ - Org capture                     |
+| M-t        | _Org Mode_ - Show all TODOs                  |
+| M-a        | _Org Mode_ - Show agenda                     |
+| C-; C-o    | _Org Mode_ - Quick jump to Org-file          |
+|------------+--------------------------------------------|
+|            | *Translate*                                  |
+|            |                                            |
+| C-c t      | _Google translate_ at point                  |
+| C-c T      | _Google translate_, ask for query            |
+| C-c R      | _Google translate_ reverse, ask for query    |
+|------------+--------------------------------------------|
+|            | *Lisp*                                       |
+|            |                                            |
+| C-x M-C-e  | Run lisp and replace with result           |
+|------------+--------------------------------------------|
+|            | *Magit*                                      |
+|            |                                            |
+| C-; g      | _Magit_ status                               |
+|------------+--------------------------------------------|
+|            | *Vimish Fold*                                |
+|            |                                            |
+| C-; f      | _Vimish_ - fold region                       |
+| C-; F      | _Vimish_ - delete region                     |
+| M-<tab>    | _Vimish_ - toggle region                     |
+|------------+--------------------------------------------|
+|            | *Yasnippet*                                  |
+|            |                                            |
+| <C-tab>    | _Yasnippet_ - Go to next field or expand     |
+| <C-M-tab>  | _Yasnippet_ - Go to previous field           |
+|------------+--------------------------------------------|
+|            |                                            |
+|            | *LOCAL KEY BINDINGS*                         |
+|------------+--------------------------------------------|
+|            | *Dired Mode*                                 |
+|            |                                            |
+| b          | _Dired_ - Go Directory up                    |
+|------------+--------------------------------------------|
+|            | *Prolog Mode*                                |
+|            |                                            |
+| C-c C-c    | Prolog Dwim                                |
+|------------+--------------------------------------------|
+|            | *JS Mode*                                    |
+|            |                                            |
+| <C-return> | Accept tern suggestion                     |
+|------------+--------------------------------------------|
+|            | *Org Mode*                                   |
+|            |                                            |
+| M-C-n      | _Org Mode_ - Go to next heading              |
+| M-C-p      | _Org Mode_ - Go to previous heading          |
+| M-C-u      | _Org Mode_ - Go one heading up               |
+| M-C-w      | _Org Mode_ - Copy table region               |
+| M-C-y      | _Org Mode_ - Past rectangle                  |
+| M-C-l      | _Org Mode_ - Sort table lines                |
+| C-c $      | _Org Mode_ - Move current subtree to archive |
+| C-c i      | _Org Mode_ - Insert screenshot               |
+| C-c C-s    | _Org Mode_ - Create Schedule                 |
+|            |                                            |
+|            | _Org Mode_ Speed keys:                       |
+|            | See variable =org-speed-commands-default=    |
+|            | More information [[./sheesh-org.org::Speed%20keys][here]].                     |
+
+** Setup Keybinding function
+
+#+BEGIN_SRC emacs-lisp :var keybindings=Keybindings
+  (setq global-keybindings keybindings)
+
+  (defun find-keybindings-in-table (table term)
+    (first (find-if '(lambda (e)
+                       (string= (second e) term))
+                    table)))
+
+  (defun my-key (term)
+    (let '(key (find-keybindings-in-table global-keybindings term))
+      (if (not key)
+          (error (concat "Keybinding " term " not defined."))
+        (kbd key))))
+
+  (defun my-bind (term)
+    (let '(key (find-keybindings-in-table global-keybindings term))
+      (if (not key)
+          (error (concat "Keybinding " term " not defined."))
+        key)))
+#+END_SRC
+
+#+RESULTS:
+: my-bind
+
+* Emacs Appearance Settings and Configuration
+
+#+BEGIN_SRC emacs-lisp
+  (require 'saveplace)
+
+  ;; Use UTF-8
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+
+  ;; Disable bell when top or bottom is reached
+  '(scroll-error-top-bottom t)
+
+  ;; No blinking cursor
+  (blink-cursor-mode 0)
+
+  ;; (setq ring-bell-function 'ignore)
+(tooltip-mode 0)
+
+  (setq
+   visible-bell t
+   font-lock-maximum-decoration t
+   transient-mark-mode t
+   shift-select-mode nil
+   column-number-mode t)
+
+
+#+END_SRC
+
+** HDPI
+
+#+BEGIN_SRC emacs-lisp
+  ;; Set font size
+  (when (> (/ (display-pixel-width) (/ (display-mm-width) 25.4)) 200)
+    (set-face-attribute 'default nil :height 80))
+
+  (when (>= emacs-major-version 27)
+    (setq gamegrid-glyph-height-mm 8.0))
+#+END_SRC
+
+** Remove Menus, scorllbars, toolbars
+
+#+BEGIN_SRC emacs-lisp
+  (custom-set-variables
+   ;; Bars + scrolling bars hidden
+   '(menu-bar-mode nil)
+   '(scroll-bar-mode nil)
+   '(tool-bar-mode nil))
+#+END_SRC
+
+** Startup buffer
+
+#+NAME: startup-message-template
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+
+#+BEGIN_SRC emacs-lisp  :var startup-message-template=startup-message-template
+  (defvar startup-buffer-location
+        (if (and (boundp 'custom-startup-buffer-location)
+                 (file-exists-p custom-startup-buffer-location))
+            custom-startup-buffer-location
+          "~/.emacs.d/startupbuffer.org"))
+
+(defun get-img-size (ext)
+  (car (image-size (create-image (expand-file-name (concat "sheeshmacs" ext)
+                                                   user-emacs-directory)))))
+(defun fancy-splash-head ()
+  (interactive)
+  "Insert the head part of the splash screen into the current buffer."
+  (let* ( (window-width (window-width))
+          (image-file-ext (if (>= window-width (get-img-size ".svg")) ".svg"
+                            (if (>= window-width   (get-img-size "_1.svg")) "_1.svg"
+                              (if (>= window-width   (get-img-size "_2.svg")) "_2.svg" "_3.svg"))))
+          (image-file (expand-file-name (concat "sheeshmacs" image-file-ext)
+                                        user-emacs-directory))
+          (img (create-image image-file))
+          (image-width (and img (car (image-size img)))))
+    (insert "\n\n\n\n")
+    ;; Center the image in the window.
+    (insert (propertize " " 'display `(space :align-to (+ center (-0.5 . ,img)))))
+    (insert-image img)
+    (insert "\n\n\n")))
+
+(setq
+  inhibit-startup-message t
+  initial-major-mode 'org-mode
+  initial-scratch-message (with-temp-buffer
+                            (insert (concat "[[" startup-buffer-location "][Edit me]]"))
+                            (when ( window-system )
+                              (fancy-splash-head))
+                            (if (file-exists-p startup-buffer-location)
+                                (insert-file-contents startup-buffer-location)
+                              startup-message-template)
+                            (buffer-string)))
+#+END_SRC
+
+** Modeline
+
+#+BEGIN_SRC emacs-lisp
+
+;;; This line below makes things a bit faster
+(set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16")
+
+(define-key mode-line-major-mode-keymap [header-line]
+  (lookup-key mode-line-major-mode-keymap [mode-line]))
+
+(defvar ml-selected-window nil)
+
+(defun ml-record-selected-window ()
+  (setq ml-selected-window (selected-window)))
+
+(defun ml-update-all ()
+  (force-mode-line-update t))
+
+(add-hook 'post-command-hook 'ml-record-selected-window)
+
+(add-hook 'buffer-list-update-hook 'ml-update-all)
+
+
+(defun mode-line-render (left middle right)
+  "Function to render the modeline LEFT to RIGHT."
+  (let* ((ww (- (window-total-width)
+                2
+                (/ (* (window-right-divider-width) 1.0)
+                   (window-font-width nil 'header-line))))
+         (available-width-left
+          (- (/ ww 2) (length left) (/ (length middle) -2)))
+         (available-width-right
+          (- ww (length left) available-width-left)))
+    (format (format "%%s %%%ds %%%ds"
+                    available-width-left
+                    available-width-right)
+            left middle right)))
+(setq-default mode-line-format
+   '((:eval
+      (mode-line-render
+       (format-mode-line
+        (propertize "%m" 'face `(:inherit face-faded)))
+       (format-mode-line
+        (list
+         (if (and buffer-file-name (buffer-modified-p))
+             (propertize " *" 'face `(:inherit face-faded))
+           "")
+         (if (eq ml-selected-window (selected-window))
+             (propertize " %b " 'face `(:inherit face-strong))
+           (propertize " %b " 'face `(:inherit face-faded)))
+         (if (and buffer-file-name (buffer-modified-p))
+             (propertize "* " 'face `(:inherit face-faded)))))
+       (format-mode-line
+        (propertize "%4l:%2c" 'face `(:inherit face-faded)))))))
+
+
+
+;;; Set modeline at the top
+(setq-default header-line-format mode-line-format)
+(setq-default mode-line-format'(""))
+
+;;; Modeline
+(defun set-modeline-faces ()
+  "Mode line at top."
+  (set-face 'header-line                                 'face-strong)
+  (set-face-attribute 'header-line nil
+                                :underline (face-foreground 'default))
+  (set-face-attribute 'mode-line nil
+                      :height 10
+                      :underline (face-foreground 'default)
+                      :overline nil
+                      :box nil
+                      :foreground (face-background 'default)
+                      :background (face-background 'default))
+  (set-face 'mode-line-inactive                            'mode-line)
+  (set-face-attribute 'cursor nil
+                      :background (face-foreground 'default))
+  (set-face-attribute 'window-divider nil
+                      :foreground (face-background 'mode-line))
+  (set-face-attribute 'window-divider-first-pixel nil
+                      :foreground (face-background 'default))
+  (set-face-attribute 'window-divider-last-pixel nil
+                      :foreground (face-background 'default)))
+#+END_SRC
+
+** Window
+
+#+BEGIN_SRC emacs-lisp
+;;; Vertical window divider
+(setq window-divider-default-right-width 16)
+(setq window-divider-default-places 'right-only)
+(window-divider-mode)
+
+;;; Frame size
+(set-frame-parameter (selected-frame)
+                     'internal-border-width 24)
+#+END_SRC
+
+** Buttons
+
+#+BEGIN_SRC emacs-lisp
+;;; -------------------------------------------------------------------
+(defun set-button-faces ()
+  "Set button faces."
+  (set-face-attribute 'custom-button nil
+                      :foreground (face-foreground 'face-faded)
+                      :background (face-background 'face-subtle)
+                      :box `(:line-width 1
+                             :color ,(face-foreground 'face-faded)
+                             :style nil))
+  (set-face-attribute 'custom-button-mouse nil
+                      :foreground (face-foreground 'default)
+                      ;;; :background (face-foreground 'face-faded)
+                      :inherit 'custom-button
+                      :box `(:line-width 1
+                             :color ,(face-foreground 'face-subtle)
+                             :style nil))
+  (set-face-attribute 'custom-button-pressed nil
+                      :foreground (face-background 'default)
+                      :background (face-foreground 'face-salient)
+                      :inherit 'face-salient
+                      :box `(:line-width 1
+                             :color ,(face-foreground 'face-salient)
+                             :style nil)
+                      :inverse-video nil))
+'(cus-edit (set-button-faces))
+#+END_SRC
+
+** Text/Fonts
+
+#+BEGIN_SRC emacs-lisp
+;;; Font
+(setq default-frame-alist
+      (append (list '(width  . 72) '(height . 40)
+                    '(vertical-scroll-bars . nil)
+                    '(internal-border-width . 24)
+                    '(font . "Roboto Mono 12"))))
+
+;;; Line spacing, can be 0 for code and 1 or 2 for text
+(setq-default line-spacing 0)
+(setq x-underline-at-descent-line t)
+(setq widget-image-enable nil)
+
+#+END_SRC
+
+** Parentheses
+
+*** Highlight matching parentheses when the point is on them.
+#+BEGIN_SRC emacs-lisp 
+(show-paren-mode 1)
+(custom-set-faces
+ '(show-paren-match ((t (:inherit face-critical)))))
+#+END_SRC
+
+*** Rainbow parenthesis
+
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+    :ensure t)
+#+END_SRC
+
+* External programs
+
+#+BEGIN_SRC emacs-lisp
+   ;; Use native mail client
+   '(send-mail-function (quote mailclient-send-it))
+
+#+END_SRC
+
+** Browser (linux)/PDF Viewer (linux)
+#+begin_src emacs-lisp
+      (when (eq system-type 'gnu/linux)
+        (setq browse-url-browser-function 'browse-url-generic
+              browse-url-generic-program "firefox")
+        (setq org-file-apps
+              (quote
+               ((auto-mode . emacs)
+                ("\\.mm\\'" . default)
+                ("\\.x?html?\\'" . "chromium %s")
+                ("\\.pdf\\'" . "evince %s")))))
+
+      (when (eq system-type 'windows-nt)
+        (setq org-file-apps
+              (quote
+               ((directory . emacs)
+                (auto-mode . emacs)))))
+#+end_src
+
+** Openwith mode
+
+#+BEGIN_SRC emacs-lisp
+  (when (eq system-type 'windows-nt)
+    (use-package openwith
+      :ensure t
+      :defer nil
+      :config
+      (openwith-mode t)
+      ;; Prevent org-mode from opening inline images externally
+      (defadvice org-display-inline-images
+          (around handle-openwith
+                  (&optional include-linked refresh beg end) activate compile)
+        (if openwith-mode
+            (progn
+              (openwith-mode -1)
+              ad-do-it
+              (openwith-mode 1))
+          ad-do-it))))
+
+#+END_SRC
+
+* Behavior
+
+#+BEGIN_SRC emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p)
+  (random t)
+#+END_SRC
+
+** Navigation
+
+*** Ace-Jump-Mode
+#+BEGIN_SRC emacs-lisp
+;;  (use-package ace-isearch
+;;    :ensure t
+;;    :config (progn
+;;              (global-ace-isearch-mode +1)
+;;              (setq ace-isearch-use-jump nil)))
+
+  ;;    (use-package ace-jump-mode
+  ;;      :ensure t
+  ;;      :bind ("C-c SPC" . ace-jump-mode))
+#+END_SRC
+
+*** Jump in 3 line-steps
+#+BEGIN_SRC emacs-lisp
+  ;; 3 Lines at once
+  (global-set-key (my-key "Go 3 lines forward")
+                  '(lambda ()
+                     (interactive)
+                     (next-line 3)
+                     ))
+
+  (global-set-key (my-key "Go 3 lines backward")
+                  '(lambda ()
+                     (interactive)
+                     (next-line -3)
+                     ))
+#+END_SRC
+
+*** Dired
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'dired-mode-hook
+            (lambda ()
+              (local-set-key (my-key "_Dired_ - Go Directory up") 'dired-up-directory)))
+#+END_SRC
+
+** Buffer management
+
+*** Window switching
+
+#+BEGIN_SRC emacs-lisp
+(global-set-key (my-key "Go to next buffer") "\C-x\o")
+(global-set-key (my-key "Go to previous buffer") 'previous-multiframe-window)
+#+END_SRC
+
+*** Toggle Split 
+
+- [[https://www.emacswiki.org/emacs/ToggleWindowSplit][Source: emacswiki.com]]
+
+"Vertical split shows more of each line, horizontal split shows more
+lines. This code toggles between them. It only works for frames with
+exactly two windows. The top window goes to the left or vice-versa. I
+was motivated by ediff-toggle-split and helped by
+TransposeWindows. There may well be better ways to write this."
+
+#+BEGIN_SRC emacs-lisp
+  (defun toggle-window-split ()
+    (interactive)
+    (if (= (count-windows) 2)
+        (let* ((this-win-buffer (window-buffer))
+         (next-win-buffer (window-buffer (next-window)))
+         (this-win-edges (window-edges (selected-window)))
+         (next-win-edges (window-edges (next-window)))
+         (this-win-2nd (not (and (<= (car this-win-edges)
+             (car next-win-edges))
+               (<= (cadr this-win-edges)
+             (cadr next-win-edges)))))
+         (splitter
+          (if (= (car this-win-edges)
+           (car (window-edges (next-window))))
+        'split-window-horizontally
+      'split-window-vertically)))
+    (delete-other-windows)
+    (let ((first-win (selected-window)))
+      (funcall splitter)
+      (if this-win-2nd (other-window 1))
+      (set-window-buffer (selected-window) this-win-buffer)
+      (set-window-buffer (next-window) next-win-buffer)
+      (select-window first-win)
+      (if this-win-2nd (other-window 1))))))
+
+  (global-set-key (my-key "Rotate window layout") 'toggle-window-split)
+#+END_SRC
+
+*** Ask before closing emacs
+#+BEGIN_SRC emacs-lisp
+  (defun close-ask-if-many-buffers ()
+    "Asks if you really want to close emacs if more than 30 buffers are open.
+   Otherwise closes emacs without asking."
+    (interactive)
+    (if (> (length (buffer-list)) 20)
+        (progn
+          (message "Really close? Many buffers are open. (y/n) ")
+          (if (eq (read-char) 121)
+              (save-buffers-kill-terminal)))
+      (save-buffers-kill-terminal)))
+
+  (global-set-key (my-key "Ask before closing emacs with many buffers") 'close-ask-if-many-buffers)
+#+END_SRC
+
+** Status Bar
+
+*** Ido mode
+
+- [ ] TODO: Check: Has it been replaced by Ivy?
+
+#+BEGIN_SRC emacs-lisp 
+  (when (> emacs-major-version 21)
+    (ido-mode t)
+    (setq
+     ;; if t ido matches only if entered text is prefix of filename
+     ido-enable-prefix nil
+     ;; flexible matching
+     ido-enable-flex-matching t
+     ;; ask if new buffer should be created (prompt), dont ask (always), dont create buffers (never)
+                                          ;        ido-create-new-buffer 'always
+     ;; maximum number of matches
+     ido-max-prospects 10
+     ido-everywhere t))
+
+  (use-package ido-vertical-mode
+    :ensure t
+    :config
+    (ido-vertical-mode 1)
+    (setq ido-vertical-define-keys 'C-n-and-C-p-only))
+#+END_SRC
+
+*** Ivy
+
+#+BEGIN_SRC emacs-lisp
+  (use-package swiper
+    :ensure t
+    :config
+    (global-set-key (my-key "Search with _Swiper_") 'swiper)
+    :bind (:map swiper-map
+                (("C-M-s" . ivy-previous-history-element))))
+  (use-package ivy
+    :ensure t
+    :config (progn
+              '(ivy-sort-matches-functions-alist
+                (quote
+                 ((t)
+                  (ivy-completion-in-region . ivy--shorter-matches-first)
+                  (ivy-switch-buffer . ivy--shorter-matches-first)
+                  (counsel-find-file . ivy--shorter-matches-first)
+                  (counsel-M-x . ivy--shorter-matches-first))))
+              (custom-set-variables
+               '(ivy-extra-directories nil))
+              (ivy-mode 1)
+
+              (setq ivy-use-virtual-buffers t)
+              (setq enable-recursive-minibuffers t)
+              (setq ivy-count-format "(%d/%d) ")))
+  (use-package counsel
+    :ensure t
+    :config
+    (custom-set-variables
+     '(counsel-preselect-current-file t))
+    (global-set-key (my-key "M-x with _Counsel_") 'counsel-M-x)
+    (global-set-key (my-key "Find file with _Counsel_") 'counsel-find-file))
+#+END_SRC
+
+** Editing
+
+- Killring backwards
+  #+BEGIN_SRC emacs-lisp
+    ;; Killring backwards
+    (defun yank-pop-forwards (arg)
+      (interactive "p")
+      (yank-pop (- arg)))
+
+    (global-set-key (my-key "Go forward in kill ring") 'yank-pop-forwards)
+  #+END_SRC
+- Multiple cursors
+  #+BEGIN_SRC emacs-lisp
+    (eval
+     `(use-package multiple-cursors
+        :ensure t
+        :bind
+        (,(cons (my-bind "MC - By region") 'mc/edit-lines)
+         ,(cons (my-bind "MC - Next line like this") 'mc/mark-next-like-this)
+         ,(cons (my-bind "MC - Next previous like this") 'mc/mark-previous-like-this)
+         ,(cons (my-bind "MC - Next all like this") 'mc/mark-all-like-this)
+         ,(cons (my-bind "MC - Mark pop") 'mc/mark-pop)
+         ,(cons (my-bind "Rectangular region") 'set-rectangular-region-anchor))))
+
+  #+END_SRC
+- Auto fill mode
+  #+BEGIN_SRC emacs-lisp
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+  #+END_SRC
+- Expand region
+  #+BEGIN_SRC emacs-lisp
+    (eval `(use-package expand-region
+             :ensure t
+             :bind
+             (,(cons (my-bind "Expend selection to region") 'er/expand-region))))
+  #+END_SRC
+- Unfill paragraph
+  By: Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph.
+
+  #+BEGIN_SRC emacs-lisp
+    (defun unfill-paragraph (&optional region)
+      "Takes a multi-line paragraph and makes it into a single line of text."
+      (interactive (progn (barf-if-buffer-read-only) '(t)))
+      (let ((fill-column (point-max))
+            ;; This would override `fill-column' if it's an integer.
+            (emacs-lisp-docstring-fill-column t))
+        (fill-paragraph nil region)))
+
+    (global-set-key (my-key "Unfill paragraph") 'unfill-paragraph)
+  #+END_SRC
+
+
+*** Spellchecking
+
+Requires installing hunspell and the dictionaries of your desire (in
+this case en_US and de_DE on your system.
+
+On windows, download hunspell (e.g. from [[https://sourceforge.net/projects/ezwinports/][here]]) and put the extracted
+folders it in a directory of your choice. Add 
+: (setq exec-path (append exec-path '("C:/Program Files/hunspell/bin")))=
+(with your correct path) to your [[file:pathes.el][pathes]] file in the section
+"PATH-Variable". Download the required dictionaries from [[https://github.com/wooorm/dictionaries][here]] (you
+will need the =.dic= and =.aff= files and if you want more than one,
+you might need to rename them from =index.dic= to e.g. =de_DE.dic= and
+the =.aff= respectively) and put them in the folder
+=<pathtohunspell>/hunspell/share/hunspell=.
+
+More information [[https://lists.gnu.org/archive/html/help-gnu-emacs/2014-04/msg00030.html][here]].
+
+#+BEGIN_SRC emacs-lisp
+  (eval
+   `(use-package flyspell
+      :ensure t
+      :init
+      (add-hook 'org-mode-hook 'flyspell-mode)
+      (add-hook 'text-mode-hook 'flyspell-mode)
+      :bind
+      (,(cons (my-bind "Go to next error with _Flyspell_")
+              'flyspell-goto-next-error)
+       ,(cons (my-bind "Autocorrect word with _Flyspell_")
+              'flyspell-auto-correct-word))
+
+      :config
+      (setq flyspell-issue-message-flag nil)
+      (define-key flyspell-mode-map (kbd "C-.") nil)
+      (define-key flyspell-mode-map (kbd "C-,") nil)
+      (define-key flyspell-mode-map (kbd "C-;") nil)
+      (with-eval-after-load "ispell"
+        (setq ispell-program-name
+              (if (eq system-type 'gnu/linux)
+                  "hunspell"
+                (when (eq system-type 'windows-nt)
+                  (locate-file "hunspell"
+                               exec-path exec-suffixes 'file-executable-p))))
+        (setq ispell-dictionary "en_US,de_DE")
+        (ispell-set-spellchecker-params)
+        (when (> emacs-major-version 24)
+          (ispell-hunspell-add-multi-dic "en_US,de_DE")))))
+#+END_SRC
+
+Install the required dictionaries!
+#+BEGIN_SRC sh
+  # Ubuntu
+  sudo apt-get install aspell-de
+  # Arch
+  sudo pacman -S aspell-de
+#+END_SRC
+
+*** Autocomplete
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-complete
+    :ensure t
+    :init
+    (global-auto-complete-mode t)
+    :config
+    (ac-config-default))
+#+END_SRC
+
+** Features
+
+*** Google Translator
+
+#+BEGIN_SRC emacs-lisp
+  ;; https://github.com/atykhonov/google-translate
+  (eval
+   `(use-package google-translate
+      :ensure t
+      :init
+      (setq google-translate-default-source-language "en")
+      (setq google-translate-default-target-language "de")
+      :bind
+      (
+       ,(cons (my-bind "_Google translate_ at point")
+              'google-translate-at-point)
+       ,(cons (my-bind "_Google translate_, ask for query")
+              'google-translate-query-translate)
+       ,(cons (my-bind "_Google translate_ reverse, ask for query")
+              'google-translate-query-translate-reverse))
+      ;;      :config
+      ;;      (require google-translate-default-ui)
+      ))
+#+END_SRC
+
+*** Tetris
+
+#+BEGIN_SRC emacs-lisp
+  (setq tetris-score-file "~/.emacs.d/scores/tetris-scores")
+#+END_SRC
+
+*** Restclient Mode
+
+#+BEGIN_SRC emacs-lisp
+  (use-package restclient
+    :ensure t)
+  (use-package ob-restclient
+    :ensure t)
+#+END_SRC
+
+

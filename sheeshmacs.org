@@ -1,0 +1,235 @@
+#+TITLE: Sheeshmacs Configuration
+
+
+:     ________  __  ____  ____  ________  _____________________________ 
+:    / ____  /_/ /_/ __/ / __/ / ____  /_/ / _____     _     ____ / __/
+:    \ \  / __  __  _/  / _/   \ \  / __  / /     \   / \   / __/ \ \ 
+:  __/ / / / / / / /__ / /_____/ / / / / /_/ _  _  \_/ _ \_/ /____/ /
+: /___/ /_/ /_/  \_____\________/ /_/ /____\/ \/ \____/ \__\_______/
+:                        the sheeshmost editor                        
+
+
+* Pathes
+
+Pathes, potentially different on every system. That is why this code
+generates a file called pathes.el which will contain all your pathes
+you need. If you messed up this file, just delete it. It will be
+automatically regenerated when you next start emacs.
+#+BEGIN_SRC emacs-lisp
+  (let ((pathes-file (expand-file-name "pathes.el" sheeshmacs-dir)))
+    (if (file-exists-p pathes-file)
+        (load-file pathes-file)
+      (progn
+        (switch-to-buffer (find-file-noselect pathes-file))
+        (insert ";;
+  ;; This is your pathes.el file. You have to set it up only once.
+  ;; This file must be saved in your sheeshmacs folder with
+  ;; the name pathes.el. Everything is setup for you, just edit the
+  ;; pathes and hit C-x C-s.
+  ;;
+
+  ;; Path-abbreviations for org-mode
+  ;; ===============================
+  ;; You can use them in links like this:
+  ;; [[gitpath:myproject/.gitignore][.gitignore of myproject]]
+  (setq org-link-abbrev-alist
+        '((\"dropboxpath\" . \"~/Dropbox\")
+          (\"cloudpath\" . \"~/\")
+          (\"imgpath\" . \"~/images\")
+          (\"gitpath\" . \"~/git\")
+          ))
+
+  ;; Project-settings for org-mode
+  ;; =============================
+  ;; Defines where your org-mode project lives
+  (defvar org-base-dir \"~/todo\")
+  ;; Defines where to export your org-project to
+  (defvar org-exp-dir \"~/todo_html\")
+
+  ;; Plantuml .jar path
+  ;; ==================
+  ;; If you do not have plantuml installed, you do not have to set this
+  ;; variable to a valid path, but you will not be able to use plantuml.
+  (defvar plantuml-dir \"/usr/share/plantuml/plantuml.jar\")
+
+  ;; PATH-Variable
+  ;; =============
+  ;; If you need git, ediff, hunspell, ... you can set the paths to the
+  ;; executables here. This setup is only required for windows systems.
+  (when (eq system-type 'windows-nt)
+    (setenv \"PATH\" (concat (getenv \"PATH\") \";C:/Program Files/diffutils/bin\"))
+    (setq exec-path (append exec-path '(\"C:/Program Files/diffutils/bin\")))
+    (setq exec-path (append exec-path '(\"C:/Program Files/Git/bin\")))
+    (setq exec-path (append exec-path '(\"C:/Program Files/hunspell/bin\")))
+    )
+
+  ;; SSH-Keys
+  ;; ========
+  ;; This list is only used for windows systems. If you need some
+  ;; ssh-keys for magit than here is the place to specify them.
+  (setq my-ssh-agency-key-list (list ""))
+
+  ;; Latitude and logitude
+  ;; =====================
+  ;; This is needed for circadian to provide use the correct time to switch
+  ;; from the day to the night theme
+  (setq calendar-latidute 50.783333333333)
+  (setq calendar-longitude 5.0833333333333)
+  (setq calendar-location-name \"Aachen, DE\")
+
+
+  ;; Startupbuffer location
+  ;; ======================
+  ;; This can be used for synchronizing the startup-buffer between
+  ;; different devices. Comment in, if you want to use it.
+  ; (defvar custom-startup-buffer-location \"~/startupbuffer.org\")
+  "))
+      ))
+#+END_SRC
+
+* Foundation Dependencies
+
+** ELPA archive repositories
+  #+BEGIN_SRC emacs-lisp
+        (setq package-archives
+              '(("gnu"         . "https://elpa.gnu.org/packages/")
+                ("org"         . "http://orgmode.org/elpa/")
+                ("melpa"       . "https://melpa.org/packages/")
+    ;                ("marmalade"   . "http://marmalade-repo.org/packages/")
+    ))
+        (package-initialize)
+  #+END_SRC
+
+** Installing/Loading use-package
+  #+BEGIN_SRC emacs-lisp
+    (require 'package)
+    (setq package-enable-at-startup nil)
+    (package-initialize)
+
+    ;; Install 'use-package' if necessary
+    (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package))
+
+    (unless (package-installed-p 'diminish)
+      (package-refresh-contents)
+      (package-install 'diminish))
+
+    ;; Enable use-package
+    (eval-when-compile
+      (require 'use-package))
+    (require 'diminish)                ;; if you use :diminish
+    (require 'bind-key)                ;; if you use any :bind variant
+  #+END_SRC
+
+** Org mode
+  #+BEGIN_SRC emacs-lisp
+  (require 'cl)
+  (setq load-path (remove-if (lambda (x) (string-match-p "org$" x)) load-path))
+  (use-package org :ensure t)
+  #+END_SRC
+
+** Load path (=src= + subdirs, =elpa= for packages) and custom-file (=custom.el=)
+  #+BEGIN_SRC emacs-lisp
+      (let ((elisp-dir (expand-file-name "src" sheeshmacs-dir)))
+        ;; add the src directory to the load path
+        (add-to-list 'load-path elisp-dir)
+        ;; load specific files
+        (when (file-exists-p elisp-dir)
+          (let ((default-directory elisp-dir))
+            (normal-top-level-add-subdirs-to-load-path))))
+                                            ; (setq autoload-file (concat sheeshmacs-dir "loaddefs.el"))
+      (setq package-user-dir (concat sheeshmacs-dir "elpa"))
+      (setq custom-file (concat sheeshmacs-dir "custom.el"))
+  #+END_SRC
+
+** Load-sheeshmacs-config function
+Function for loading other parts of sheeshmacs
+  #+name: sheeshmacs-load
+  #+BEGIN_SRC emacs-lisp
+    (defun sheeshmacs-load (file &optional header-or-tag)
+      "Load configuration from other sheesh-*.org files.
+    If the optional argument is the id of a subtree then only
+    configuration from within that subtree will be loaded.  If it is
+    not an id then it will be interpreted as a tag, and only subtrees
+    marked with the given tag will be loaded.
+
+    For example, to load all of sheesh-org.org simply
+    add (sheeshmacs-load \"org\") to your configuration."
+      (let ((file (expand-file-name (if (string-match "sheesh-.+\.org" file)
+                                        file
+                                      (format "sheesh-%s.org" file))
+                                    sheeshmacs-dir)))
+        (org-babel-load-file
+         (if header-or-tag
+             (let* ((base (file-name-nondirectory file))
+                    (dir  (file-name-directory file))
+                    (partial-file (expand-file-name
+                                   (concat "." (file-name-sans-extension base)
+                                           ".part." header-or-tag ".org")
+                                   dir)))
+               (unless (file-exists-p partial-file)
+                 (with-temp-file partial-file
+                   (insert
+                    (with-temp-buffer
+                      (insert-file-contents file)
+                      (save-excursion
+                        (condition-case nil ;; collect as a header
+                            (progn
+                              (org-link-search (concat"#"header-or-tag))
+                              (org-narrow-to-subtree)
+                              (buffer-string))
+                          (error ;; collect all entries with as tags
+                           (let (body)
+                             (org-map-entries
+                              (lambda ()
+                                (save-restriction
+                                  (org-narrow-to-subtree)
+                                  (setq body (concat body "\n" (buffer-string)))))
+                              header-or-tag)
+                             body))))))))
+               partial-file)
+           file))))
+  #+END_SRC
+
+** Polyfills
+
+- Work around a bug on OS X where system-name is FQDN.
+  #+BEGIN_SRC emacs-lisp
+    (if (or
+        (eq system-type 'darwin)
+        (eq system-type 'berkeley-unix))
+        (setq system-name (car (split-string system-name "\\."))))
+  #+END_SRC
+- On Windows Emacs 25 turned out to be unbearibly slow, especially
+  with certain elements (as code elements, org-bullets, etc.) in
+  org-mode. The reason seems to be a too agressive garbage collection
+  ([[https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/][compare here]]). This code snippet fixes that issue.
+
+#+BEGIN_SRC emacs-lisp
+  (when (eq system-type 'windows-nt)
+    (setq gc-cons-threshold (* 511 1024 1024))
+    (setq gc-cons-percentage 0.5)
+    (run-with-idle-timer 5 t #'garbage-collect))
+#+END_SRC
+  
+* Customizations
+
+Settings from M-x customize.
+
+#+name: m-x-customize-customizations
+#+BEGIN_SRC emacs-lisp
+  (load custom-file 'noerror)
+#+END_SRC
+* Load Sub-Sheeshes
+
+The following files contain the remainder of the core of Sheeshmacs.
+
+#+BEGIN_SRC emacs-lisp
+  (sheeshmacs-load "emacs")
+  (sheeshmacs-load "org")
+  (sheeshmacs-load "programming")
+  (sheeshmacs-load "theme")
+#+END_SRC
+
+
