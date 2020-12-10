@@ -98,6 +98,45 @@ a lambda doesn't already exist in the list.
     :ensure t)
 #+END_SRC
 
+**** Smartparens
+
+
+- Wrap something: =C-M-<space>= and e.g. =(=
+-  Unwrap from within: =M-[= ......... =(|[abc]) -> [|abc]=
+- Unwrap from outside: =M-]= ......... =(|[abc]) -> (|abc)=
+-  Slurp to the right: =C-<right>= ... =(a b|) c= -> =(a b| c)=
+-   Slurp to the left: =C-<left>= .... =a (b c|)= -> =(a b c|)=
+-   Barf to the right: =M-<right>= ... =(a b c)= -> =(a b) c=
+-    Barf to the left: =M-<left>= .... =(a b c)= -> =a (b c)=
+-       Switch places: =C-M-t= ....... =a |b= -> =b a|=
+
+
+  (use-package smartparens
+    :ensure t
+    :config
+    (require 'smartparens-config)
+    (local-set-key (kbd "C-M-a") 'sp-beginning-of-sexp)
+    (local-set-key (kbd "C-M-e") 'sp-end-of-sexp)
+    (local-set-key (kbd "M-f") 'sp-down-sexp) ;; nach vorne hinein
+    (local-set-key (kbd "M-b") 'sp-backward-down-sexp) ;; hach hinten hinein
+    (local-set-key (kbd "C-M-f") 'sp-up-sexp) ;; nach vorne heraus
+    (local-set-key (kbd "C-M-b") 'sp-backward-up-sexp) ;; hach hinten heraus
+    (local-set-key (kbd "M-[") 'sp-backward-unwrap-sexp)
+    (local-set-key (kbd "M-]") 'sp-unwrap-sexp)
+    (local-set-key (kbd "C-<right>") 'sp-forward-slurp-sexp)
+    (local-set-key (kbd "C-<left>") 'sp-backward-slurp-sexp)
+    (local-set-key (kbd "M-<right>") 'sp-forward-barf-sexp)
+    (local-set-key (kbd "M-<left>") 'sp-backward-barf-sexp)
+    (local-set-key (kbd "C-M-t") 'sp-transpose-sexp)
+    (local-set-key (kbd "C-M-k") 'sp-kill-sexp)
+(local-set-key (kbd "C-M-G") 'sp-split-sexp)
+(local-set-key (kbd "C-M-g") 'sp-join-sexp)
+;; C-M-Space -> Mark whole sexp
+)
+
+ (sp-cheat-sheet)
+  (turn-on-smartparens-strict-mode)
+
 ** Vimish fold
 
 https://github.com/mrkkrp/vimish-fold
