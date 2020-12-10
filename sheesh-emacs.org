@@ -140,6 +140,13 @@ information.
         key)))
 #+END_SRC
 
+** Find free keybindings
+
+#+BEGIN_SRC emacs-lisp
+(load-file "~/.emacs.d/src/free-keys.el")
+(free-keys)
+#+END_SRC
+
 * Emacs Appearance Settings and Configuration
 
 #+BEGIN_SRC emacs-lisp
