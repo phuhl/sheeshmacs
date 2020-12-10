@@ -46,6 +46,9 @@ a lambda doesn't already exist in the list.
   (defun sheesh-turn-on-hex-color-mode ()
     (rainbow-mode t))
 
+  (defun sheesh-turn-on-braces-color-mode ()
+    (rainbow-delimiters-mode t))
+
   (defun sheesh-dont-brake-long-lines ()
     (setq truncate-lines t))
 
@@ -61,7 +64,7 @@ a lambda doesn't already exist in the list.
   (add-hook 'sheesh-coding-hook 'sheesh-turn-on-hex-color-mode)
   (add-hook 'sheesh-coding-hook 'sheesh-dont-brake-long-lines)
   (add-hook 'sheesh-coding-hook 'sheesh-add-font-lock-keywords)
-  (add-hook 'sheesh-coding-hook #'rainbow-delimiters-mode)
+  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-braces-color-mode)
 
   (defun run-sheesh-coding-hook ()
     "Enable things that are convenient across all coding buffers."
@@ -278,7 +281,7 @@ https://github.com/mrkkrp/vimish-fold
     :ensure t
     :defer t
     :config
-    (add-hook 'haskell-mode-hook 'sheesh-coding-hook)
+    (add-hook 'haskell-mode-hook 'run-sheesh-coding-hook)
     (when (window-system)
       (add-hook 'haskell-mode-hook 'pretty-lambdas-haskell))
     (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
@@ -308,7 +311,7 @@ https://github.com/mrkkrp/vimish-fold
     (c-set-offset 'arglist-intro '++)
     (c-set-offset 'arglist-cont '0)
     (c-set-offset 'arglist-cont-nonempty 'c-lineup-arglist))
-  (add-hook 'java-mode-hook 'sheesh-coding-hook)
+  (add-hook 'java-mode-hook 'run-sheesh-coding-hook)
   (add-hook 'java-mode-hook 'my-indent-setup)
   (add-hook 'java-mode-hook 'enable-hide-show-mode)
 #+END_SRC
@@ -324,7 +327,7 @@ https://github.com/mrkkrp/vimish-fold
 
 #+BEGIN_SRC emacs-lisp
   (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
-  (add-hook 'emacs-lisp-mode-hook 'sheesh-coding-hook)
+  (add-hook 'emacs-lisp-mode-hook 'run-sheesh-coding-hook)
   (add-hook 'emacs-lisp-mode-hook 'starter-kit-remove-elc-on-save)
   ;;  (add-hook 'emacs-lisp-mode-hook 'idle-highlight)
   ;;  (add-hook 'emacs-lisp-mode-hook 'turn-on-paredit)
@@ -358,7 +361,7 @@ https://github.com/mrkkrp/vimish-fold
 *** Common Lisp
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'lisp-mode-hook 'sheesh-coding-hook)
+(add-hook 'lisp-mode-hook 'run-sheesh-coding-hook)
 #+END_SRC
 ** Python
 
@@ -373,7 +376,7 @@ https://github.com/mrkkrp/vimish-fold
   :after python
   :config
   (elpy-enable)
-  (add-hook 'elpy-mode-hook 'sheesh-coding-hook)
+  (add-hook 'elpy-mode-hook 'run-sheesh-coding-hook)
   (setq indent-tabs-mode nil
         tab-width 4
         python-indent-offset 4)
@@ -382,7 +385,7 @@ https://github.com/mrkkrp/vimish-fold
 ** CSS
 
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'css-mode-hook 'sheesh-coding-hook)
+  (add-hook 'css-mode-hook 'run-sheesh-coding-hook)
 #+END_SRC
 ** HTML
 
@@ -424,7 +427,7 @@ Use =C-j= to expand emmet-code to html/css code.
     :config
     (add-hook 'web-mode-hook
               (lambda ()
-                (sheesh-coding-hook)
+                (run-sheesh-coding-hook)
                 (setq web-mode-markup-indent-offset 2)
                 (setq web-mode-css-indent-offset 2)
                 (setq web-mode-code-indent-offset 2)
@@ -479,7 +482,7 @@ Use =C-j= to expand emmet-code to html/css code.
      '(js-indent-level 2))
 
     :config
-    (add-hook 'rjsx-mode-hook 'sheesh-coding-hook)
+    (add-hook 'rjsx-mode-hook 'run-sheesh-coding-hook)
     (add-hook 'rjsx-mode-hook 'flycheck-mode)
     (add-hook 'rjsx-mode-hook
               '(lambda ()
@@ -610,7 +613,7 @@ Once in a while it can be usefull to restart tern.
        '(typescript-indent-level 2))
 
       :config
-      (add-hook 'typescript-mode-hook 'sheesh-coding-hook)
+      (add-hook 'typescript-mode-hook 'run-sheesh-coding-hook)
       (add-hook 'typescript-mode-hook 'flycheck-mode)
       ;;    (add-hook 'typescript-mode-hook #'lsp)
       )

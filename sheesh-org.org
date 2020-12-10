@@ -90,10 +90,7 @@ much more like reading and editing of code using its major mode.
                                  `(org-agenda-date ((t (:inherit org-agenda-structure :foreground "#666666" :height 0.8))))
                                  `(org-agenda-date-today ((t (:inherit org-agenda-date :background ,background4-color :foreground "#000000" :box nil :underline nil :weight bold :height 1.1))))
                                  `(org-agenda-structure ((t (:inherit default :background ,background3-color :foreground ,base3-font-color :box nil :underline nil :weight bold :height 1.2 :family "Sans Serif"))))))
-       (provide-theme 'org-beautify-mods)
-
-   ))
-
+       (provide-theme 'org-beautify-mods)))
 #+end_src
 
 * Behavior
