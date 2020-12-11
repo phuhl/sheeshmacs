@@ -116,6 +116,35 @@ information.
 |            | _Org Mode_ Speed keys:                       |
 |            | See variable =org-speed-commands-default=    |
 |            | More information [[./sheesh-org.org::Speed%20keys][here]].                     |
+|------------+--------------------------------------------|
+|            | *All Programming Modes*                      |
+|            |                                            |
+|            | _Smartparens - Navigation_                   |
+| C-M-i      | Forwards into sexp                         |
+| C-M-S-i    | Backwards into sexp                        |
+| C-M-o      | Forwards out of sexp                       |
+| C-M-S-o    | Backwards out of sexp                      |
+| C-M-f      | Go forward over sexp                       |
+| C-M-n      | Go to start of next sexp                   |
+| C-M-b      | Go backwards over sexp                     |
+| C-M-p      | Go to end of previous sexp                 |
+| C-M-a      | Go to beginning of sexp                    |
+| C-M-e      | Go to ending of sexp                       |
+|            |                                            |
+|            | _Smartparens - Manipulation_                 |
+| M-[        | Unwrap previous sexp                       |
+| M-]        | Unwrap next sexp                           |
+| C-<right>  | Slurp next sexp                            |
+| C-<left>   | Slurp previous sexp                        |
+| M-<right>  | Barf last sexp                             |
+| M-<left>   | Barf first sexp                            |
+| C-M-t      | Transpose previous and next sexp           |
+| C-M-k      | Kill next sexp                             |
+| C-M-G      | Split (unGroup) sexp                       |
+| C-M-g      | Join (Group) sexp                          |
+| C-<up>     | Move sexp up/backwards                     |
+| C-<down>   | Move sexp down/forwards                    |
+
 
 ** Setup Keybinding function
 

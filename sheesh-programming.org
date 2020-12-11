@@ -49,6 +49,9 @@ a lambda doesn't already exist in the list.
   (defun sheesh-turn-on-braces-color-mode ()
     (rainbow-delimiters-mode t))
 
+  (defun sheesh-turn-on-smartparen-mode ()
+    (turn-on-smartparens-strict-mode))
+
   (defun sheesh-dont-brake-long-lines ()
     (setq truncate-lines t))
 
@@ -65,6 +68,7 @@ a lambda doesn't already exist in the list.
   (add-hook 'sheesh-coding-hook 'sheesh-dont-brake-long-lines)
   (add-hook 'sheesh-coding-hook 'sheesh-add-font-lock-keywords)
   (add-hook 'sheesh-coding-hook 'sheesh-turn-on-braces-color-mode)
+  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-smartparen-mode)
 
   (defun run-sheesh-coding-hook ()
     "Enable things that are convenient across all coding buffers."
@@ -111,31 +115,72 @@ a lambda doesn't already exist in the list.
 -       Switch places: =C-M-t= ....... =a |b= -> =b a|=
 
 
+#+BEGIN_SRC emacs-lisp
+
   (use-package smartparens
     :ensure t
     :config
+    (defun sheesh-sp-transpose-sexp ()
+      (interactive)
+      (sp-transpose-sexp)
+      (sp-backward-sexp))
+    (defun sheesh-sp-move-down-sexp ()
+      (interactive)
+      (sp-forward-sexp)
+      (sheesh-sp-transpose-sexp))
+    (defun sheesh-sp-move-up-sexp ()
+      (interactive)
+      (sheesh-sp-transpose-sexp)
+      (sp-backward-sexp))
     (require 'smartparens-config)
-    (local-set-key (kbd "C-M-a") 'sp-beginning-of-sexp)
-    (local-set-key (kbd "C-M-e") 'sp-end-of-sexp)
-    (local-set-key (kbd "M-f") 'sp-down-sexp) ;; nach vorne hinein
-    (local-set-key (kbd "M-b") 'sp-backward-down-sexp) ;; hach hinten hinein
-    (local-set-key (kbd "C-M-f") 'sp-up-sexp) ;; nach vorne heraus
-    (local-set-key (kbd "C-M-b") 'sp-backward-up-sexp) ;; hach hinten heraus
-    (local-set-key (kbd "M-[") 'sp-backward-unwrap-sexp)
-    (local-set-key (kbd "M-]") 'sp-unwrap-sexp)
-    (local-set-key (kbd "C-<right>") 'sp-forward-slurp-sexp)
-    (local-set-key (kbd "C-<left>") 'sp-backward-slurp-sexp)
-    (local-set-key (kbd "M-<right>") 'sp-forward-barf-sexp)
-    (local-set-key (kbd "M-<left>") 'sp-backward-barf-sexp)
-    (local-set-key (kbd "C-M-t") 'sp-transpose-sexp)
-    (local-set-key (kbd "C-M-k") 'sp-kill-sexp)
-(local-set-key (kbd "C-M-G") 'sp-split-sexp)
-(local-set-key (kbd "C-M-g") 'sp-join-sexp)
-;; C-M-Space -> Mark whole sexp
-)
 
- (sp-cheat-sheet)
-  (turn-on-smartparens-strict-mode)
+    (add-hook
+     'smartparens-mode-hook
+     (lambda ()
+       ;; Navigation
+       (message "test")
+       (local-set-key (my-key "Forwards into sexp") 'sp-down-sexp)
+       (local-set-key (my-key "Backwards into sexp") 'sp-backward-down-sexp)
+       (local-set-key (my-key "Forwards out of sexp") 'sp-up-sexp)
+       (local-set-key (my-key "Backwards out of sexp") 'sp-backward-up-sexp)
+       (local-set-key (my-key "Go forward over sexp") 'sp-forward-sexp)
+       (local-set-key (my-key "Go to start of next sexp") 'sp-next-sexp)
+       (local-set-key (my-key "Go backwards over sexp") 'sp-backward-sexp)
+       (local-set-key (my-key "Go to end of previous sexp") 'sp-previous-sexp)
+       (local-set-key (my-key "Go to beginning of sexp") 'sp-beginning-of-sexp)
+       (local-set-key (my-key "Go to ending of sexp") 'sp-end-of-sexp)
+
+
+       ;; Manipulation
+       (local-set-key (my-key "Unwrap previous sexp")
+                      'sp-backward-unwrap-sexp)
+       (local-set-key (my-key "Unwrap next sexp")
+                      'sp-unwrap-sexp)
+       (local-set-key (my-key "Slurp next sexp")
+                      'sp-forward-slurp-sexp)
+       (local-set-key (my-key "Slurp previous sexp")
+                      'sp-backward-slurp-sexp)
+       (local-set-key (my-key "Barf last sexp")
+                      'sp-forward-barf-sexp)
+       (local-set-key (my-key "Barf first sexp")
+                      'sp-backward-barf-sexp)
+       (local-set-key (my-key "Transpose previous and next sexp")
+                      'sheesh-sp-transpose-sexp)
+       (local-set-key (my-key "Kill next sexp")
+                      'sp-kill-sexp)
+       (local-set-key (my-key "Split (unGroup) sexp")
+                      'sp-split-sexp)
+       (local-set-key (my-key "Join (Group) sexp")
+                      'sp-join-sexp)
+       (local-set-key (my-key "Move sexp up/backwards")
+                      'sheesh-sp-move-up-sexp)
+       (local-set-key (my-key "Move sexp down/forwards")
+                      'sheesh-sp-move-down-sexp))))
+  ;; C-M-Space -> Mark whole sexp
+  ;;(sp-local-pair '(web-mode) "<" ">" :actions nil)
+  ;; (sp-cheat-sheet)
+  ;;  (turn-on-smartparens-strict-mode)
+#+END_SRC
 
 ** Vimish fold
 
@@ -436,15 +481,35 @@ includes HTML) and CSS.
 Use =C-j= to expand emmet-code to html/css code.
 
 #+BEGIN_SRC emacs-lisp
-(use-package emmet-mode
-  :ensure t
-  :commands emmet-mode
-  :init
-  (setq emmet-indentation 2)
-  (setq emmet-move-cursor-between-quotes t)
-  :config
-  (add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
-  (add-hook 'css-mode-hook  'emmet-mode)) ;; enable Emmet's css abbreviation.
+  (use-package emmet-mode
+    :ensure t
+    :commands emmet-mode
+    :init
+    (setq emmet-indentation 2)
+    (setq emmet-move-cursor-between-quotes t)
+    :config
+
+    ;; Add _ as alternative syntax for > (child) to make it work with
+    ;; smartparens-strict-mode.
+    (defun emmet-child-sans (parent input)
+      (emmet-parse "[>_]" 1 ">"
+                   (emmet-run emmet-subexpr
+                              it
+                              '(error "expected child"))))
+    (defun emmet-child (parent input)
+      (emmet-parse "[>_]" 1 ">"
+                   (emmet-run emmet-subexpr
+                              (let ((child expr))
+                                (emmet-aif (emmet-regex "^" input '(0 1))
+                                           (let ((input (elt it 1)))
+                                             (emmet-run emmet-subexpr
+                                                        `((sibling (parent-child ,parent ,child) ,expr) . ,input)
+                                                        `((parent-child ,parent ,child) . ,input)))
+                                           `((parent-child ,parent ,child) . ,input)))
+                              '(error "expected child"))))
+    (add-hook 'sgml-mode-hook 'emmet-mode)
+    (add-hook 'css-mode-hook  'emmet-mode)
+    (add-hook 'web-mode-hook  'emmet-mode))
 #+END_SRC
 
 *** Web mode
@@ -464,6 +529,42 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.jsx\\'" . web-mode)
            ("\\.ftl\\'" . web-mode))
     :config
+    (defun pretify-afterwards (fun)
+      (interactive)
+      (funcall fun)
+      (prettier-prettify))
+
+    (defun web-mode-sp-backward-unwrap-sexp ()
+      (interactive)
+      (pretify-afterwards 'sp-backward-unwrap-sexp))
+    (defun web-mode-sp-unwrap-sexp ()
+      (interactive)
+      (pretify-afterwards 'sp-unwrap-sexp))
+    (defun web-mode-sp-forward-slurp-sexp ()
+      (interactive)
+      (pretify-afterwards 'sp-forward-slurp-sexp))
+    (defun web-mode-sp-backward-slurp-sexp ()
+      (interactive)
+      (pretify-afterwards 'sp-backward-slurp-sexp))
+    (defun web-mode-sp-forward-barf-sexp ()
+      (interactive)
+      (pretify-afterwards 'sp-forward-barf-sexp))
+    (defun web-mode-sp-backward-barf-sexp ()
+      (interactive)
+      (pretify-afterwards 'sp-backward-barf-sexp))
+    (defun web-mode-sp-transpose-sexp ()
+      (interactive)
+      (pretify-afterwards 'sheesh-sp-transpose-sexp))
+    (defun web-mode-sp-kill-sexp ()
+      (interactive)
+      (tagedit-kill))
+    (defun web-mode-sp-split-sexp ()
+      (interactive)
+      (pretify-afterwards 'sp-split-sexp))
+    (defun web-mode-sp-join-sexp ()
+      (interactive)
+      (pretify-afterwards 'sp-join-sexp))
+
     (add-hook 'web-mode-hook
               (lambda ()
                 (run-sheesh-coding-hook)
@@ -481,11 +582,32 @@ Use =C-j= to expand emmet-code to html/css code.
                                             (insert ";")
                                             (indent-for-tab-command)))
                 (set (make-local-variable 'comment-auto-fill-only-comments) nil)
-                (auto-fill-mode t)))
+                (auto-fill-mode t)
+
+                (local-set-key (my-key "Unwrap previous sexp")
+                               'web-mode-sp-backward-unwrap-sexp)
+                (local-set-key (my-key "Unwrap next sexp")
+                               'web-mode-sp-unwrap-sexp)
+                (local-set-key (my-key "Slurp next sexp")
+                               'web-mode-sp-forward-slurp-sexp)
+                (local-set-key (my-key "Slurp previous sexp")
+                               'web-mode-sp-backward-slurp-sexp)
+                (local-set-key (my-key "Barf last sexp")
+                               'web-mode-sp-forward-barf-sexp)
+                (local-set-key (my-key "Barf first sexp")
+                               'web-mode-sp-backward-barf-sexp)
+                (local-set-key (my-key "Transpose previous and next sexp")
+                               'web-mode-sheesh-sp-transpose-sexp)
+                (local-set-key (my-key "Kill next sexp")
+                               'web-mode-sp-kill-sexp)
+                (local-set-key (my-key "Split (unGroup) sexp")
+                               'web-mode-sp-split-sexp)
+                (local-set-key (my-key "Join (Group) sexp")
+                               'web-mode-sp-join-sexp)))
+
     :init
     (setq web-mode-engines-alist
-          '(("freemarker" . "\\.ftl\\'")))
-    )
+          '(("freemarker" . "\\.ftl\\'"))))
 
   ;; for better jsx syntax-highlighting in web-mode
   ;; - courtesy of Patrick @halbtuerke
