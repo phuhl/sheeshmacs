@@ -142,7 +142,7 @@ information.
 
 ** Find free keybindings
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (load-file "~/.emacs.d/src/free-keys.el")
 (free-keys)
 #+END_SRC
