@@ -41,6 +41,7 @@ request/*
 tmp/*
 mentor/*
 games/*
+elpy/
 
 ## exported and encrypted files
 *gpg
