@@ -98,8 +98,26 @@ a lambda doesn't already exist in the list.
 **** Rainbow parenthesis
 
 #+BEGIN_SRC emacs-lisp
-(use-package rainbow-delimiters
-    :ensure t)
+  (use-package rainbow-delimiters
+    :ensure t
+    :config
+    (custom-set-faces
+     '(rainbow-delimiters-depth-2-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "blue"))))
+     '(rainbow-delimiters-depth-3-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "green"))))
+     '(rainbow-delimiters-depth-4-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "goldenrod"))))
+     '(rainbow-delimiters-depth-5-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "red4"))))
+     '(rainbow-delimiters-depth-6-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "magenta"))))
+     '(rainbow-delimiters-depth-7-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "cyan"))))
+     '(rainbow-delimiters-depth-8-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "sea green"))))
+     '(rainbow-delimiters-depth-9-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "tomato"))))))
 #+END_SRC
 
 **** Smartparens

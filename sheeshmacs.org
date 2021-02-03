@@ -221,6 +221,7 @@ Settings from M-x customize.
 #+BEGIN_SRC emacs-lisp
   (load custom-file 'noerror)
 #+END_SRC
+
 * Load Sub-Sheeshes
 
 The following files contain the remainder of the core of Sheeshmacs.
@@ -229,7 +230,6 @@ The following files contain the remainder of the core of Sheeshmacs.
   (sheeshmacs-load "emacs")
   (sheeshmacs-load "org")
   (sheeshmacs-load "programming")
-  (sheeshmacs-load "theme")
 #+END_SRC
 
 
