@@ -140,7 +140,7 @@ information.
 | M-<left>   | Barf first sexp                            |
 | C-M-t      | Transpose previous and next sexp           |
 | C-M-k      | Kill next sexp                             |
-| C-M-G      | Split (unGroup) sexp                       |
+| C-M-S-G    | Split (unGroup) sexp                       |
 | C-M-g      | Join (Group) sexp                          |
 | C-<up>     | Move sexp up/backwards                     |
 | C-<down>   | Move sexp down/forwards                    |
