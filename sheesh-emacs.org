@@ -140,7 +140,7 @@ information.
 | M-<left>   | Barf first sexp                            |
 | C-M-t      | Transpose previous and next sexp           |
 | C-M-k      | Kill next sexp                             |
-| C-M-G      | Split (unGroup) sexp                       |
+| C-M-S-G    | Split (unGroup) sexp                       |
 | C-M-g      | Join (Group) sexp                          |
 | C-<up>     | Move sexp up/backwards                     |
 | C-<down>   | Move sexp down/forwards                    |
@@ -181,21 +181,27 @@ information.
 #+BEGIN_SRC emacs-lisp
   (require 'saveplace)
 
+  ;;; Frame size
+  (set-frame-parameter (selected-frame)
+                       'internal-border-width 24)
+
+
   ;; Use UTF-8
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
 
   ;; Disable bell when top or bottom is reached
-  '(scroll-error-top-bottom t)
+  (custom-set-variables
+  '(scroll-error-top-bottom t))
 
   ;; No blinking cursor
   (blink-cursor-mode 0)
 
-  ;; (setq ring-bell-function 'ignore)
-(tooltip-mode 0)
+  (tooltip-mode 0)
 
   (setq
+   ring-bell-function 'ignore
    visible-bell t
    font-lock-maximum-decoration t
    transient-mark-mode t
@@ -205,15 +211,110 @@ information.
 
 #+END_SRC
 
-** HDPI
+** Theme
 
 #+BEGIN_SRC emacs-lisp
-  ;; Set font size
-  (when (> (/ (display-pixel-width) (/ (display-mm-width) 25.4)) 200)
-    (set-face-attribute 'default nil :height 80))
+ (load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
+#+END_SRC
 
-  (when (>= emacs-major-version 27)
-    (setq gamegrid-glyph-height-mm 8.0))
+** Modeline
+
+#+BEGIN_SRC emacs-lisp
+
+  ;;; This line below makes things a bit faster
+  (set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16")
+
+  (define-key mode-line-major-mode-keymap [header-line]
+    (lookup-key mode-line-major-mode-keymap [mode-line]))
+
+  (defvar ml-selected-window nil)
+
+  (defun ml-record-selected-window ()
+    (setq ml-selected-window (selected-window)))
+
+  (defun ml-update-all ()
+    (force-mode-line-update t))
+
+  (add-hook 'post-command-hook 'ml-record-selected-window)
+
+  (add-hook 'buffer-list-update-hook 'ml-update-all)
+
+
+  (defun mode-line-render (left middle right)
+    "Function to render the modeline LEFT to RIGHT."
+    (let* ((ww (- (window-total-width)
+                  2
+                  (/ (* (window-right-divider-width) 1.0)
+                     (window-font-width nil 'header-line))))
+           (available-width-left
+            (- (/ ww 2) (length left) (/ (length middle) -2)))
+           (available-width-right
+            (- ww (length left) available-width-left)))
+      (format (format "%%s %%%ds %%%ds"
+                      available-width-left
+                      available-width-right)
+              left middle right)))
+  (setq-default mode-line-format
+     '((:eval
+        (mode-line-render
+         (format-mode-line
+          (propertize "%m" 'face `(:inherit face-faded)))
+         (format-mode-line
+          (list
+           (if (and buffer-file-name (buffer-modified-p))
+               (propertize " *" 'face `(:inherit face-faded))
+             "")
+           (if (eq ml-selected-window (selected-window))
+               (propertize " %b " 'face `(:inherit face-strong))
+             (propertize " %b " 'face `(:inherit face-faded)))
+           (if (and buffer-file-name (buffer-modified-p))
+               (propertize "* " 'face `(:inherit face-faded)))))
+         (format-mode-line
+          (propertize "%4l:%2c" 'face `(:inherit face-faded)))))))
+
+
+
+  ;;; Set modeline at the top
+  (setq-default header-line-format mode-line-format)
+  (setq-default mode-line-format'(""))
+
+  ;;; Modeline
+  (defun set-modeline-faces ()
+    "Mode line at top."
+    (set-face 'header-line                                 'face-strong)
+    (set-face-attribute 'header-line nil
+                                  :underline (face-foreground 'default))
+    (set-face-attribute 'mode-line nil
+                        :height 10
+                        :underline (face-foreground 'default)
+                        :overline nil
+                        :box nil
+                        :foreground (face-background 'default)
+                        :background (face-background 'default))
+    (set-face 'mode-line-inactive                            'mode-line)
+    (set-face-attribute 'cursor nil
+                        :background (face-foreground 'default))
+    (set-face-attribute 'window-divider nil
+                        :foreground (face-background 'mode-line))
+    (set-face-attribute 'window-divider-first-pixel nil
+                        :foreground (face-background 'default))
+    (set-face-attribute 'window-divider-last-pixel nil
+                        :foreground (face-background 'default)))
+
+  (set-modeline-faces)
+#+END_SRC
+
+** Window
+
+#+BEGIN_SRC emacs-lisp
+;;; Vertical window divider
+(setq window-divider-default-right-width 16)
+(setq window-divider-default-places 'right-only)
+(window-divider-mode)
+
+(setq default-frame-alist
+      (append (list '(vertical-scroll-bars . nil)
+                    '(internal-border-width . 24))))
 #+END_SRC
 
 ** Remove Menus, scorllbars, toolbars
@@ -273,149 +374,32 @@ information.
                             (buffer-string)))
 #+END_SRC
 
-** Modeline
-
-#+BEGIN_SRC emacs-lisp
-
-;;; This line below makes things a bit faster
-(set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16")
-
-(define-key mode-line-major-mode-keymap [header-line]
-  (lookup-key mode-line-major-mode-keymap [mode-line]))
-
-(defvar ml-selected-window nil)
-
-(defun ml-record-selected-window ()
-  (setq ml-selected-window (selected-window)))
-
-(defun ml-update-all ()
-  (force-mode-line-update t))
-
-(add-hook 'post-command-hook 'ml-record-selected-window)
-
-(add-hook 'buffer-list-update-hook 'ml-update-all)
-
-
-(defun mode-line-render (left middle right)
-  "Function to render the modeline LEFT to RIGHT."
-  (let* ((ww (- (window-total-width)
-                2
-                (/ (* (window-right-divider-width) 1.0)
-                   (window-font-width nil 'header-line))))
-         (available-width-left
-          (- (/ ww 2) (length left) (/ (length middle) -2)))
-         (available-width-right
-          (- ww (length left) available-width-left)))
-    (format (format "%%s %%%ds %%%ds"
-                    available-width-left
-                    available-width-right)
-            left middle right)))
-(setq-default mode-line-format
-   '((:eval
-      (mode-line-render
-       (format-mode-line
-        (propertize "%m" 'face `(:inherit face-faded)))
-       (format-mode-line
-        (list
-         (if (and buffer-file-name (buffer-modified-p))
-             (propertize " *" 'face `(:inherit face-faded))
-           "")
-         (if (eq ml-selected-window (selected-window))
-             (propertize " %b " 'face `(:inherit face-strong))
-           (propertize " %b " 'face `(:inherit face-faded)))
-         (if (and buffer-file-name (buffer-modified-p))
-             (propertize "* " 'face `(:inherit face-faded)))))
-       (format-mode-line
-        (propertize "%4l:%2c" 'face `(:inherit face-faded)))))))
-
-
-
-;;; Set modeline at the top
-(setq-default header-line-format mode-line-format)
-(setq-default mode-line-format'(""))
-
-;;; Modeline
-(defun set-modeline-faces ()
-  "Mode line at top."
-  (set-face 'header-line                                 'face-strong)
-  (set-face-attribute 'header-line nil
-                                :underline (face-foreground 'default))
-  (set-face-attribute 'mode-line nil
-                      :height 10
-                      :underline (face-foreground 'default)
-                      :overline nil
-                      :box nil
-                      :foreground (face-background 'default)
-                      :background (face-background 'default))
-  (set-face 'mode-line-inactive                            'mode-line)
-  (set-face-attribute 'cursor nil
-                      :background (face-foreground 'default))
-  (set-face-attribute 'window-divider nil
-                      :foreground (face-background 'mode-line))
-  (set-face-attribute 'window-divider-first-pixel nil
-                      :foreground (face-background 'default))
-  (set-face-attribute 'window-divider-last-pixel nil
-                      :foreground (face-background 'default)))
-#+END_SRC
-
-** Window
-
-#+BEGIN_SRC emacs-lisp
-;;; Vertical window divider
-(setq window-divider-default-right-width 16)
-(setq window-divider-default-places 'right-only)
-(window-divider-mode)
-
-;;; Frame size
-(set-frame-parameter (selected-frame)
-                     'internal-border-width 24)
-#+END_SRC
-
-** Buttons
-
-#+BEGIN_SRC emacs-lisp
-;;; -------------------------------------------------------------------
-(defun set-button-faces ()
-  "Set button faces."
-  (set-face-attribute 'custom-button nil
-                      :foreground (face-foreground 'face-faded)
-                      :background (face-background 'face-subtle)
-                      :box `(:line-width 1
-                             :color ,(face-foreground 'face-faded)
-                             :style nil))
-  (set-face-attribute 'custom-button-mouse nil
-                      :foreground (face-foreground 'default)
-                      ;;; :background (face-foreground 'face-faded)
-                      :inherit 'custom-button
-                      :box `(:line-width 1
-                             :color ,(face-foreground 'face-subtle)
-                             :style nil))
-  (set-face-attribute 'custom-button-pressed nil
-                      :foreground (face-background 'default)
-                      :background (face-foreground 'face-salient)
-                      :inherit 'face-salient
-                      :box `(:line-width 1
-                             :color ,(face-foreground 'face-salient)
-                             :style nil)
-                      :inverse-video nil))
-'(cus-edit (set-button-faces))
-#+END_SRC
-
 ** Text/Fonts
 
+
 #+BEGIN_SRC emacs-lisp
-;;; Font
-(setq default-frame-alist
-      (append (list '(width  . 72) '(height . 40)
-                    '(vertical-scroll-bars . nil)
-                    '(internal-border-width . 24)
-                    '(font . "Roboto Mono 12"))))
+  ;;; Line spacing, can be 0 for code and 1 or 2 for text
+  (setq-default line-spacing 0)
+  (setq x-underline-at-descent-line t)
+  (setq widget-image-enable nil)
 
-;;; Line spacing, can be 0 for code and 1 or 2 for text
-(setq-default line-spacing 0)
-(setq x-underline-at-descent-line t)
-(setq widget-image-enable nil)
-
+  (custom-set-faces
+   '(default ((t (
+                  :inherit nil
+                  :extend nil
+                  :stipple nil
+                  :background "#ffffff"
+                  :foreground "#111111"
+                  :inverse-video nil
+                  :box nil
+                  :strike-through nil
+                  :overline nil
+                  :underline nil
+                  :slant normal
+                  :weight light
+                  :width normal
+                  :foundry "GOOG"
+                  :family "Roboto Mono")))))
 #+END_SRC
 
 ** Parentheses
@@ -432,6 +416,17 @@ information.
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
     :ensure t)
+#+END_SRC
+
+** HDPI
+
+#+BEGIN_SRC emacs-lisp
+  ;; Set font size
+  (when (> (/ (display-pixel-width) (/ (display-mm-width) 25.4)) 200)
+    (set-face-attribute 'default nil :height 80))
+
+  (when (>= emacs-major-version 27)
+    (setq gamegrid-glyph-height-mm 8.0))
 #+END_SRC
 
 * External programs

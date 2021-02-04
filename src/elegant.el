@@ -30,20 +30,7 @@
 
 
 
-;;; -------------------------------------------------------------------
 
-
-;;; No sound
-;;; -------------------------------------------------------------------
-(setq visible-bell t)
-(setq ring-bell-function 'ignore)
-;;; -------------------------------------------------------------------
-
-
-;;; No Tooltips
-;;; -------------------------------------------------------------------
-(tooltip-mode 0)
-;;; -------------------------------------------------------------------
 
 
 ;;; When we set a face, we take care of removing any previous settings
@@ -257,22 +244,33 @@ background color that is barely perceptible."
 ;;; -------------------------------------------------------------------
 
 
-;; Button function (hardcoded)
+;; Buttons
 ;;; -------------------------------------------------------------------
-  (defun package-make-button (text &rest properties)
-    "Insert button labeled TEXT with button PROPERTIES at point.
-PROPERTIES are passed to `insert-text-button', for which this
-function is a convenience wrapper used by `describe-package-1'."
-    (let ((button-text (if (display-graphic-p)
-                           text (concat "[" text "]")))
-          (button-face (if (display-graphic-p)
-                           '(:box `(:line-width 1
-                             :color "#999999":style nil)
-                            :foreground "#999999"
-                            :background "#F0F0F0")
-                         'link)))
-      (apply #'insert-text-button button-text
-             'face button-face 'follow-link t properties)))
+(defun elegant-buttons ()
+  "Derive button faces from nano faces."
+  ;; Buttons
+  (with-eval-after-load 'cus-edit
+    (set-face-attribute 'custom-button nil
+                         :foreground (face-foreground 'default)
+                         :background (face-background 'face-subtle)
+                         :box `(:line-width 2
+                                :color ,(face-foreground 'face-faded)
+                                :style nil))
+    (set-face-attribute 'custom-button-mouse nil
+                         ;;                      :inherit 'custom-button
+                         :foreground (face-foreground 'face-faded)
+                         :background (face-background 'face-subtle)
+                         :box `(:line-width 1
+                                            :color ,(face-foreground 'default)
+                                            :style nil))
+    (set-face-attribute 'custom-button-pressed nil
+                         :foreground (face-background 'default)
+                         :background (face-foreground 'face-salient)
+                         :inherit 'face-salient
+                         :box `(:line-width 1
+                                            :color ,(face-foreground 'face-salient)
+                                            :style nil)
+                         :inverse-video nil)))
 ;;; -------------------------------------------------------------------
 
 

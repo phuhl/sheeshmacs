@@ -50,7 +50,7 @@ a lambda doesn't already exist in the list.
     (rainbow-delimiters-mode t))
 
   (defun sheesh-turn-on-smartparen-mode ()
-    (turn-on-smartparens-strict-mode))
+    (turn-on-smartparens-mode))
 
   (defun sheesh-dont-brake-long-lines ()
     (setq truncate-lines t))
@@ -98,8 +98,26 @@ a lambda doesn't already exist in the list.
 **** Rainbow parenthesis
 
 #+BEGIN_SRC emacs-lisp
-(use-package rainbow-delimiters
-    :ensure t)
+  (use-package rainbow-delimiters
+    :ensure t
+    :config
+    (custom-set-faces
+     '(rainbow-delimiters-depth-2-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "blue"))))
+     '(rainbow-delimiters-depth-3-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "green"))))
+     '(rainbow-delimiters-depth-4-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "goldenrod"))))
+     '(rainbow-delimiters-depth-5-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "red4"))))
+     '(rainbow-delimiters-depth-6-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "magenta"))))
+     '(rainbow-delimiters-depth-7-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "cyan"))))
+     '(rainbow-delimiters-depth-8-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "sea green"))))
+     '(rainbow-delimiters-depth-9-face
+       ((t (:inherit rainbow-delimiters-base-face :foreground "tomato"))))))
 #+END_SRC
 
 **** Smartparens
@@ -471,6 +489,144 @@ https://github.com/mrkkrp/vimish-fold
 #+BEGIN_SRC emacs-lisp
   (add-hook 'css-mode-hook 'run-sheesh-coding-hook)
 #+END_SRC
+** JS
+
+#+BEGIN_SRC emacs-lisp
+  (use-package js-doc
+    :ensure t
+    :defer t)
+#+END_SRC
+
+*** React
+
+#+BEGIN_SRC emacs-lisp
+  (use-package rjsx-mode
+    :ensure t
+    ;;  :mode ("\\.js$" . rjsx-mode)
+    :interpreter ("node" . rjsx-mode)
+    :init
+    ;; Set indentation to 2 spaces
+    (setq rjsx-basic-offset 2)
+    (custom-set-variables
+     '(js-indent-level 2))
+
+    :config
+    (add-hook 'rjsx-mode-hook 'run-sheesh-coding-hook)
+    (add-hook 'rjsx-mode-hook 'flycheck-mode)
+    (add-hook 'rjsx-mode-hook
+              '(lambda ()
+                 (define-key rjsx-mode-map (kbd "C-c i") 'js-doc-insert-function-doc)
+                 (define-key rjsx-mode-map "@" 'js-doc-insert-tag))))
+#+END_SRC
+
+*** Vue
+
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+      :ensure t
+      :commands lsp)
+
+    ;; for completions
+  (use-package company-lsp
+      :ensure t
+      :after lsp-mode
+      :config (push 'company-lsp company-backends))
+
+  (use-package vue-mode
+      :mode "\\.vue\\'"
+      :ensure t
+      :config
+      (add-hook 'vue-mode-hook #'lsp))
+#+END_SRC
+
+*** Prettier
+
+#+BEGIN_SRC emacs-lisp
+  (use-package prettier-js
+    :ensure t
+    :hook ((web-mode vue-mode rjsx-mode typescript-mode json-mode)
+           . prettier-js-mode))
+#+END_SRC
+
+*** Tern
+
+Once in a while it can be usefull to restart tern.
+
+#+BEGIN_SRC emacs-lisp
+  (eval
+   `(use-package company-tern
+    :ensure t
+    :defer t
+    :bind
+    (,(cons (my-bind "Accept tern suggestion") 'company-tern))
+
+    :config
+    (add-to-list 'company-backends 'company-tern)))
+
+
+
+  (defun delete-tern-process ()
+    (interactive)
+    (delete-process "Tern"))
+
+  (add-hook 'rjsx-mode-hook (lambda ()
+                              (company-mode)))
+  (add-hook 'rjsx-mode-hook (lambda ()
+                              (tern-mode)))
+  (add-hook 'web-mode-hook (lambda ()
+                              (company-mode)))
+  (add-hook 'web-mode-hook (lambda ()
+                              (tern-mode)))
+
+  (use-package tern
+    :defer t
+    :ensure t
+    :config
+    (eval-after-load 'tern
+      '(progn (require 'company-tern)))
+    )
+#+END_SRC
+
+*** Spellchecking in JS
+
+#+BEGIN_SRC emacs-lisp
+  ;; disable jshint since we prefer eslint checking
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(javascript-jshint)))
+
+  ;; disable json-jsonlist checking for json files
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(json-jsonlist)))
+
+
+  ;; use eslint with web-mode for jsx files
+  (defun my/use-eslint-from-node-modules ()
+    (let* ((root (locate-dominating-file
+                  (or (buffer-file-name) default-directory)
+                  "node_modules"))
+           (eslint (and root
+                        (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                          root))))
+      (when (and eslint (file-executable-p eslint))
+        (setq-local flycheck-javascript-eslint-executable eslint))))
+  (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
+  (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
+
+#+END_SRC
+
+*** ESLint Fix
+
+#+BEGIN_SRC emacs-lisp
+  (use-package eslint-fix
+    :ensure t)
+  (defun js-fix ()
+    (interactive)
+    (setq eslint-fix-executable (my/use-eslint-from-node-modules))
+    (eslint-fix))
+#+END_SRC
+
 ** HTML
 
 *** Emmet mode
@@ -526,6 +682,7 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.mustache\\'" . web-mode)
            ("\\.djhtml\\'" . web-mode)
            ("\\.html?\\'" . web-mode)
+           ("\\.js$" . web-mode)
            ("\\.jsx\\'" . web-mode)
            ("\\.ftl\\'" . web-mode))
     :config
@@ -564,6 +721,8 @@ Use =C-j= to expand emmet-code to html/css code.
     (defun web-mode-sp-join-sexp ()
       (interactive)
       (pretify-afterwards 'sp-join-sexp))
+
+    (add-hook 'web-mode-hook 'flycheck-mode)
 
     (add-hook 'web-mode-hook
               (lambda ()
@@ -618,140 +777,23 @@ Use =C-j= to expand emmet-code to html/css code.
       ad-do-it))
 #+END_SRC
 
-** JS
+**** Tern in Web Mode
+
+See [[Tern]].
 
 #+BEGIN_SRC emacs-lisp
-  (use-package js-doc
-    :ensure t
-    :defer t)
-
-
-
+  (add-hook 'web-mode-hook (lambda ()
+                              (company-mode)))
+  (add-hook 'web-mode-hook (lambda ()
+                              (tern-mode)))
 #+END_SRC
 
-*** React
+**** Flycheck for Web Mode
+
+See [[Spellchecking in JS]].
 
 #+BEGIN_SRC emacs-lisp
-  (use-package rjsx-mode
-    :ensure t
-    :mode ("\\.js$" . rjsx-mode)
-    :interpreter ("node" . rjsx-mode)
-    :init
-    ;; Set indentation to 2 spaces
-    (setq rjsx-basic-offset 2)
-    (custom-set-variables
-     '(js-indent-level 2))
-
-    :config
-    (add-hook 'rjsx-mode-hook 'run-sheesh-coding-hook)
-    (add-hook 'rjsx-mode-hook 'flycheck-mode)
-    (add-hook 'rjsx-mode-hook
-              '(lambda ()
-                 (define-key rjsx-mode-map (kbd "C-c i") 'js-doc-insert-function-doc)
-                 (define-key rjsx-mode-map "@" 'js-doc-insert-tag))))
-#+END_SRC
-
-*** Vue
-
-#+BEGIN_SRC emacs-lisp
-  (use-package lsp-mode
-      :ensure t
-      :commands lsp)
-
-    ;; for completions
-  (use-package company-lsp
-      :ensure t
-      :after lsp-mode
-      :config (push 'company-lsp company-backends))
-
-  (use-package vue-mode
-      :mode "\\.vue\\'"
-      :ensure t
-      :config
-      (add-hook 'vue-mode-hook #'lsp))
-#+END_SRC
-
-*** Prettier
-
-#+BEGIN_SRC emacs-lisp
-  (use-package prettier-js
-    :ensure t
-    :hook ((vue-mode rjsx-mode typescript-mode json-mode) . prettier-js-mode))
-#+END_SRC
-
-*** Tern
-
-Once in a while it can be usefull to restart tern.
-
-#+BEGIN_SRC emacs-lisp
-    (eval
-     `(use-package company-tern
-      :ensure t
-      :defer t
-      :bind
-      (,(cons (my-bind "Accept tern suggestion") 'company-tern))
-
-      :config
-      (add-to-list 'company-backends 'company-tern)))
-
-
-
-    (defun delete-tern-process ()
-      (interactive)
-      (delete-process "Tern"))
-
-    (add-hook 'rjsx-mode-hook (lambda ()
-                                (company-mode)))
-    (add-hook 'rjsx-mode-hook (lambda ()
-                                (tern-mode)))
-
-    (use-package tern
-      :defer t
-      :ensure t
-      :config
-      (eval-after-load 'tern
-        '(progn (require 'company-tern)))
-      )
-#+END_SRC
-
-**** Spellchecking
-
-#+BEGIN_SRC emacs-lisp
-  ;; disable jshint since we prefer eslint checking
-  (setq-default flycheck-disabled-checkers
-                (append flycheck-disabled-checkers
-                        '(javascript-jshint)))
-
-  ;; disable json-jsonlist checking for json files
-  (setq-default flycheck-disabled-checkers
-                (append flycheck-disabled-checkers
-                        '(json-jsonlist)))
-
-
-  ;; use eslint with web-mode for jsx files
-  (defun my/use-eslint-from-node-modules ()
-    (let* ((root (locate-dominating-file
-                  (or (buffer-file-name) default-directory)
-                  "node_modules"))
-           (eslint (and root
-                        (expand-file-name "node_modules/eslint/bin/eslint.js"
-                                          root))))
-      (when (and eslint (file-executable-p eslint))
-        (setq-local flycheck-javascript-eslint-executable eslint))))
-  (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
-  (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
-
-#+END_SRC
-
-**** ESLint Fix
-
-#+BEGIN_SRC emacs-lisp
-  (use-package eslint-fix
-    :ensure t)
-  (defun js-fix ()
-    (interactive)
-    (setq eslint-fix-executable (my/use-eslint-from-node-modules))
-    (eslint-fix))
+(flycheck-add-mode 'javascript-eslint 'web-mode)
 #+END_SRC
 
 ** JSON
@@ -797,4 +839,13 @@ Once in a while it can be usefull to restart tern.
     (add-hook 'typescript-mode-hook #'setup-tide-mode))
 #+END_SRC
 
+** SQL
+
+#+BEGIN_SRC emacs-lisp
+  (defun sheesh-launch-sql-submodes ()
+    (sqlind-minor-mode))
+
+  (add-hook 'sql-mode-hook 'run-sheesh-coding-hook)
+  (add-hook 'sql-mode-hook 'sheesh-launch-sql-submodes)
+#+END_SRC
 

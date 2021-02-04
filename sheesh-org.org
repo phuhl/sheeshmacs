@@ -72,25 +72,7 @@ much more like reading and editing of code using its major mode.
 ** Org-sub-Theme
 
 #+begin_src emacs-lisp
-   (when window-system
-     (use-package org-beautify-theme
-       :ensure t
-       :config
-       (deftheme org-beautify-mods "Sub-sub-theme to beautify org-beautify.... ahhh god damnit")
-       (let* ((base-font-color (face-foreground 'default  nil 'default))
-              (base3-font-color (face-foreground 'org-agenda-structure  nil 'default))
-              (background-color (face-background 'default nil 'default))
-              (background2-color (face-background 'org-verbatim nil 'default))
-              (background3-color (face-background 'org-agenda-structure nil 'default))
-              (background4-color (face-foreground 'org-agenda-done nil 'default)))
-         (custom-theme-set-faces 'org-beautify-mods
-                                 `(org-block-begin-line ((t :foreground ,base-font-color :background, background-color)))
-                                 `(org-block-end-line ((t :foreground ,base-font-color :background, background-color)))
-                                 `(org-block ((t (:foreground ,base-font-color :background ,background2-color :box nil))))
-                                 `(org-agenda-date ((t (:inherit org-agenda-structure :foreground "#666666" :height 0.8))))
-                                 `(org-agenda-date-today ((t (:inherit org-agenda-date :background ,background4-color :foreground "#000000" :box nil :underline nil :weight bold :height 1.1))))
-                                 `(org-agenda-structure ((t (:inherit default :background ,background3-color :foreground ,base3-font-color :box nil :underline nil :weight bold :height 1.2 :family "Sans Serif"))))))
-       (provide-theme 'org-beautify-mods)))
+ (load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
 #+end_src
 
 ** Clock-information

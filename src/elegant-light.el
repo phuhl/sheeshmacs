@@ -41,28 +41,28 @@
 (require 'elegant)
 ;;; -------------------------------------------------------------------
 
-
 ;;; General colors
 ;;; -------------------------------------------------------------------
 (set-background-color "#ffffff")
-(set-foreground-color "#333333")
+(set-foreground-color "#111111")
 (set-face-attribute 'default nil
         :foreground (face-foreground 'default)
-        :background (face-background 'default))
+        :background (face-background 'default)
+        :weight 'light)
 (set-face-attribute 'face-critical nil :foreground "#ffffff"
         :background "#ff6347")
 (set-face-attribute 'face-popout nil :foreground "#ffa07a")
-(set-face-attribute 'face-strong nil :foreground "#333333"
-        :weight 'bold)
-(set-face-attribute 'face-salient nil :foreground "#00008b"
+(set-face-attribute 'face-strong nil :foreground "#222222"
+                    :weight 'regular)
+(set-face-attribute 'italic nil :slant 'italic)
+(set-face-attribute 'bold-italic nil :slant 'italic)
+(set-face-attribute 'face-salient nil :foreground "#a0008b"
         :weight 'light)
 (set-face-attribute 'face-faded nil :foreground "#999999"
         :weight 'light)
 (set-face-attribute 'face-subtle nil :background "#f0f0f0")
 
-(set-modeline-faces)
-
-'(cus-edit (set-button-faces))
+(elegant-buttons)
 ;;; -------------------------------------------------------------------
 
 
