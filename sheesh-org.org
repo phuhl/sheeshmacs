@@ -428,3 +428,14 @@ schedule) add a corresponding end-hour.
        ,(cons (my-bind "_Org Mode_ - Show all TODOs") 'run-todo-with-agenda-files))))
 #+END_SRC
 
+** Insert Week of Calendar
+
+#+BEGIN_SRC emacs-lisp
+  (defun kw-insert ()
+    (interactive)
+    (insert (concat "* KW "
+                    (number-to-string
+                     (+ 1 (string-to-number (format-time-string "%W"))))
+                    "\n\n** Montag\n\n** Dienstag\n\n** Mittwoch\n\n** Donnerstag\n\n** Freitag"
+                    )))
+#+END_SRC
