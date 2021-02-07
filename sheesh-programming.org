@@ -541,6 +541,12 @@ https://github.com/mrkkrp/vimish-fold
 
 *** Prettier
 
+To install prettier on your system you have to manually run:
+#+BEGIN_SRC sh
+npm i -g prettier
+#+END_SRC
+
+
 #+BEGIN_SRC emacs-lisp
   (use-package prettier-js
     :ensure t
