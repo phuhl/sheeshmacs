@@ -801,7 +801,21 @@ See [[Spellchecking in JS]].
 #+BEGIN_SRC emacs-lisp
   (use-package json-mode
     :ensure t
-    :mode ("\\.json$" . json-mode))
+    :mode ("\\.json$" . json-mode)
+    :config
+    (add-hook 'json-mode-hook 'run-sheesh-coding-hook))
+#+END_SRC
+
+** YAML
+
+#+BEGIN_SRC emacs-lisp
+  (use-package yaml-mode
+    :ensure t
+    :mode (("\\.yml$" . yaml-mode)
+           ("\\.yaml$" . yaml-mode))
+    :config
+    (add-hook 'yaml-mode-hook 'run-sheesh-coding-hook))
+
 #+END_SRC
 
 ** Typescript
