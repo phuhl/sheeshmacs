@@ -53,7 +53,7 @@
         :background "#ff6347")
 (set-face-attribute 'face-popout nil :foreground "#ffa07a")
 (set-face-attribute 'face-strong nil :foreground "#222222"
-                    :weight 'regular)
+                    :weight 'bold)
 (set-face-attribute 'italic nil :slant 'italic)
 (set-face-attribute 'bold-italic nil :slant 'italic)
 (set-face-attribute 'face-salient nil :foreground "#a0008b"

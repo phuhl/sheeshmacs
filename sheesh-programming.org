@@ -122,10 +122,9 @@ a lambda doesn't already exist in the list.
 
 **** Smartparens
 
-
-- Wrap something: =C-M-<space>= and e.g. =(=
--  Unwrap from within: =M-[= ......... =(|[abc]) -> [|abc]=
-- Unwrap from outside: =M-]= ......... =(|[abc]) -> (|abc)=
+-      Wrap something: =C-M-<space>= and e.g. =(=
+-  Unwrap from within: =M-[= ......... =(|[abc])= -> =|[abc]=
+- Unwrap from outside: =M-]= ......... =(|[abc])= -> =(|abc)=
 -  Slurp to the right: =C-<right>= ... =(a b|) c= -> =(a b| c)=
 -   Slurp to the left: =C-<left>= .... =a (b c|)= -> =(a b c|)=
 -   Barf to the right: =M-<right>= ... =(a b c)= -> =(a b) c=
