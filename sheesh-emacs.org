@@ -51,7 +51,7 @@ information.
 | C-c m n    | MC - Next line like this                   |
 | C-c m p    | MC - Next previous like this               |
 | C-c m a    | MC - Next all like this                    |
-| C-c m m    | MC - Mark pop                              |
+| C-c m m    | MC - Mark more like this                |
 | C-c M-SPC  | Rectangular region                         |
 |------------+--------------------------------------------|
 |            | *Org Mode*                                   |
@@ -671,7 +671,7 @@ TransposeWindows. There may well be better ways to write this."
          ,(cons (my-bind "MC - Next line like this") 'mc/mark-next-like-this)
          ,(cons (my-bind "MC - Next previous like this") 'mc/mark-previous-like-this)
          ,(cons (my-bind "MC - Next all like this") 'mc/mark-all-like-this)
-         ,(cons (my-bind "MC - Mark pop") 'mc/mark-pop)
+         ,(cons (my-bind "MC - Mark more like this") 'mc/mark-more-like-this-extended)
          ,(cons (my-bind "Rectangular region") 'set-rectangular-region-anchor))))
 
   #+END_SRC
