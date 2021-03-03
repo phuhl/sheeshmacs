@@ -81,49 +81,49 @@ https://gist.github.com/rougier/baaf4ff6e0461680e3f070c5c32b64a2
 
 #+BEGIN_SRC emacs-lisp
 
-  (defun sheesh-enhanced-message (orig-fun &rest args)
-    "This enhanced message displays a regular message in the echo area
-     and adds a specific text on the right part of the echo area. This
-     is to be used as an advice."
-    (when (and (boundp 'org-clock-current-task) org-clock-current-task)
-      (let* ((msg (if (car args) (apply 'format-message args) ""))
-             ;; Hack: The space for the split is a thin space, not a regular space
-             ;; This way, we get rid of the added part if present (unless an actual
-             ;; message uses a thin space.
-             (msg (car (split-string msg " ")))
-             (msg (string-trim msg))
-             (left msg)
-             (right (propertize
-                     ;; Hack: The first space is a thin space, not a regular space
-                     (format "%s (in %s)"
-                             (truncate-string-to-width org-clock-current-task
-                                                       8 nil nil "…")
-                             (truncate-string-to-width
-                              (buffer-name (marker-buffer org-clock-marker))
-                              10 nil nil "…"))
-                     'face '(:height 0.85
-                                     :overline t
-                                     :inherit face-salient)))
-             (width (- (frame-width) (length right) -0))
-             (right (if (< width 0) "" right))
-             (width (if (< width 0) 0 width))
-             (full (format (format "%%-%ds %%s" width) left right)))
-        (if (active-minibuffer-window)
-            ;; Regular log and display when minibuffer is active
-            (apply orig-fun args)
-          (progn
-            ;; Log actual message without echo
-            (if message-log-max
-                (let ((inhibit-message t)) (apply orig-fun (list msg))))
-            ;; Display enhanced message without log
-            (let ((message-truncate-lines t) (message-log-max nil))
-              (apply orig-fun (list full)))
-            ;; Set current message explicitely
-            (setq current-message msg))))))
-
-  (advice-add 'message :around #'sheesh-enhanced-message)
-  (add-hook 'post-command-hook (lambda () (let ((message-log-max nil))
-                                            (message (current-message)))))
+;  (defun sheesh-enhanced-message (orig-fun &rest args)
+;    "This enhanced message displays a regular message in the echo area
+;     and adds a specific text on the right part of the echo area. This
+;     is to be used as an advice."
+;    (when (and (boundp 'org-clock-current-task) org-clock-current-task)
+;      (let* ((msg (if (car args) (apply 'format-message args) ""))
+;             ;; Hack: The space for the split is a thin space, not a regular space
+;             ;; This way, we get rid of the added part if present (unless an actual
+;             ;; message uses a thin space.
+;             (msg (car (split-string msg " ")))
+;             (msg (string-trim msg))
+;             (left msg)
+;             (right (propertize
+;                     ;; Hack: The first space is a thin space, not a regular space
+;                     (format "%s (in %s)"
+;                             (truncate-string-to-width org-clock-current-task
+;                                                       8 nil nil "…")
+;                             (truncate-string-to-width
+;                              (buffer-name (marker-buffer org-clock-marker))
+;                              10 nil nil "…"))
+;                     'face '(:height 0.85
+;                                     :overline t
+;                                     :inherit face-salient)))
+;             (width (- (frame-width) (length right) -0))
+;             (right (if (< width 0) "" right))
+;             (width (if (< width 0) 0 width))
+;             (full (format (format "%%-%ds %%s" width) left right)))
+;        (if (active-minibuffer-window)
+;            ;; Regular log and display when minibuffer is active
+;            (apply orig-fun args)
+;          (progn
+;            ;; Log actual message without echo
+;            (if message-log-max
+;                (let ((inhibit-message t)) (apply orig-fun (list msg))))
+;            ;; Display enhanced message without log
+;            (let ((message-truncate-lines t) (message-log-max nil))
+;              (apply orig-fun (list full)))
+;            ;; Set current message explicitely
+;            (setq current-message msg))))))
+;
+;  (advice-add 'message :around #'sheesh-enhanced-message)
+;  (add-hook 'post-command-hook (lambda () (let ((message-log-max nil))
+;                                            (message (current-message)))))
 #+END_SRC
 
 * Behavior
