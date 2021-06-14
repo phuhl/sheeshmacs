@@ -582,10 +582,27 @@ TransposeWindows. There may well be better ways to write this."
         (progn
           (message "Really close? Many buffers are open. (y/n) ")
           (if (eq (read-char) 121)
-              (save-buffers-kill-terminal)))
+              t))
+      t))
+
+  (defun close-ask-if-clocked-in ()
+    "Asks if you really want to close emacs if Org-mode is clocking time."
+    (interactive)
+    (if (not (eq (message org-clock-current-task) nil))
+        (progn
+          (message "You are CLOCKED IN. Really close? (y/n) ")
+          (if (eq (read-char) 121)
+              t))
+      t))
+
+  (defun close-ask ()
+    "Asks if you really want to close emacs if Org-mode is clocking time."
+    (interactive)
+    (if (and (close-ask-if-many-buffers)
+             (close-ask-if-clocked-in))
       (save-buffers-kill-terminal)))
 
-  (global-set-key (my-key "Ask before closing emacs with many buffers") 'close-ask-if-many-buffers)
+  (global-set-key (my-key "Ask before closing emacs with many buffers") 'close-ask)
 #+END_SRC
 
 ** Status Bar
