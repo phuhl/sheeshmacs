@@ -549,7 +549,7 @@ npm i -g prettier
 #+BEGIN_SRC emacs-lisp
   (use-package prettier-js
     :ensure t
-    :hook ((web-mode vue-mode rjsx-mode typescript-mode json-mode)
+    :hook ((web-mode vue-mode rjsx-mode typescript-mode json-mode yaml-mode)
            . prettier-js-mode))
 #+END_SRC
 
@@ -575,12 +575,12 @@ Once in a while it can be usefull to restart tern.
     (delete-process "Tern"))
 
   (add-hook 'rjsx-mode-hook (lambda ()
-                              (company-mode)))
-  (add-hook 'rjsx-mode-hook (lambda ()
+                              (auto-complete-mode 0)
+                              (company-mode)
                               (tern-mode)))
   (add-hook 'web-mode-hook (lambda ()
-                              (company-mode)))
-  (add-hook 'web-mode-hook (lambda ()
+                              (auto-complete-mode 0)
+                              (company-mode)
                               (tern-mode)))
 
   (use-package tern
@@ -785,13 +785,6 @@ Use =C-j= to expand emmet-code to html/css code.
 **** Tern in Web Mode
 
 See [[Tern]].
-
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'web-mode-hook (lambda ()
-                              (company-mode)))
-  (add-hook 'web-mode-hook (lambda ()
-                              (tern-mode)))
-#+END_SRC
 
 **** Flycheck for Web Mode
 
