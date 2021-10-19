@@ -73,6 +73,7 @@ much more like reading and editing of code using its major mode.
 
 #+begin_src emacs-lisp
  (load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
+ (enable-theme 'org-beautify)
 #+end_src
 
 ** Clock-information

@@ -155,7 +155,6 @@ a lambda doesn't already exist in the list.
      'smartparens-mode-hook
      (lambda ()
        ;; Navigation
-       (message "test")
        (local-set-key (my-key "Forwards into sexp") 'sp-down-sexp)
        (local-set-key (my-key "Backwards into sexp") 'sp-backward-down-sexp)
        (local-set-key (my-key "Forwards out of sexp") 'sp-up-sexp)
@@ -396,11 +395,12 @@ https://github.com/mrkkrp/vimish-fold
 *** Intero Mode
 
 #+BEGIN_SRC emacs-lisp
-(use-package intero
-  :ensure t
-  :defer t
-  :init
-  (add-hook 'haskell-mode-hook 'intero-mode))
+;; it appears as if intero was discontinued
+;;(use-package intero
+;;  :ensure t
+;;  :defer t
+;;  :init
+;;  (add-hook 'haskell-mode-hook 'intero-mode))
 #+END_SRC
 
 ** Java
@@ -531,10 +531,11 @@ https://github.com/mrkkrp/vimish-fold
       :commands lsp)
 
     ;; for completions
-  (use-package company-lsp
-      :ensure t
-      :after lsp-mode
-      :config (push 'company-lsp company-backends))
+    ;; it appears as company-lsp was discontinued
+    ;;  (use-package company-lsp
+;;      :ensure t
+;;      :after lsp-mode
+;;      :config (push 'company-lsp company-backends))
 
   (use-package vue-mode
       :mode "\\.vue\\'"
@@ -563,15 +564,16 @@ npm i -g prettier
 Once in a while it can be usefull to restart tern.
 
 #+BEGIN_SRC emacs-lisp
-  (eval
-   `(use-package company-tern
-    :ensure t
-    :defer t
-    :bind
-    (,(cons (my-bind "Accept tern suggestion") 'company-tern))
-
-    :config
-    (add-to-list 'company-backends 'company-tern)))
+    ;; it appears as company-tern was discontinued
+;;  (eval
+;;   `(use-package company-tern
+;;    :ensure t
+;;    :defer t
+;;    :bind
+;;    (,(cons (my-bind "Accept tern suggestion") 'company-tern))
+;;
+;;    :config
+;;    (add-to-list 'company-backends 'company-tern)))
 
 
 

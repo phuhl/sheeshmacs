@@ -42,7 +42,8 @@ automatically regenerated when you next start emacs.
   ;; Project-settings for org-mode
   ;; =============================
   ;; Defines where your org-mode project lives
-  (defvar org-base-dir \"~/todo\")
+  ;; (Don't use ~ in this path, but use an absolute path instead)
+  (defvar org-base-dir \"/home/<username>/todo\")
   ;; Defines where to export your org-project to
   (defvar org-exp-dir \"~/todo_html\")
 
