@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: story
+# key: story
+# --
+export const $1 = Template.bind({});
+$1.args = { $0 };

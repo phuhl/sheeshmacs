@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: stories
+# key: stories
+# --
+import React from 'react';
+
+import { $1 } from './$1';
+
+export default {
+  title: '$1',
+  component: $1,
+};
+
+const Template = (args) => <$1 {...args} />;
+
+export const Default = Template.bind({});
+Default.args = { $0 };

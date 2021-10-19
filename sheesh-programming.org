@@ -496,7 +496,7 @@ https://github.com/mrkkrp/vimish-fold
     :defer t)
 #+END_SRC
 
-*** React
+*** RJSX mode / React
 
 #+BEGIN_SRC emacs-lisp
   (use-package rjsx-mode
@@ -514,8 +514,13 @@ https://github.com/mrkkrp/vimish-fold
     (add-hook 'rjsx-mode-hook 'flycheck-mode)
     (add-hook 'rjsx-mode-hook
               '(lambda ()
-                 (define-key rjsx-mode-map (kbd "C-c i") 'js-doc-insert-function-doc)
-                 (define-key rjsx-mode-map "@" 'js-doc-insert-tag))))
+                 (setup-cycle-quotes)
+                 (define-key rjsx-mode-map
+                   (my-key "JS Doc insert function doc")
+                   'js-doc-insert-function-doc)
+                 (define-key rjsx-mode-map
+                   (my-key "JS DOc insert tag")
+                   'js-doc-insert-tag))))
 #+END_SRC
 
 *** Vue
@@ -632,6 +637,17 @@ Once in a while it can be usefull to restart tern.
     (eslint-fix))
 #+END_SRC
 
+*** Cycle Quotes
+
+#+BEGIN_SRC emacs-lisp
+  (use-package cycle-quotes
+    :ensure t)
+  (defun setup-cycle-quotes ()
+    (setq cycle-quotes--quote-chars '(34 96 39))
+    (local-set-key (my-key "Cycle quotes")
+                   'cycle-quotes))
+#+END_SRC
+
 ** HTML
 
 *** Emmet mode
@@ -728,13 +744,14 @@ Use =C-j= to expand emmet-code to html/css code.
       (pretify-afterwards 'sp-join-sexp))
 
     (add-hook 'web-mode-hook 'flycheck-mode)
-
     (add-hook 'web-mode-hook
               (lambda ()
                 (run-sheesh-coding-hook)
                 (setq web-mode-markup-indent-offset 2)
                 (setq web-mode-css-indent-offset 2)
                 (setq web-mode-code-indent-offset 2)
+
+                (setup-cycle-quotes)
 
                 ;; Auto indent on certain characters
                 (local-set-key (kbd "}") '(lambda ()
@@ -829,7 +846,7 @@ See [[Spellchecking in JS]].
 
       :config
       (add-hook 'typescript-mode-hook 'run-sheesh-coding-hook)
-      (add-hook 'typescript-mode-hook 'flycheck-mode)
+      ;; (add-hook 'typescript-mode-hook 'flycheck-mode)
       ;;    (add-hook 'typescript-mode-hook #'lsp)
       )
 
@@ -839,7 +856,7 @@ See [[Spellchecking in JS]].
     (interactive)
     (tide-setup)
     (flycheck-mode +1)
-    (setq flycheck-check-syntax-automatically '(save-mode-enabled))
+    ;; (setq flycheck-check-syntax-automatically '(save-mode-enabled))
     (eldoc-mode +1)
     (tide-hl-identifier-mode +1)
     (company-mode +1))
@@ -849,6 +866,14 @@ See [[Spellchecking in JS]].
     :config
     (setq company-tooltip-align-annotations t)
     (add-hook 'typescript-mode-hook #'setup-tide-mode))
+#+END_SRC
+
+*** Flycheck for Web Mode
+
+See [[Spellchecking in JS]].
+
+#+BEGIN_SRC emacs-lisp
+; (flycheck-add-mode 'javascript-eslint 'typescript-mode)
 #+END_SRC
 
 ** SQL

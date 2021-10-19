@@ -3,4 +3,4 @@
 # key: req
 # expand-env: ((yas-after-exit-snippet-hook (lambda () (yas-delete-space))))
 # --
-.isRequired,
+.isRequired

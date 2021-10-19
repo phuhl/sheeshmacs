@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: intlf
+# key: intlf
+# --
+intl.formatMessage({
+  defaultMessage: "$1",
+  description: "$0",
+})

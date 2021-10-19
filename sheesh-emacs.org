@@ -41,9 +41,10 @@ information.
 | M-Q        | Unfill paragraph                           |
 | M-C-c      | Capitalize, modify first letter only       |
 |------------+--------------------------------------------|
-|            | *Search*                                     |
+|            | *Search/Replace*                             |
 |            |                                            |
 | C-M-s      | Search with _Swiper_                         |
+| M-s        | Query replace                              |
 |------------+--------------------------------------------|
 |            | *Multiple cursors*                           |
 |            |                                            |
@@ -51,7 +52,7 @@ information.
 | C-c m n    | MC - Next line like this                   |
 | C-c m p    | MC - Next previous like this               |
 | C-c m a    | MC - Next all like this                    |
-| C-c m m    | MC - Mark more like this                |
+| C-c m m    | MC - Mark more like this                   |
 | C-c M-SPC  | Rectangular region                         |
 |------------+--------------------------------------------|
 |            | *Org Mode*                                   |
@@ -100,6 +101,9 @@ information.
 |            | *JS Mode*                                    |
 |            |                                            |
 | <C-return> | Accept tern suggestion                     |
+| C-'        | Cycle quotes                               |
+| C-c i      | JS Doc insert function doc                 |
+| @          | JS DOc insert tag                          |
 |------------+--------------------------------------------|
 |            | *Org Mode*                                   |
 |            |                                            |
@@ -140,7 +144,7 @@ information.
 | M-<left>   | Barf first sexp                            |
 | C-M-t      | Transpose previous and next sexp           |
 | C-M-k      | Kill next sexp                             |
-| C-M-S-G    | Split (unGroup) sexp                       |
+| C-M-G      | Split (unGroup) sexp                       |
 | C-M-g      | Join (Group) sexp                          |
 | C-<up>     | Move sexp up/backwards                     |
 | C-<down>   | Move sexp down/forwards                    |
@@ -429,6 +433,36 @@ information.
     (setq gamegrid-glyph-height-mm 8.0))
 #+END_SRC
 
+** Calendar
+
+#+BEGIN_SRC emacs-lisp
+  (copy-face font-lock-constant-face 'calendar-iso-week-face)
+  (set-face-attribute 'calendar-iso-week-face nil
+                      :height 1.0 :foreground (face-background 'face-subtle))
+  (setq calendar-intermonth-text
+        '(propertize
+          (format "%2d"
+                  (car
+                   (calendar-iso-from-absolute
+                    (calendar-absolute-from-gregorian (list month day year)))))
+          'font-lock-face 'calendar-iso-week-face))
+  
+  ;; Title for week number
+  (copy-face 'default 'calendar-iso-week-header-face)
+  (set-face-attribute 'calendar-iso-week-header-face nil
+                      :height 1.0 :foreground (face-background 'face-subtle))
+  (setq calendar-intermonth-header
+        (propertize "Wk"
+                    'font-lock-face 'calendar-iso-week-header-face))
+  
+  
+  (setq calendar-week-start-day 1)
+  (add-hook 'calendar-load-hook
+            (lambda ()
+              (calendar-set-date-style 'european)))
+  
+#+END_SRC
+
 * External programs
 
 #+BEGIN_SRC emacs-lisp
@@ -588,7 +622,8 @@ TransposeWindows. There may well be better ways to write this."
   (defun close-ask-if-clocked-in ()
     "Asks if you really want to close emacs if Org-mode is clocking time."
     (interactive)
-    (if (not (eq (message org-clock-current-task) nil))
+    (if (and (boundp 'org-clock-current-task)
+             (not (eq (message org-clock-current-task) nil)))
         (progn
           (message "You are CLOCKED IN. Really close? (y/n) ")
           (if (eq (read-char) 121)
@@ -600,7 +635,7 @@ TransposeWindows. There may well be better ways to write this."
     (interactive)
     (if (and (close-ask-if-many-buffers)
              (close-ask-if-clocked-in))
-      (save-buffers-kill-terminal)))
+        (save-buffers-kill-terminal)))
 
   (global-set-key (my-key "Ask before closing emacs with many buffers") 'close-ask)
 #+END_SRC
@@ -717,7 +752,10 @@ TransposeWindows. There may well be better ways to write this."
 
     (global-set-key (my-key "Unfill paragraph") 'unfill-paragraph)
   #+END_SRC
-
+- Query replace
+  #+BEGIN_SRC emacs-lisp
+  (global-set-key (my-key "Query replace") 'query-replace)
+  #+END_SRC
 
 *** Spellchecking
 
@@ -820,8 +858,12 @@ Install the required dictionaries!
 
 #+BEGIN_SRC emacs-lisp
   (use-package restclient
-    :ensure t)
+    :ensure t
+    :config
+    (load-file (concat sheeshmacs-dir "/src/restclient-jq.el")))
   (use-package ob-restclient
+    :ensure t)
+  (use-package jq-mode
     :ensure t)
 #+END_SRC
 
@@ -831,8 +873,6 @@ Install the required dictionaries!
 #+BEGIN_SRC emacs-lisp
   (defun capitalize-first-char (arg)
     (interactive "p")
-    (forward-word 1)
-    (backward-word 1)
     (forward-char 1)
     (insert " ")
     (backward-char 2)

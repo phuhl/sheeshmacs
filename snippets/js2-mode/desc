@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: desc
+# key: desc
+# --
+describe("$1", () => {
+  it("should $2", async () => {
+    $0
+  });
+});

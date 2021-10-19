@@ -60,7 +60,7 @@
         :weight 'light)
 (set-face-attribute 'face-faded nil :foreground "#999999"
         :weight 'light)
-(set-face-attribute 'face-subtle nil :background "#f0f0f0")
+(set-face-attribute 'face-subtle nil :background "#e0e0e0")
 
 (elegant-buttons)
 ;;; -------------------------------------------------------------------
