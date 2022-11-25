@@ -78,6 +78,7 @@ really bad under some circumstances."
    `(org-headline-done ((t (:strike-through t))))
    `(org-done ((t (:strike-through t))))))
 
+
 ;;;###autoload
 (when load-file-name
   (add-to-list 'custom-theme-load-path

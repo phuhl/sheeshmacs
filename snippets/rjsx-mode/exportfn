@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: exportfn
+# key: exportfn
+# --
+export const $1 = ($0) => {
+
+}

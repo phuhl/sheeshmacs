@@ -76,6 +76,8 @@ agent/*
 !literate-starter-kit-pkg.el
 literate-starter-kit/
 literate-starter-kit.tar
+emojis/
+tutorial/
 
 ## Src directory
 src/gamegrid.el

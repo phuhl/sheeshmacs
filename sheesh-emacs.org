@@ -1,6 +1,7 @@
 #+TITLE: Sheesh-Emacs Config
 #+DATE: [2020-12-09 Wed]
 #+AUTHOR: Philipp Uhl
+#+STARTUP: overview
 
 * Keybindigns
 
@@ -12,142 +13,158 @@ syntax: see [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-Reb
 information.
 
 #+NAME: Keybindings
-|            |                                            |
-|            | *GLOBAL KEY BINDINGS*                        |
-|------------+--------------------------------------------|
-|            | *Basic stuff*                                |
-|            |                                            |
-| M-x        | M-x with _Counsel_                           |
-| C-x C-f    | Find file with _Counsel_                     |
-|------------+--------------------------------------------|
-|            | *Navigation*                                 |
-|            |                                            |
-| M-n        | Go 3 lines forward                         |
-| M-p        | Go 3 lines backward                        |
-|------------+--------------------------------------------|
-|            | *Manage buffers*                             |
-|            |                                            |
-| C-.        | Go to next buffer                          |
-| C-,        | Go to previous buffer                      |
-| C-M-,      | Rotate window layout                       |
-| C-x C-c    | Ask before closing emacs with many buffers |
-|------------+--------------------------------------------|
-|            | *Editing*                                    |
-|            |                                            |
-| M-Y        | Go forward in kill ring                    |
-| C-=        | Expend selection to region                 |
-| C-; ,      | Go to next error with _Flyspell_             |
-| C-; .      | Autocorrect word with _Flyspell_             |
-| M-Q        | Unfill paragraph                           |
-| M-C-c      | Capitalize, modify first letter only       |
-|------------+--------------------------------------------|
-|            | *Search/Replace*                             |
-|            |                                            |
-| C-M-s      | Search with _Swiper_                         |
-| M-s        | Query replace                              |
-|------------+--------------------------------------------|
-|            | *Multiple cursors*                           |
-|            |                                            |
-| C-c m r    | MC - By region                             |
-| C-c m n    | MC - Next line like this                   |
-| C-c m p    | MC - Next previous like this               |
-| C-c m a    | MC - Next all like this                    |
-| C-c m m    | MC - Mark more like this                   |
-| C-c M-SPC  | Rectangular region                         |
-|------------+--------------------------------------------|
-|            | *Org Mode*                                   |
-| C-c c      | _Org Mode_ - Org capture                     |
-| M-t        | _Org Mode_ - Show all TODOs                  |
-| M-a        | _Org Mode_ - Show agenda                     |
-| C-; C-o    | _Org Mode_ - Quick jump to Org-file          |
-|------------+--------------------------------------------|
-|            | *Translate*                                  |
-|            |                                            |
-| C-c t      | _Google translate_ at point                  |
-| C-c T      | _Google translate_, ask for query            |
-| C-c R      | _Google translate_ reverse, ask for query    |
-|------------+--------------------------------------------|
-|            | *Lisp*                                       |
-|            |                                            |
-| C-x M-C-e  | Run lisp and replace with result           |
-|------------+--------------------------------------------|
-|            | *Magit*                                      |
-|            |                                            |
-| C-; g      | _Magit_ status                               |
-|------------+--------------------------------------------|
-|            | *Vimish Fold*                                |
-|            |                                            |
-| C-; f      | _Vimish_ - fold region                       |
-| C-; F      | _Vimish_ - delete region                     |
-| M-<tab>    | _Vimish_ - toggle region                     |
-| C-M-<tab>  | _Vimish_ - toggle all                        |
-|------------+--------------------------------------------|
-|            | *Yasnippet*                                  |
-|            |                                            |
-| <C-tab>    | _Yasnippet_ - Go to next field or expand     |
-| <C-M-tab>  | _Yasnippet_ - Go to previous field           |
-|------------+--------------------------------------------|
-|            |                                            |
-|            | *LOCAL KEY BINDINGS*                         |
-|------------+--------------------------------------------|
-|            | *Dired Mode*                                 |
-|            |                                            |
-| b          | _Dired_ - Go Directory up                    |
-|------------+--------------------------------------------|
-|            | *Prolog Mode*                                |
-|            |                                            |
-| C-c C-c    | Prolog Dwim                                |
-|------------+--------------------------------------------|
-|            | *JS Mode*                                    |
-|            |                                            |
-| <C-return> | Accept tern suggestion                     |
-| C-'        | Cycle quotes                               |
-| C-c i      | JS Doc insert function doc                 |
-| @          | JS DOc insert tag                          |
-|------------+--------------------------------------------|
-|            | *Org Mode*                                   |
-|            |                                            |
-| M-C-n      | _Org Mode_ - Go to next heading              |
-| M-C-p      | _Org Mode_ - Go to previous heading          |
-| M-C-u      | _Org Mode_ - Go one heading up               |
-| M-C-w      | _Org Mode_ - Copy table region               |
-| M-C-y      | _Org Mode_ - Past rectangle                  |
-| M-C-l      | _Org Mode_ - Sort table lines                |
-| C-c $      | _Org Mode_ - Move current subtree to archive |
-| C-c i      | _Org Mode_ - Insert screenshot               |
-| C-c C-s    | _Org Mode_ - Create Schedule                 |
-|            |                                            |
-|            | _Org Mode_ Speed keys:                       |
-|            | See variable =org-speed-commands-default=    |
-|            | More information [[./sheesh-org.org::Speed%20keys][here]].                     |
-|------------+--------------------------------------------|
-|            | *All Programming Modes*                      |
-|            |                                            |
-|            | _Smartparens - Navigation_                   |
-| C-M-i      | Forwards into sexp                         |
-| C-M-S-i    | Backwards into sexp                        |
-| C-M-o      | Forwards out of sexp                       |
-| C-M-S-o    | Backwards out of sexp                      |
-| C-M-f      | Go forward over sexp                       |
-| C-M-n      | Go to start of next sexp                   |
-| C-M-b      | Go backwards over sexp                     |
-| C-M-p      | Go to end of previous sexp                 |
-| C-M-a      | Go to beginning of sexp                    |
-| C-M-e      | Go to ending of sexp                       |
-|            |                                            |
-|            | _Smartparens - Manipulation_                 |
-| M-[        | Unwrap previous sexp                       |
-| M-]        | Unwrap next sexp                           |
-| C-<right>  | Slurp next sexp                            |
-| C-<left>   | Slurp previous sexp                        |
-| M-<right>  | Barf last sexp                             |
-| M-<left>   | Barf first sexp                            |
-| C-M-t      | Transpose previous and next sexp           |
-| C-M-k      | Kill next sexp                             |
-| C-M-G      | Split (unGroup) sexp                       |
-| C-M-g      | Join (Group) sexp                          |
-| C-<up>     | Move sexp up/backwards                     |
-| C-<down>   | Move sexp down/forwards                    |
+|            |                                             |
+|            | *GLOBAL KEY BINDINGS*                         |
+|------------+---------------------------------------------|
+|            | *Basic stuff*                                 |
+|            |                                             |
+| M-x        | M-x with _Counsel_                            |
+| C-x C-f    | Find file with _Counsel_                      |
+|------------+---------------------------------------------|
+|            | *Navigation*                                  |
+|            |                                             |
+| M-n        | Go 3 lines forward                          |
+| M-p        | Go 3 lines backward                         |
+|------------+---------------------------------------------|
+|            | *Manage buffers*                              |
+|            |                                             |
+| C-.        | Go to next buffer                           |
+| C-,        | Go to previous buffer                       |
+| C-M-,      | Rotate window layout                        |
+| C-x C-c    | Ask before closing emacs with many buffers  |
+|            |                                             |
+| C-x C-b    | (standart) Buffer list                      |
+| C-x M-b    | Buffer list with only buffers visiting file |
+|------------+---------------------------------------------|
+|            | *Editing*                                     |
+|            |                                             |
+| M-Y        | Go forward in kill ring                     |
+| C-=        | Expend selection to region                  |
+| C-; ,      | Go to next error with _Flyspell_              |
+| C-; .      | Autocorrect word with _Flyspell_              |
+| M-Q        | Unfill paragraph                            |
+| M-C-c      | Capitalize, modify first letter only        |
+| C-; )      | Insert emoji                                |
+|------------+---------------------------------------------|
+|            | *Search/Replace*                              |
+|            |                                             |
+| C-M-s      | Search with _Swiper_                          |
+| M-s        | Query replace                               |
+|------------+---------------------------------------------|
+|            | *Keyboard macros*                             |
+| C-x C-k    | Keyboard macro Prefix                       |
+|------------+---------------------------------------------|
+|            | *Multiple cursors*                            |
+| C-c m      | MC - Prefix                                 |
+| C-c m h    | Toggle help                                 |
+|------------+---------------------------------------------|
+|            | *Org Mode*                                    |
+| C-c c      | _Org Mode_ - Org capture                      |
+| M-t        | _Org Mode_ - Show all TODOs                   |
+| M-a        | _Org Mode_ - Show agenda                      |
+| C-; C-o    | _Org Mode_ - Quick jump to Org-file           |
+|------------+---------------------------------------------|
+|            | *Translate*                                   |
+|            |                                             |
+| C-c t      | _Google translate_ Prefix                     |
+|------------+---------------------------------------------|
+|            | *Lisp*                                        |
+|            |                                             |
+| C-x M-C-e  | Run lisp and replace with result            |
+|------------+---------------------------------------------|
+|            | *Magit*                                       |
+|            |                                             |
+| C-; g      | _Magit_ status                                |
+|------------+---------------------------------------------|
+|            | *Vimish Fold*                                 |
+|            |                                             |
+| C-; f      | _Vimish_ - fold region                        |
+| C-; F      | _Vimish_ - delete region                      |
+| M-<tab>    | _Vimish_ - toggle region                      |
+| C-M-<tab>  | _Vimish_ - toggle all                         |
+|------------+---------------------------------------------|
+|            | *Yasnippet*                                   |
+|            |                                             |
+| <C-tab>    | _Yasnippet_ - Go to next field or expand      |
+| <C-M-tab>  | _Yasnippet_ - Go to previous field            |
+|------------+---------------------------------------------|
+|            |                                             |
+|            | *LOCAL KEY BINDINGS*                          |
+|------------+---------------------------------------------|
+| M-o        | Mode hydra                                  |
+|------------+---------------------------------------------|
+|            | *Dired Mode*                                  |
+|            |                                             |
+| b          | _Dired_ - Go Directory up                     |
+| <tab>      | _Dired_ - Toggle subtree                      |
+| C          | _Dired_ - Mark for Copy/Move                  |
+| M          | _Dired_ - Move                                |
+| P          | _Dired_ - Paste                               |
+|------------+---------------------------------------------|
+|            | *Prolog Mode*                                 |
+|            |                                             |
+| C-c C-c    | Prolog Dwim                                 |
+|------------+---------------------------------------------|
+|            | *JS Mode*                                     |
+|            |                                             |
+| <C-return> | Accept tern suggestion                      |
+| C-'        | Cycle quotes                                |
+| C-c i      | JS Doc insert function doc                  |
+| @          | JS DOc insert tag                           |
+|------------+---------------------------------------------|
+|            | *Typescript Mode*                             |
+|            |                                             |
+| C-'        | Cycle quotes                                |
+| C-c C-r    | (Refactor) Rename item                      |
+| C-c C-.    | Fix at place                                |
+|------------+---------------------------------------------|
+|            | *Org Mode*                                    |
+|            |                                             |
+| M-C-n      | _Org Mode_ - Go to next heading               |
+| M-C-p      | _Org Mode_ - Go to previous heading           |
+| M-C-u      | _Org Mode_ - Go one heading up                |
+| M-C-w      | _Org Mode_ - Copy table region                |
+| M-C-y      | _Org Mode_ - Past rectangle                   |
+| M-C-l      | _Org Mode_ - Sort table lines                 |
+| C-c $      | _Org Mode_ - Move current subtree to archive  |
+| C-c i      | _Org Mode_ - Insert screenshot                |
+| C-c C-s    | _Org Mode_ - Create Schedule                  |
+|            |                                             |
+|            | _Org Mode_ Speed keys:                        |
+|            | See variable =org-speed-commands-default=     |
+|            | More information [[./sheesh-org.org::Speed%20keys][here]].                      |
+|------------+---------------------------------------------|
+|            | *All Programming Modes*                       |
+|            |                                             |
+|            | _Combobulate_                                 |
+| C-c p      | Combobulate Hydra Prefix                    |
+| C-c p h    | Toggle help                                 |
+|            |                                             |
+|            | _Smartparens - Navigation_                    |
+| C-M-i      | Forwards into sexp                          |
+| C-M-S-i    | Backwards into sexp                         |
+| C-M-o      | Forwards out of sexp                        |
+| C-M-S-o    | Backwards out of sexp                       |
+| C-M-f      | Go forward over sexp                        |
+| C-M-n      | Go to start of next sexp                    |
+| C-M-b      | Go backwards over sexp                      |
+| C-M-p      | Go to end of previous sexp                  |
+| C-M-a      | Go to beginning of sexp                     |
+| C-M-e      | Go to ending of sexp                        |
+|            |                                             |
+|            | _Smartparens - Manipulation_                  |
+| M-[        | Unwrap previous sexp                        |
+| M-]        | Unwrap next sexp                            |
+| C-<right>  | Slurp next sexp                             |
+| C-<left>   | Slurp previous sexp                         |
+| M-<right>  | Barf last sexp                              |
+| M-<left>   | Barf first sexp                             |
+| C-M-t      | Transpose previous and next sexp            |
+| C-M-k      | Kill next sexp                              |
+| C-M-G      | Split (unGroup) sexp                        |
+| C-M-g      | Join (Group) sexp                           |
+| C-<up>     | Move sexp up/backwards                      |
+| C-<down>   | Move sexp down/forwards                     |
 
 
 ** Setup Keybinding function
@@ -156,7 +173,7 @@ information.
   (setq global-keybindings keybindings)
 
   (defun find-keybindings-in-table (table term)
-    (first (find-if '(lambda (e)
+    (first (find-if #'(lambda (e)
                        (string= (second e) term))
                     table)))
 
@@ -174,6 +191,13 @@ information.
 #+END_SRC
 
 ** Find free keybindings
+
+Currently free(ish) bindings:
+- C-' :: more or less free (bound in e.g. org mode, js/ts mode)
+- C-q :: quoted-insert
+- C-z :: suspend-frame
+- C-\ :: toggle-input-method
+
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (load-file "~/.emacs.d/src/free-keys.el")
@@ -218,7 +242,7 @@ information.
 ** Theme
 
 #+BEGIN_SRC emacs-lisp
- (load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
+(load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
 #+END_SRC
 
 ** Modeline
@@ -424,6 +448,8 @@ information.
 
 ** HDPI
 
+Custom size: (set-face-attribute 'default nil :height 120)
+
 #+BEGIN_SRC emacs-lisp
   ;; Set font size
   (when (> (/ (display-pixel-width) (/ (display-mm-width) 25.4)) 200)
@@ -461,6 +487,38 @@ information.
             (lambda ()
               (calendar-set-date-style 'european)))
   
+#+END_SRC
+
+** Hydra
+
+#+BEGIN_SRC emacs-lisp
+  (use-package hydra
+    :ensure t
+    :config
+    ;; Overwrites hydra table generation to not have | between columns
+    (defun hydra--hint-row (heads body)
+      (let ((lst (hydra-interpose
+                  " "
+                  (mapcar (lambda (head)
+                            (funcall hydra-key-doc-function
+                                     (hydra-fontify-head head body)
+                                     (let ((n (hydra--head-property head :max-key-len)))
+                                       (+ n (cl-count ?% (car head))))
+                                     (nth 2 head) ;; doc
+                                     (hydra--head-property head :max-doc-len)))
+                          heads))))
+        (when (stringp (car (last lst)))
+          (let ((len (length lst))
+                (new-last (replace-regexp-in-string "\s+$" "" (car (last lst)))))
+            (when (= 0 (length (setf (nth (- len 1) lst) new-last)))
+              (setf (nth (- len 2) lst) " "))))
+        lst)))
+
+  (defun hydra-toggle-menu (hydra)
+    (interactive)
+    (if (eq (hydra-get-property hydra :verbosity) 0)
+        (hydra-set-property hydra :verbosity 1)
+      (hydra-set-property hydra :verbosity 0)))
 #+END_SRC
 
 * External programs
@@ -538,13 +596,13 @@ information.
 #+BEGIN_SRC emacs-lisp
   ;; 3 Lines at once
   (global-set-key (my-key "Go 3 lines forward")
-                  '(lambda ()
+                  #'(lambda ()
                      (interactive)
                      (next-line 3)
                      ))
 
   (global-set-key (my-key "Go 3 lines backward")
-                  '(lambda ()
+                  #'(lambda ()
                      (interactive)
                      (next-line -3)
                      ))
@@ -553,9 +611,70 @@ information.
 *** Dired
 
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'dired-mode-hook
-            (lambda ()
-              (local-set-key (my-key "_Dired_ - Go Directory up") 'dired-up-directory)))
+  (add-hook
+   'dired-mode-hook
+   (lambda ()
+     (setq truncate-lines t)
+     (local-set-key (my-key "_Dired_ - Go Directory up") 'dired-up-directory)
+     (local-set-key (my-key "_Dired_ - Toggle subtree") 'dired-subtree-toggle)
+     (local-set-key (my-key "_Dired_ - Mark for Copy/Move") 'dired-ranger-copy)
+     (local-set-key (my-key "_Dired_ - Move") 'dired-ranger-move)
+     (local-set-key (my-key "_Dired_ - Paste") 'dired-ranger-paste)
+     (local-set-key (my-key "Mode hydra") 'hydra-dired/body)))
+
+  (add-hook
+   'wdired-mode-hook
+   (lambda ()
+     (local-set-key (my-key "Mode hydra") 'hydra-wdired/body)))
+
+  (use-package dired-subtree
+    :ensure t
+    :config
+    (setq dired-subtree-line-prefix "    "))
+
+  ;; Copy paste support
+  (use-package dired-ranger
+    :ensure t)
+
+  (defhydra hydra-dired (:hint nil)
+    "dired"
+    ("+" dired-create-directory "mkdir":column "Edit")
+    ("C" dired-do-copy "Copy")
+    ("D" dired-do-delete "Delete")
+    ("R" dired-do-rename "Rename")
+    ("S" dired-do-symlink "Symlink")
+    ("Y" dired-do-relsymlink "Sel-symlink")
+
+    ("Z" dired-do-compress "(Un)compress" :column "Edit 2")
+    ("M" dired-do-chmod "chmod")
+    ("G" dired-do-chgrp "chgrp")
+    ("Q" dired-do-find-regexp-and-replace "Find/replace")
+    ("q" dired-toggle-read-only "Edit buffer" :color blue)
+
+    ("m" dired-mark "Mark" :column "Mark")
+    ("u" dired-unmark "Unmark")
+    ("U" dired-unmark-all-marks "Unmark all")
+    ("i" dired-toggle-marks "Invert selectino")
+    ("E" dired-mark-extension "Mark by extendsion")
+    ("F" dired-do-find-marked-files "Open marked files")
+    ("A" dired-do-find-regexp "Find by regex")
+
+    ("(" dired-hide-details-mode "Hide details" :column "Display")
+    (")" dired-omit-mode "Hide boring files")
+    ("o" dired-find-file-other-window "Open in other buffer")
+    ("g" revert-buffer "Refresh")
+    ("<tab>" dired-subtree-toggle "Show subdir inline")
+    ("d" dired-maybe-insert-subdir "Show subdir")
+    ("s" dired-sort-toggle-or-edit "Sort")
+
+
+    ("C-n" next-line :column "Other")
+    ("C-p" previous-line))
+
+  (defhydra hydra-wdired (:hint nil :color blue)
+    "wdired"
+    ("c" wdired-finish-edit "Commit edits")
+    ("a" wdired-abort-changes "Abort"))
 #+END_SRC
 
 ** Buffer management
@@ -640,6 +759,24 @@ TransposeWindows. There may well be better ways to write this."
   (global-set-key (my-key "Ask before closing emacs with many buffers") 'close-ask)
 #+END_SRC
 
+*** Don't kill scratch
+
+#+BEGIN_SRC emacs-lisp
+;; bury *scratch* buffer instead of kill it
+(defadvice kill-buffer (around kill-buffer-around-advice activate)
+  (let ((buffer-to-kill (ad-get-arg 0)))
+    (if (equal buffer-to-kill "*scratch*")
+        (bury-buffer)
+      ad-do-it)))
+#+END_SRC
+
+*** Buffer Menu
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (my-key "Buffer list with only buffers visiting file")
+                  #'(lambda () (interactive) (buffer-menu t)))
+#+END_SRC
+
 ** Status Bar
 
 *** Ido mode
@@ -704,7 +841,7 @@ TransposeWindows. There may well be better ways to write this."
 
 ** Editing
 
-- Killring backwards
+*** Killring backwards
   #+BEGIN_SRC emacs-lisp
     ;; Killring backwards
     (defun yank-pop-forwards (arg)
@@ -713,32 +850,75 @@ TransposeWindows. There may well be better ways to write this."
 
     (global-set-key (my-key "Go forward in kill ring") 'yank-pop-forwards)
   #+END_SRC
-- Multiple cursors
+*** Multiple cursors
   #+BEGIN_SRC emacs-lisp
     (eval
      `(use-package multiple-cursors
         :ensure t
         :bind
-        (,(cons (my-bind "MC - By region") 'mc/edit-lines)
-         ,(cons (my-bind "MC - Next line like this") 'mc/mark-next-like-this)
-         ,(cons (my-bind "MC - Next previous like this") 'mc/mark-previous-like-this)
-         ,(cons (my-bind "MC - Next all like this") 'mc/mark-all-like-this)
-         ,(cons (my-bind "MC - Mark more like this") 'mc/mark-more-like-this-extended)
-         ,(cons (my-bind "Rectangular region") 'set-rectangular-region-anchor))))
+        (,(cons (my-bind "MC - Prefix") 'hydra-multiple-cursors/body))
+        :hydra
+        (hydra-multiple-cursors
+         (:color blue :hint nil)
+         "Multiple Cursors"
+         ("r" mc/edit-lines "By region" :column "Mark")
+         ("R" mc/edit-lines "By region" :color red)
+         ("a" mc/mark-all-like-this "All like this" :color red)
+         ("m" mc/mark-more-like-this-extended "Mark more")
 
+         ("n" mc/mark-next-like-this "Mark" :color red :column "Next like this")
+         ("N" mc/skip-to-next-like-this "Skip" :color red)
+         ("M-n" mc/unmark-next-like-this "Unmark" :color red)
+
+         ("p" mc/mark-previous-like-this "Mark" :color red :column "Prev")
+         ("P" mc/skip-to-previous-like-this "Skip" :color red)
+         ("M-p" mc/unmark-previous-like-this "Unmark" :color red :column "Prev")
+
+         ("0" mc/insert-numbers "Insert 0, 1, 2..." :column "Insert")
+         ("1" (mc/insert-numbers t) "Insert 1, 2, 3...")
+         ("|" mc/vertical-align "Fill to align")
+
+         ("s" (hydra-phi-search/body) "Search" :column "Other")
+         ("q" quit "Quit")
+         ("h" (hydra-toggle-menu 'hydra-multiple-cursors) "Toggle Help" :color red))
+
+        :config
+        (use-package phi-search
+          :defer nil
+          :ensure t
+          :config
+          (defhydra hydra-phi-search
+            (:color red :hint nil)
+            "MC Search"
+            ("C-s" (phi-search) "Search" :column "Search")
+            ("C-r" (phi-search-backward) "Reverse")
+            ("C-w" (phi-search-yank-word) "Expand query by one word from buffer")
+            ("RET" (phi-search-complete) "Finish")
+            ("C-RET" (phi-search-complete-at-beginning) "Finish, jump to beginning of match")
+
+            ("C-v" (phi-search-scroll-up) "Scroll window up" :column "Scroll")
+            ("M-v" (phi-search-scroll-down) "Scroll window down")
+            ("C-l" (phi-search-recenter) "Recenter window")
+
+            ("M-c" (phi-search-case-toggle) "Toggle case sensitive" :column "More")
+            ("C-c C-c" (phi-search-unlimit) "Ignore search limit")
+            ("C-g" (phi-search-abort) "Abort")))
+
+        ))
   #+END_SRC
-- Auto fill mode
+
+*** Auto fill mode
   #+BEGIN_SRC emacs-lisp
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
   #+END_SRC
-- Expand region
+*** Expand region
   #+BEGIN_SRC emacs-lisp
     (eval `(use-package expand-region
              :ensure t
              :bind
              (,(cons (my-bind "Expend selection to region") 'er/expand-region))))
   #+END_SRC
-- Unfill paragraph
+*** Unfill paragraph
   By: Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph.
 
   #+BEGIN_SRC emacs-lisp
@@ -752,7 +932,7 @@ TransposeWindows. There may well be better ways to write this."
 
     (global-set-key (my-key "Unfill paragraph") 'unfill-paragraph)
   #+END_SRC
-- Query replace
+*** Query replace
   #+BEGIN_SRC emacs-lisp
   (global-set-key (my-key "Query replace") 'query-replace)
   #+END_SRC
@@ -836,16 +1016,14 @@ Install the required dictionaries!
       (setq google-translate-default-source-language "en")
       (setq google-translate-default-target-language "de")
       :bind
-      (
-       ,(cons (my-bind "_Google translate_ at point")
-              'google-translate-at-point)
-       ,(cons (my-bind "_Google translate_, ask for query")
-              'google-translate-query-translate)
-       ,(cons (my-bind "_Google translate_ reverse, ask for query")
-              'google-translate-query-translate-reverse))
-      ;;      :config
-      ;;      (require google-translate-default-ui)
-      ))
+      (,(cons (my-bind "_Google translate_ Prefix") 'hydra-google-translate/body))
+      :hydra
+      (hydra-google-translate (:color blue :hint nil)
+      "Google translate"
+      ("t" google-translate-at-point "En -> De")
+      ("T" google-translate-at-point-reverse "De -> En")
+      ("s" google-translate-query-translate "Ask: En -> De")
+      ("S" google-translate-query-translate-reverse "Ask: De -> En"))))
 #+END_SRC
 
 *** Tetris
@@ -859,6 +1037,7 @@ Install the required dictionaries!
 #+BEGIN_SRC emacs-lisp
   (use-package restclient
     :ensure t
+    :mode ("restclient\\'" . restclient-mode)
     :config
     (load-file (concat sheeshmacs-dir "/src/restclient-jq.el")))
   (use-package ob-restclient
@@ -866,7 +1045,6 @@ Install the required dictionaries!
   (use-package jq-mode
     :ensure t)
 #+END_SRC
-
 
 *** Uppercase first letter
 
@@ -881,4 +1059,127 @@ Install the required dictionaries!
     (forward-word 1))
 
   (global-set-key (my-key "Capitalize, modify first letter only") 'capitalize-first-char)
+#+END_SRC
+
+*** Emojis
+
+#+BEGIN_SRC emacs-lisp
+  (eval
+   `(use-package emojify
+      :ensure t
+      :bind (,(cons "C-; )" 'emojify-insert-emoji))))
+#+END_SRC
+
+*** Ox-Clip: Formatted copy/past from org-mode
+
+#+BEGIN_SRC emacs-lisp
+(use-package ox-clip)
+#+END_SRC
+
+From the documentation:
+
+#+BEGIN_EXAMPLE
+The main command is `ox-clip-formatted-copy' that should work across
+Windows, Mac and Linux. By default, it copies as html.
+
+Note: Images/equations may not copy well in html. Use `ox-clip-image-to-clipboard' to
+copy the image or latex equation at point to the clipboard as an image. The
+default latex scale is too small for me, so the default size for this is set
+to 3 in `ox-clip-default-latex-scale'. This overrides the settings in
+`org-format-latex-options'.
+#+END_EXAMPLE
+
+** Macros
+
+
+
+#+BEGIN_SRC emacs-lisp
+(defhydra hydra-macro (:hint nil :color pink :pre 
+                             (when defining-kbd-macro
+                                 (kmacro-end-macro 1)))
+  "
+^^^^^^^^               B^a^sic           I^n^sert        S^a^ve         E^d^it
+^^^^^^^^----------------^-^---------------^-^-------------^-^------------^-^----------
+^^^     _p_rev     ^^^ [_d_] delete      [_i_] insert    [_b_] name     [_'_] previous
+^^^      |       ^^^^^ [_o_] edit        [_t_] set       [_K_] key      [_,_] last
+new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
+^^^      |       ^^^^^ [_m_] step        [_f_] format    [_B_] insert as function
+^^^     _n_ext     ^^^ [_s_] swap
+"
+  ("(" kmacro-start-macro :color blue)
+  ("e" kmacro-end-or-call-macro-repeat)
+  ("0" (kmacro-end-or-call-macro-repeat 0))
+  ("p" kmacro-cycle-ring-previous)
+  ("n" kmacro-cycle-ring-next)
+  ("r" apply-macro-to-region-lines)
+  ("d" kmacro-delete-ring-head)
+  ("o" kmacro-edit-macro-repeat)
+  ("m" kmacro-step-edit-macro)
+  ("s" kmacro-swap-ring)
+  ("i" kmacro-insert-counter)
+  ("t" kmacro-set-counter)
+  ("a" kmacro-add-counter)
+  ("f" kmacro-set-format)
+  ("b" kmacro-name-last-macro)
+  ("K" kmacro-bind-to-key)
+  ("B" insert-kbd-macro)
+  ("x" kmacro-to-register)
+  ("'" kmacro-edit-macro)
+  ("," edit-kbd-macro)
+  ("q" nil :color blue))
+
+  (global-set-key (my-key "Keyboard macro Prefix") 'hydra-macro/body)
+#+END_SRC
+
+* Other modes
+
+** Markdown
+
+#+BEGIN_SRC emacs-lisp
+  (use-package markdown-mode
+    :mode "\\.md\\'"
+    :ensure t
+    :init
+    (defhydra hydra-markdown-mode-formatting (:hint nil) "MD Formatting/Headings"
+      ("h" markdown-insert-header-dwim "Header dwim" :column "Heading")
+      ("1" markdown-insert-header-atx-1 "Header 1")
+      ("2" markdown-insert-header-atx-2 "Header 2")
+      ("3" markdown-insert-header-atx-3 "Header 3")
+      ("4" markdown-insert-header-atx-4 "Header 4")
+
+      ("b" markdown-insert-bold "Bold" :column "Formatting")
+      ("i" markdown-insert-italic "Italic")
+      ("q" markdown-insert-blockquote "Block-Quote" :color blue)
+      ("p" markdown-insert-pre "Pre" :color blue)
+      ("c" markdown-insert-code "Code")
+      ("c" markdown-insert-code "Code")
+      ("~" markdown-insert-strike-through "Strike-through")
+
+      ("C-g" hydra-markdown-mode/body :color blue :column "Other"))
+
+    (defhydra hydra-markdown-mode (:hint nil)
+      "Markdown"
+      ("f" hydra-markdown-mode-formatting/body "Formatting/Headings" :color blue :column "Basic")
+
+      ("m" markdown-insert-list-item "Insert list item" :column "Lists")
+
+      ("<backtab>" markdown-promote "Move left")
+      ("TAB" markdown-demote "Move right")
+      ("d" markdown-move-down "Move down")
+      ("u" markdown-move-up "Move up")
+      ("C-n" next-line "Go down")
+      ("C-p" previous-line "Go up")
+
+      ("L" markdown-insert-link "Link" :color blue :column "Insert")
+      ("U" markdown-insert-uri "Uri" :color blue)
+      ("F" markdown-insert-footnote "Footnote" :color blue)
+      ("W" markdown-insert-wiki-link "Wiki-link" :color blue)
+      ("R" markdown-insert-reference-link-dwim "Reference-link-dwim" :color blue))
+
+    (add-hook
+     'markdown-mode-hook
+     #'(lambda ()
+         (local-unset-key (my-key "Go 3 lines forward"))
+         (local-unset-key (my-key "Go 3 lines backward"))
+         (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body))))
 #+END_SRC

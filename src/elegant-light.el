@@ -58,9 +58,18 @@
 (set-face-attribute 'bold-italic nil :slant 'italic)
 (set-face-attribute 'face-salient nil :foreground "#a0008b"
         :weight 'light)
-(set-face-attribute 'face-faded nil :foreground "#999999"
+(set-face-attribute 'face-salient-strong nil :foreground "#a0008b"
+        :weight 'bold)
+(set-face-attribute 'face-faded nil :foreground  "#999999"
         :weight 'light)
 (set-face-attribute 'face-subtle nil :background "#e0e0e0")
+(set-face-attribute 'face-backlit nil :background "#f0f0f0" :foreground "#000000")
+
+(set-face-attribute 'face-underline-error nil
+                    :underline '(:color "#f00" :style wave))
+(set-face-attribute 'face-underline-warning nil
+                    :underline '(:color "#ffa07a" :style wave))
+
 
 (elegant-buttons)
 ;;; -------------------------------------------------------------------

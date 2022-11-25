@@ -2,7 +2,6 @@
 #+DATE: [2020-12-10 Thu]
 #+AUTHOR: Philipp Uhl
 
-
 * Appearance
 
 #+BEGIN_SRC emacs-lisp
@@ -127,6 +126,16 @@ https://gist.github.com/rougier/baaf4ff6e0461680e3f070c5c32b64a2
 ;                                            (message (current-message)))))
 #+END_SRC
 
+** Emojis 🍳
+
+#+BEGIN_SRC emacs-lisp
+  (use-package emojify
+    :ensure t)
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (emojify-mode)))
+#+END_SRC
+
 * Behavior
 
 #+BEGIN_SRC emacs-lisp
@@ -149,6 +158,11 @@ https://gist.github.com/rougier/baaf4ff6e0461680e3f070c5c32b64a2
   ;; Sets default clock report table properties
   (setq org-clock-clocktable-default-properties
         '(:maxlevel 10 :scope tree :properties ("Effort") :compact t))
+#+END_SRC
+
+Disabling some commands that are confusing or destructive:
+#+BEGIN_SRC emacs-lisp
+(put 'org-kill-note-or-show-branches 'disabled t)
 #+END_SRC
 
 ** Keybindings
@@ -229,7 +243,8 @@ contains an up to date list of the currently supported languages.
      (restclient . t)
      (plantuml . t)
      (js . t)
-     (python . t)))
+     (python . t)
+     ))
 #+END_SRC
 
 Disables confirmation for code evaluation in org-mode. Might be risky
@@ -272,8 +287,8 @@ Setting the plantuml.jar
 Usage: add =:async= to the babel properties of the code block.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package ob-async
-    :ensure t)
+;  (use-package ob-async
+;    :ensure t)
 #+END_SRC
 
 ** Exporting
@@ -404,18 +419,24 @@ schedule) add a corresponding end-hour.
                     (if (eq system-type 'gnu/linux)
                         ".img/org_"
                       ".img\\org_")
-                    (format-time-string "%Y%m%d_%H%M%S_")) ) ".jpg"))
+                    (format-time-string "%Y%m%d_%H%M%S_")) )
+                    (if (eq system-type 'gnu/linux) ".png" ".jpg")
+                    ))
     (if (eq system-type 'gnu/linux)
-        ;; Linux: ImageMagick
-        (progn
-          (message "3...")
-          (sleep-for 1)
-          (message "2..")
-          (sleep-for 1)
-          (message "1.")
-          (sleep-for 1)
-          (message "Snap!")
-          (call-process "import" nil nil nil filename))
+        ;;; Linux: ImageMagick
+        ;; (progn
+        ;;   (message "3...")
+        ;;   (sleep-for 1)
+        ;;   (message "2..")
+        ;;   (sleep-for 1)
+        ;;   (message "1.")
+        ;;   (sleep-for 1)
+        ;;   (message "Snap!")
+        ;;   (call-process "import" nil nil nil filename))
+
+        ;; New Linux:
+        (call-process "xclip" nil `(:file ,filename) nil
+                      "-selection" "clipboard" "-t" "image/png" "-o")
       ;; Windows: Irfanview
       (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
                     (concat "/clippaste /convert=" filename)))

@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: fn
+# key: fn
+# --
+type $1Props = {
+  $0
+};
+
+const $1 = (props: $1Props) => null;

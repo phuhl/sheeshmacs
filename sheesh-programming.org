@@ -1,6 +1,7 @@
 #+TITLE: Sheesh-Programming Config
 #+DATE: [2020-12-09 Wed]
 #+AUTHOR: Philipp Uhl
+#+STARTUP: overview
 
 
 * Setup for all Programming Modes
@@ -130,7 +131,8 @@ a lambda doesn't already exist in the list.
 -   Barf to the right: =M-<right>= ... =(a b c)= -> =(a b) c=
 -    Barf to the left: =M-<left>= .... =(a b c)= -> =a (b c)=
 -       Switch places: =C-M-t= ....... =a |b= -> =b a|=
-
+- Split group:  ...... =(a b c d)= -> =(a b) | (c d)=
+- Join groups: =C-M-g= ....... =(a b) | (c d)= -> =(a b c d)=
 
 #+BEGIN_SRC emacs-lisp
 
@@ -197,6 +199,59 @@ a lambda doesn't already exist in the list.
   ;; (sp-cheat-sheet)
   ;;  (turn-on-smartparens-strict-mode)
 #+END_SRC
+
+**** Combobulate
+
+- still in alpha
+- Could be a Smartparens replacement for JSX and HTML
+- Still missing lot's of features
+
+#+BEGIN_SRC emacs-lisp
+  (use-package combobulate
+    ;; Ensure `combobulate-mode` is activated when you launch a mode it supports
+    :hook ((python-mode . combobulate-mode)
+           (js-mode . combobulate-mode)
+           (typescript-mode . combobulate-mode))
+    :config
+    (defhydra combobulate-my-menu (:color red :hint nil)
+      "Combobulate"
+      ("i" combobulate-navigate-down "Navigate In" :column "Navigation")
+      ("o" combobulate-navigate-up "Navigate Out")
+      ("n" combobulate-navigate-next "Navigate Next")
+      ("p" combobulate-navigate-previous "Navigate Prev")
+      ("f" combobulate-navigate-forward "Navigate Forward")
+      ("b" combobulate-navigate-backward "Navigate Backward")
+
+
+      ("C-p" combobulate-drag-up "Drag backwards" :column "Marking and Editing")
+      ("C-n" combobulate-drag-down "Drag forwards")
+      ("" nil "")
+      ("M-k" combobulate-kill-node-dwim "Kill Node DWIM")
+      ("m" combobulate-mark-node-dwim "Mark DWIM")
+      ("" nil "")
+      ("s" sp-split-sexp "Split Group" :color blue)
+      ("j" sp-join-sexp "Join Group" :color blue)
+
+      ("u" combobulate-javascript-jsx-vanish-node "Unmantle JSX" :column "JSX")
+      ("{" combobulate-javascript-jsx-element-to-expression "<div/> -> {<div/>}")
+      (";" combobulate-javascript-jsx-element-to-comment "Comment")
+      ("r" combobulate-javascript-jsx-rename-element "Rename element")
+
+      ("q" nil :column "Other")
+      ("h" (hydra-toggle-menu 'combobulate-my-menu)))
+    (add-hook
+     'combobulate-mode-hook
+     (lambda ()
+       (local-set-key (my-key "Combobulate Hydra Prefix") 'combobulate-my-menu/body)))
+    :load-path
+    (lambda () (list (file-name-concat
+                      (file-name-directory (or load-file-name (buffer-file-name)))
+                      "src" "combobulate" "combobulate-master" "combobulate-master" "combobulate.el"))))
+
+
+
+#+END_SRC
+
 
 ** Vimish fold
 
@@ -273,7 +328,7 @@ https://github.com/mrkkrp/vimish-fold
       (define-key yas-minor-mode-map (kbd "<tab>") nil)
       (define-key yas-minor-mode-map (kbd "TAB") nil)
       (define-key yas-minor-mode-map (kbd "<C-tab>")
-        '(lambda ()
+        #'(lambda ()
            (interactive)
            (indent-for-tab-command)
            (yas-expand)))
@@ -336,6 +391,182 @@ https://github.com/mrkkrp/vimish-fold
       :defer t
       :bind
       (,(cons (my-bind "_Magit_ status") 'magit-status))))
+#+END_SRC
+
+** Flycheck
+
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :ensure t)
+#+END_SRC
+
+** Prettify
+
+#+BEGIN_SRC emacs-lisp
+(use-package web-beautify
+  :ensure t)
+#+END_SRC
+
+** Faster Macros
+
+Sometimes I need to modify a lot of files. Usually, I start with a
+list of files from compilation mode or in dired. I create a macro to
+go to the file in line 1, do changes, save the file, move to the next
+line in the original buffer. Repeat.
+
+This is very slow when there are lot's of hooks on the mode of the
+buffer to be changed. To prevent these hooks to run, you can use
+=macro-setup= to change file opening to literal mode and =macro-teardown=
+to change it back afterwards. This affects compilation mode and dired
+mode.
+
+#+BEGIN_SRC emacs-lisp
+  (setq is-in-macro-mode nil)
+  (defun macro-setup ()
+    "Modify file opening in compilation mode to open files literally.
+
+  Can be undone with `teardown-after-macro'."
+    (interactive)
+    (setq is-in-macro-mode t))
+
+  (defun macro-teardown ()
+    (interactive)
+    (setq is-in-macro-mode nil))
+#+END_SRC
+
+*** Overwritten Functions
+
+To ensure functioning of faster macros, we need to modify some
+functions and make them open files differently depending on =is-=in-macro-mode=.
+
+**** Dired
+
+Modified =dired-find-file= function checks for =is-=in-macro-mode= first to
+see how to open a file.
+
+#+BEGIN_SRC emacs-lisp
+  (setf dired-find-file-orig (symbol-function #'dired-find-file))
+  (defun dired-find-file ()
+    "In Dired, visit the file or directory named on this line in literal mode."
+    (interactive)
+    (if is-in-macro-mode
+        (dired--find-file #'find-file-literally (dired-get-file-for-visit))
+      (funcall dired-find-file-orig)))
+#+END_SRC
+
+**** Compilation mode
+
+Modified =compilation-find-file= function: Nearly an exact copy of the
+original, but with different calls to open a file.
+
+#+BEGIN_SRC emacs-lisp
+  (setf compilation-find-file-orig (symbol-function #'compilation-find-file))
+  (defun compilation-find-file (marker filename directory &rest formats)
+    (if (not is-in-macro-mode)
+        (apply compilation-find-file-orig marker filename directory formats)
+      (or formats (setq formats '("%s")))
+      (let ((dirs compilation-search-path)
+            (spec-dir (if directory
+                          (expand-file-name directory)
+                        default-directory))
+            buffer thisdir fmts name)
+        (if (and filename
+                 (file-name-absolute-p filename))
+            ;; The file name is absolute.  Use its explicit directory as
+            ;; the first in the search path, and strip it from FILENAME.
+            (setq filename (abbreviate-file-name (expand-file-name filename))
+                  dirs (cons (file-name-directory filename) dirs)
+                  filename (file-name-nondirectory filename)))
+        ;; Now search the path.
+        (while (and dirs (null buffer))
+          (setq thisdir (or (car dirs) spec-dir)
+                fmts formats)
+          ;; For each directory, try each format string.
+          (while (and fmts (null buffer))
+            (setq name (file-truename
+                        (file-name-concat thisdir (format (car fmts) filename)))
+                  buffer (and (file-exists-p name)
+                              (find-file-noselect name nil t))
+                  fmts (cdr fmts)))
+          (setq dirs (cdr dirs)))
+        ;; If we haven't found it, this might be a parallel build.
+        ;; Search the directories further up the buffer.
+        (when (and (null buffer)
+                   compilation-search-all-directories)
+          (with-current-buffer (marker-buffer marker)
+            (save-excursion
+              (goto-char (marker-position marker))
+              (when-let ((prev (compilation--previous-directory (point))))
+                (goto-char prev))
+              (setq dirs (cdr (or (get-text-property
+                                   (1- (point)) 'compilation-directory)
+                                  (get-text-property
+                                   (point) 'compilation-directory))))))
+          (while (and dirs (null buffer))
+            (setq thisdir (car dirs)
+                  fmts formats)
+            (while (and fmts (null buffer))
+              (setq name (file-truename
+                          (file-name-concat thisdir (format (car fmts) filename)))
+                    buffer (and (file-exists-p name)
+                                (find-file-noselect name nil t))
+                    fmts (cdr fmts)))
+            (if (null buffer)
+                (message "2 is null")
+              (message "2 is not null"))
+            (setq dirs (cdr dirs))))
+        (while (null buffer)    ;Repeat until the user selects an existing file.
+          ;; The file doesn't exist.  Ask the user where to find it.
+          (save-excursion            ;This save-excursion is probably not right.
+            (let ((w (let ((pop-up-windows t))
+                       (display-buffer (marker-buffer marker)
+                                       '(nil (allow-no-window . t))))))
+              (with-current-buffer (marker-buffer marker)
+                (goto-char marker)
+                (and w (progn (compilation-set-window w marker)
+                              (compilation-set-overlay-arrow w))))
+              (let* ((name (read-file-name
+                            (format-prompt "Find this %s in"
+                                           filename compilation-error)
+                            spec-dir filename t nil
+                            ;; The predicate below is fine when called from
+                            ;; minibuffer-complete-and-exit, but it's too
+                            ;; restrictive otherwise, since it also prevents the
+                            ;; user from completing "fo" to "foo/" when she
+                            ;; wants to enter "foo/bar".
+                            ;;
+                            ;; Try to make sure the user can only select
+                            ;; a valid answer.  This predicate may be ignored,
+                            ;; tho, so we still have to double-check afterwards.
+                            ;; TODO: We should probably fix read-file-name so
+                            ;; that it never ignores this predicate, even when
+                            ;; using popup dialog boxes.
+                            ;; (lambda (name)
+                            ;;   (if (file-directory-p name)
+                            ;;       (setq name (expand-file-name filename name)))
+                            ;;   (file-exists-p name))
+                            ))
+                     (origname name))
+                (cond
+                 ((not (file-exists-p name))
+                  (message "Cannot find file `%s'" name)
+                  (ding) (sit-for 2))
+                 ((and (file-directory-p name)
+                       (not (file-exists-p
+                             (setq name (file-truename
+                                         (file-name-concat name filename))))))
+                  (message "No `%s' in directory %s" filename origname)
+                  (ding) (sit-for 2))
+                 (t
+                  (setq buffer (find-file-noselect name nil t))))))))
+        ;; Make intangible overlays tangible.
+        ;; This is weird: it's not even clear which is the current buffer,
+        ;; so the code below can't be expected to DTRT here.  -- Stef
+        (dolist (ov (overlays-in (point-min) (point-max)))
+          (when (overlay-get ov 'intangible)
+            (overlay-put ov 'intangible nil)))
+        buffer)))
+
 #+END_SRC
 
 * Language Specific
@@ -513,7 +744,7 @@ https://github.com/mrkkrp/vimish-fold
     (add-hook 'rjsx-mode-hook 'run-sheesh-coding-hook)
     (add-hook 'rjsx-mode-hook 'flycheck-mode)
     (add-hook 'rjsx-mode-hook
-              '(lambda ()
+              #'(lambda ()
                  (setup-cycle-quotes)
                  (define-key rjsx-mode-map
                    (my-key "JS Doc insert function doc")
@@ -577,26 +808,26 @@ Once in a while it can be usefull to restart tern.
 
 
 
-  (defun delete-tern-process ()
-    (interactive)
-    (delete-process "Tern"))
-
-  (add-hook 'rjsx-mode-hook (lambda ()
-                              (auto-complete-mode 0)
-                              (company-mode)
-                              (tern-mode)))
-  (add-hook 'web-mode-hook (lambda ()
-                              (auto-complete-mode 0)
-                              (company-mode)
-                              (tern-mode)))
-
-  (use-package tern
-    :defer t
-    :ensure t
-    :config
-    (eval-after-load 'tern
-      '(progn (require 'company-tern)))
-    )
+;;  (defun delete-tern-process ()
+;;    (interactive)
+;;    (delete-process "Tern"))
+;;
+;;  (add-hook 'rjsx-mode-hook (lambda ()
+;;                              (auto-complete-mode 0)
+;;                              (company-mode)
+;;                              (tern-mode)))
+;;  (add-hook 'web-mode-hook (lambda ()
+;;                              (auto-complete-mode 0)
+;;                              (company-mode)
+;;                              (tern-mode)))
+;;
+;;  (use-package tern
+;;    :defer t
+;;    :ensure t
+;;    :config
+;;    (eval-after-load 'tern
+;;      '(progn (require 'company-tern)))
+;;    )
 #+END_SRC
 
 *** Spellchecking in JS
@@ -625,7 +856,6 @@ Once in a while it can be usefull to restart tern.
         (setq-local flycheck-javascript-eslint-executable eslint))))
   (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
   (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
-
 #+END_SRC
 
 *** ESLint Fix
@@ -637,6 +867,15 @@ Once in a while it can be usefull to restart tern.
     (interactive)
     (setq eslint-fix-executable (my/use-eslint-from-node-modules))
     (eslint-fix))
+#+END_SRC
+
+*** EsLint Compile Mode
+
+Adds a parser to compilation mode to support eslint output.
+
+#+BEGIN_SRC emacs-lisp
+(require 'compile-eslint)
+(push 'eslint compilation-error-regexp-alist)
 #+END_SRC
 
 *** Cycle Quotes
@@ -712,7 +951,7 @@ Use =C-j= to expand emmet-code to html/css code.
     (defun pretify-afterwards (fun)
       (interactive)
       (funcall fun)
-      (prettier-prettify))
+      (prettier-js))
 
     (defun web-mode-sp-backward-unwrap-sexp ()
       (interactive)
@@ -756,11 +995,11 @@ Use =C-j= to expand emmet-code to html/css code.
                 (setup-cycle-quotes)
 
                 ;; Auto indent on certain characters
-                (local-set-key (kbd "}") '(lambda ()
+                (local-set-key (kbd "}") #'(lambda ()
                                             (interactive)
                                             (insert "}")
                                             (indent-for-tab-command)))
-                (local-set-key (kbd ";") '(lambda ()
+                (local-set-key (kbd ";") #'(lambda ()
                                             (interactive)
                                             (insert ";")
                                             (indent-for-tab-command)))
@@ -820,7 +1059,10 @@ See [[Spellchecking in JS]].
     :ensure t
     :mode ("\\.json$" . json-mode)
     :config
-    (add-hook 'json-mode-hook 'run-sheesh-coding-hook))
+    (add-hook 'json-mode-hook 'run-sheesh-coding-hook)
+    (setq-local flycheck-json-jsonlint-executable "jsonlint")
+    (flycheck-add-mode 'json-jsonlint 'json-mode)
+    (add-hook 'json-mode-hook 'flycheck-mode))
 #+END_SRC
 
 ** YAML
@@ -838,31 +1080,45 @@ See [[Spellchecking in JS]].
 ** Typescript
 
 #+BEGIN_SRC emacs-lisp
+  (flycheck-add-mode 'javascript-eslint 'typescript-mode)
+  
   (use-package typescript-mode
-      :ensure t
-      :mode ("\\.ts\\'" . typescript-mode)
-      :init
-      ;; Set indentation to 2 spaces
-      (custom-set-variables
-       '(typescript-indent-level 2))
-
-      :config
-      (add-hook 'typescript-mode-hook 'run-sheesh-coding-hook)
-      ;; (add-hook 'typescript-mode-hook 'flycheck-mode)
-      ;;    (add-hook 'typescript-mode-hook #'lsp)
-      )
-
-
+    :ensure t
+    :mode ("\\.tsx?\\'" . typescript-mode)
+    :init
+    (setq tide-always-show-documentation t)
+    ;; Set indentation to 2 spaces
+    (custom-set-variables
+     '(typescript-indent-level 2))
+  
+    :config
+    (add-hook 'typescript-mode-hook 'run-sheesh-coding-hook)
+    (add-hook 'typescript-mode-hook 'flycheck-mode)
+    (add-hook 'typescript-mode-hook #'(lambda () (setup-cycle-quotes)))
+    (require 'ansi-color)
+    (defun colorize-compilation-buffer ()
+    (ansi-color-filter-region compilation-filter-start (point-max)))
+    ;(ansi-color-apply-on-region compilation-filter-start (point-max)))
+    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+    ;;    (add-hook 'typescript-mode-hook #'lsp)
+    )
+  
   (defun setup-tide-mode ()
     "Set up Tide mode."
     (interactive)
     (tide-setup)
     (flycheck-mode +1)
+    (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
+    ;; (setq flycheck-checker 'javascript-eslint)
     ;; (setq flycheck-check-syntax-automatically '(save-mode-enabled))
     (eldoc-mode +1)
     (tide-hl-identifier-mode +1)
-    (company-mode +1))
-
+   (company-mode +1)
+    (local-set-key (my-key "(Refactor) Rename item")
+                   'tide-rename-symbol)
+    (local-set-key (my-key "Fix at place")
+                   'tide-fix))
+  
   (use-package tide
     :ensure t
     :config
@@ -881,6 +1137,9 @@ See [[Spellchecking in JS]].
 ** SQL
 
 #+BEGIN_SRC emacs-lisp
+  (use-package sql-indent
+    :ensure t)
+
   (defun sheesh-launch-sql-submodes ()
     (sqlind-minor-mode))
 

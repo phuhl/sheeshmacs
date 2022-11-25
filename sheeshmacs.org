@@ -94,7 +94,7 @@ automatically regenerated when you next start emacs.
   #+BEGIN_SRC emacs-lisp
         (setq package-archives
               '(("gnu"         . "https://elpa.gnu.org/packages/")
-                ("org"         . "http://orgmode.org/elpa/")
+                ("nongnu" . "https://elpa.nongnu.org/nongnu/")
                 ("melpa"       . "https://melpa.org/packages/")
     ;                ("marmalade"   . "http://marmalade-repo.org/packages/")
     ))
@@ -121,13 +121,12 @@ automatically regenerated when you next start emacs.
       (require 'use-package))
     (require 'diminish)                ;; if you use :diminish
     (require 'bind-key)                ;; if you use any :bind variant
+    (use-package use-package-hydra :ensure t) ;; For using hydra
   #+END_SRC
 
 ** Org mode
   #+BEGIN_SRC emacs-lisp
   (require 'cl)
-  (setq load-path (remove-if (lambda (x) (string-match-p "org$" x)) load-path))
-  (use-package org :ensure t)
   #+END_SRC
 
 ** Load path (=src= + subdirs, =elpa= for packages) and custom-file (=custom.el=)
@@ -232,5 +231,3 @@ The following files contain the remainder of the core of Sheeshmacs.
   (sheeshmacs-load "org")
   (sheeshmacs-load "programming")
 #+END_SRC
-
-
