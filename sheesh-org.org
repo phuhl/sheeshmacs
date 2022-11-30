@@ -21,6 +21,11 @@
    ;; Makes ord-mode inline all images by default
    (setq org-startup-with-inline-images t)
 
+   ;; Make markup span up to 3 lines. "That variable is a list, the fifth
+   ;; element of which says how many newlines the emphasis markers will
+   ;; allow." - https://emacs-orgmode.gnu.narkive.com/4tkVxjr1/o-markup-blod-for-instance-over-line-breaks#post5
+   (setf (nth 4 org-emphasis-regexp-components) 3)
+
    (add-hook 'org-mode-hook
              (lambda ()
                ;; Don't wrap long lines and wrap them at words if you wrap (whut?)
