@@ -1085,7 +1085,7 @@ Install the required dictionaries!
 *** Ox-Clip: Formatted copy/past from org-mode
 
 #+BEGIN_SRC emacs-lisp
-(use-package ox-clip)
+(use-package ox-clip :ensure t)
 #+END_SRC
 
 From the documentation:
