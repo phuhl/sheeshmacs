@@ -450,10 +450,22 @@ Currently free(ish) bindings:
 
 Custom size: (set-face-attribute 'default nil :height 120)
 
+Set font size relative to DPI.
+
 #+BEGIN_SRC emacs-lisp
   ;; Set font size
-  (when (> (/ (display-pixel-width) (/ (display-mm-width) 25.4)) 200)
-    (set-face-attribute 'default nil :height 80))
+  ;; (when (> (/ (display-pixel-width) (/ (display-mm-width) 25.4)) 200)
+  ;; (set-face-attribute 'default nil :height 80))
+
+  (set-face-attribute 'default nil :height
+                      (round
+                       (*
+                        (/
+                         (/
+                          (display-pixel-width)
+                          (/ (display-mm-width) 25.4)) ;; mm -> inch
+                         200) ;; dpi
+                        75))) ;; font size at 200 dpi
 
   (when (>= emacs-major-version 27)
     (setq gamegrid-glyph-height-mm 8.0))
