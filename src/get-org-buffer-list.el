@@ -22,6 +22,14 @@ If FILEXT is provided, return files with extension FILEXT instead."
         org-file-list) ; add files found to result
     (add-to-list 'org-file-list org-file)))))))
 
+(defun sort-org-file-list (list)
+  "Sorts org file list by name with index.org files before other files
+ in a folder"
+  (sort list (lambda (a b)
+               (string<
+                (replace-regexp-in-string "index.org$" "" a)
+                (replace-regexp-in-string "index.org$" "" b)))))
+
 (defun show-org-file-list ()
   "Opens buffer that shows all .org and .org_archive files in the
  by the global variable org-base-dir specified directory and it's subdirectories."
@@ -29,17 +37,26 @@ If FILEXT is provided, return files with extension FILEXT instead."
   (let ((my-buffer (get-buffer-create "*orgfiles listed*"))
         (orgfiles (list)))
     (setq orgfiles
-          (append (sa-find-org-file-recursively org-base-dir)))
+          (append (sort-org-file-list (sa-find-org-file-recursively org-base-dir))))
     (switch-to-buffer my-buffer)
     (erase-buffer)
     (org-mode)
     (org-file-list-mode)
     (insert (mapconcat #'(lambda (x)
-                          (concat "[[" x "][" (cl-subseq x (length org-base-dir)) "]]")) 
+                           (concat "[["
+                                   x
+                                   "]["
+                                   (replace-regexp-in-string
+                                    ".org$" ""
+                                    (cl-subseq x (length org-base-dir)))
+                                   "]]"))
                        orgfiles "\n"))
     (goto-char 0)
     (isearch-forward)
     (message "Orgfiles")))
+
+
+
 
 
 (define-minor-mode org-file-list-mode
