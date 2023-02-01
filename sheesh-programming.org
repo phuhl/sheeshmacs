@@ -211,6 +211,7 @@ a lambda doesn't already exist in the list.
     ;; Ensure `combobulate-mode` is activated when you launch a mode it supports
     :hook ((python-mode . combobulate-mode)
            (js-mode . combobulate-mode)
+           (web-mode . combobulate-mode)
            (typescript-mode . combobulate-mode))
     :config
     (defhydra combobulate-my-menu (:color red :hint nil)
@@ -567,6 +568,22 @@ original, but with different calls to open a file.
             (overlay-put ov 'intangible nil)))
         buffer)))
 
+#+END_SRC
+
+** Base64
+
+The inbuild =base64-decode-string= function, when called interactively
+does not work on all base64 strings. You need to pass =t= as second
+parameter to make it use RFC 4648 decoding. This function wraps it in
+such a way that it uses RFC 4648 decoding.
+
+#+BEGIN_SRC emacs-lisp
+  (defun decode-base64-region (start end)
+    (interactive "r")
+    (replace-string-in-region
+     (buffer-substring start end)
+     (base64-decode-string (buffer-substring start end) t)
+     start end))
 #+END_SRC
 
 * Language Specific
@@ -1081,7 +1098,7 @@ See [[Spellchecking in JS]].
 
 #+BEGIN_SRC emacs-lisp
   (flycheck-add-mode 'javascript-eslint 'typescript-mode)
-  
+
   (use-package typescript-mode
     :ensure t
     :mode ("\\.tsx?\\'" . typescript-mode)
@@ -1090,40 +1107,59 @@ See [[Spellchecking in JS]].
     ;; Set indentation to 2 spaces
     (custom-set-variables
      '(typescript-indent-level 2))
-  
+
     :config
     (add-hook 'typescript-mode-hook 'run-sheesh-coding-hook)
     (add-hook 'typescript-mode-hook 'flycheck-mode)
-    (add-hook 'typescript-mode-hook #'(lambda () (setup-cycle-quotes)))
+    (add-hook
+     'typescript-mode-hook
+     #'(lambda ()
+         (setup-cycle-quotes)
+         (local-set-key (my-key "Mode hydra") 'hydra-typescript/body)))
     (require 'ansi-color)
     (defun colorize-compilation-buffer ()
-    (ansi-color-filter-region compilation-filter-start (point-max)))
-    ;(ansi-color-apply-on-region compilation-filter-start (point-max)))
+      (ansi-color-filter-region compilation-filter-start (point-max)))
+                                          ;(ansi-color-apply-on-region compilation-filter-start (point-max)))
     (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
     ;;    (add-hook 'typescript-mode-hook #'lsp)
-    )
-  
-  (defun setup-tide-mode ()
-    "Set up Tide mode."
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
-    ;; (setq flycheck-checker 'javascript-eslint)
-    ;; (setq flycheck-check-syntax-automatically '(save-mode-enabled))
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-   (company-mode +1)
-    (local-set-key (my-key "(Refactor) Rename item")
-                   'tide-rename-symbol)
-    (local-set-key (my-key "Fix at place")
-                   'tide-fix))
-  
-  (use-package tide
-    :ensure t
-    :config
-    (setq company-tooltip-align-annotations t)
-    (add-hook 'typescript-mode-hook #'setup-tide-mode))
+
+    (defhydra hydra-typescript (:hint nil :color blue)
+      "TS"
+      ("sd" tide-documentation-at-point "Documentation at point" :column "Show")
+      ("sr" tide-references "References")
+      ("se" tide-error-at-point "Error at point")
+      ("sE" tide-project-errors "Project errors")
+
+
+      ("f" tide-fix "Fix")
+      ("t" tide-add-tslint-disable-next-line "Add tslint-disable-next-line")
+      ("R" tide-rename-symbol "Rename symbol" :column "Change")
+      ("F" tide-rename-file "Rename file")
+      ("r" tide-refactor "Refactor")
+      ("i" tide-organize-imports "Organize-imports")
+      ("C-r" tide-restart-server "Restart server" :column "Other")))
+
+    (defun setup-tide-mode ()
+      "Set up Tide mode."
+      (interactive)
+      (tide-setup)
+      (flycheck-mode +1)
+      (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
+      ;; (setq flycheck-checker 'javascript-eslint)
+      ;; (setq flycheck-check-syntax-automatically '(save-mode-enabled))
+      (eldoc-mode +1)
+      (tide-hl-identifier-mode +1)
+      (company-mode +1)
+      (local-set-key (my-key "(Refactor) Rename item")
+                     'tide-rename-symbol)
+      (local-set-key (my-key "Fix at place")
+                     'tide-fix))
+
+    (use-package tide
+      :ensure t
+      :config
+      (setq company-tooltip-align-annotations t)
+      (add-hook 'typescript-mode-hook #'setup-tide-mode))
 #+END_SRC
 
 *** Flycheck for Web Mode
