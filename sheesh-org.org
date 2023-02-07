@@ -440,8 +440,11 @@ schedule) add a corresponding end-hour.
         ;;   (call-process "import" nil nil nil filename))
 
         ;; New Linux:
-        (call-process "xclip" nil `(:file ,filename) nil
-                      "-selection" "clipboard" "-t" "image/png" "-o")
+        (if (eq window-system 'x)
+            (call-process "xclip" nil `(:file ,filename) nil
+                          "-selection" "clipboard" "-t" "image/png" "-o")
+            (call-process "wl-paste" nil `(:file ,filename) nil "-t" "image/png" "-n"))
+    
       ;; Windows: Irfanview
       (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
                     (concat "/clippaste /convert=" filename)))
