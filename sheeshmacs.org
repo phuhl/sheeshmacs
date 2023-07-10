@@ -213,6 +213,18 @@ Function for loading other parts of sheeshmacs
     (run-with-idle-timer 5 t #'garbage-collect))
 #+END_SRC
   
+** Gather OS and Display Server Info
+
+#+BEGIN_SRC emacs-lisp
+  (defun detect-os-display-type ()
+    "Detect the Emacs display type: X-Org or Wayland"
+    (let ((display (getenv "WAYLAND_DISPLAY")))
+      (if (eq system-type 'gnu/linux)
+          (if (and display (string-match-p "wayland" display))
+              'wayland
+            'xorg)
+        'non-linux)))
+#+END_SRC
 * Customizations
 
 Settings from M-x customize.

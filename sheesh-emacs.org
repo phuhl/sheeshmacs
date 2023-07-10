@@ -1084,8 +1084,20 @@ Install the required dictionaries!
 
 *** Ox-Clip: Formatted copy/past from org-mode
 
+On Wayland: Requires a script "ox-clip" to be in the path:
+
+#+CAPTION: ox-clip
+#+BEGIN_SRC sh
+#!/bin/bash
+
+wl-copy -t text/html < "$1"
+#+END_SRC
+
 #+BEGIN_SRC emacs-lisp
-(use-package ox-clip :ensure t)
+  (use-package ox-clip :ensure t
+    :config
+    (if (eq (detect-os-display-type) 'wayland)
+        (setq ox-clip-linux-cmd "ox-clip \"%f\"")))
 #+END_SRC
 
 From the documentation:
