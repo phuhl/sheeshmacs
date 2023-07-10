@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: JSON2
+# key: JSON2
+# --
+JSON.stringify($0, undefined, 2)
