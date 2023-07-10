@@ -84,3 +84,5 @@ src/gamegrid.el
 
 ## Root directory
 startupbuffer.org
+
+!.mc-lists.el

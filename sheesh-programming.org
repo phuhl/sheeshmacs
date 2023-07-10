@@ -606,6 +606,23 @@ original, but with different calls to open a file.
 
 #+END_SRC
 
+** Base64
+
+The inbuild =base64-decode-string= function, when called interactively
+does not work on all base64 strings. You need to pass =t= as second
+parameter to make it use RFC 4648 decoding. This function wraps it in
+such a way that it uses RFC 4648 decoding.
+
+#+BEGIN_SRC emacs-lisp
+  (defun decode-base64-region (start end)
+    (interactive "r")
+    (replace-string-in-region
+     (buffer-substring start end)
+     (base64-decode-string (buffer-substring start end) t)
+     start end))
+#+END_SRC
+
+
 ** Auto complete
 
 #+BEGIN_SRC emacs-lisp
