@@ -45,6 +45,8 @@ information.
 | M-Q        | Unfill paragraph                            |
 | M-C-c      | Capitalize, modify first letter only        |
 | C-; )      | Insert emoji                                |
+| C-M-SPC    | Mark expression                             |
+| TAB        | Autocomplete                                |
 |------------+---------------------------------------------|
 |            | *Search/Replace*                              |
 |            |                                             |
@@ -178,12 +180,19 @@ information.
                     table)))
 
   (defun my-key (term)
+    "Returns a key-binding when given a string as parameter. The
+  string is loooked up in a table in
+  sheesh-emacs.org (Keybindings). The returned key binding has been
+  processed by the kdb function."
     (let '(key (find-keybindings-in-table global-keybindings term))
       (if (not key)
           (error (concat "Keybinding " term " not defined."))
         (kbd key))))
 
   (defun my-bind (term)
+    "Returns a key-binding as string when given a string as
+  parameter. The string is loooked up in a table in
+  sheesh-emacs.org (Keybindings)."
     (let '(key (find-keybindings-in-table global-keybindings term))
       (if (not key)
           (error (concat "Keybinding " term " not defined."))
@@ -1136,6 +1145,47 @@ to 3 in `ox-clip-default-latex-scale'. This overrides the settings in
 `org-format-latex-options'.
 #+END_EXAMPLE
 
+*** Langtool (Spellchecking)
+
+Requires languagetool to be installed.
+
+#+BEGIN_SRC sh
+# On Arch Linux:
+yay -S languagetool
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package languagetool
+    :ensure t
+    :defer t
+    :commands (languagetool-check
+               languagetool-clear-suggestions
+               languagetool-correct-at-point
+               languagetool-correct-buffer
+               languagetool-set-language
+               languagetool-server-mode
+               languagetool-server-start
+               languagetool-server-stop)
+    :config
+  (setq languagetool-java-arguments '("-Dfile.encoding=UTF-8"
+                                      "-cp" "/usr/share/languagetool:/usr/share/java/languagetool/*")
+        languagetool-console-command "org.languagetool.commandline.Main"
+        languagetool-server-command "org.languagetool.server.HTTPServer"
+        languagetool-server-has-been-started nil)
+
+  ;; For payed account:
+  ;; (setq languagetool-api-key "xxxxxxxxxxxx"
+  ;;      languagetool-username "johndoe@example.com")
+  )
+
+  (defun enable-languagetool-mode ()
+    (if (not languagetool-server-has-been-started)
+        (languagetool-server-start))
+    (setq languagetool-server-has-been-started t)
+    (languagetool-server-mode))
+
+#+END_SRC
+
 ** Macros
 
 
@@ -1178,11 +1228,121 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
   (global-set-key (my-key "Keyboard macro Prefix") 'hydra-macro/body)
 #+END_SRC
 
-* Other modes
+** Screenshots
+
+#+BEGIN_SRC emacs-lisp
+  ;; Past images from clipboard into org-mode
+  (defun save-screenshot ()
+    "Take a screenshot into a time stamped unique-named file in the same
+  directory as the buffer and insert
+  a link to this file."
+    (interactive)
+    (setq tilde-buffer-filename
+          (if (eq system-type 'gnu/linux)
+              buffer-file-name
+            (replace-regexp-in-string "/" "\\" (buffer-file-name) t t)))
+    (unless (file-exists-p (concat tilde-buffer-filename ".img"))
+      (make-directory (concat tilde-buffer-filename ".img")))
+    (setq filename
+          (concat
+           (make-temp-name
+            (concat tilde-buffer-filename
+                    (if (eq system-type 'gnu/linux)
+                        ".img/"
+                      ".img\\")
+                    (format-time-string "%Y%m%d_%H%M%S_")) )
+                    (if (eq system-type 'gnu/linux) ".png" ".jpg")
+                    ))
+    (if (eq system-type 'gnu/linux)
+        (if (eq window-system 'x)
+            (call-process "xclip" nil `(:file ,filename) nil
+                          "-selection" "clipboard" "-t" "image/png" "-o")
+            (call-process "wl-paste" nil `(:file ,filename) nil "-t" "image/png" "-n"))
+
+      ;; Windows: Irfanview
+      (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
+                    (concat "/clippaste /convert=" filename)))
+     (file-relative-name
+                     (if (eq system-type 'gnu/linux)
+                         filename
+                       (replace-regexp-in-string "\\\\" "/" filename t t))
+                     (file-name-directory (buffer-file-name))))
+#+END_SRC
+
+** GTD
+Function to open GTD buffers.
+
+#+BEGIN_SRC emacs-lisp
+  (defun gtd ()
+    (interactive)
+    (delete-other-windows)
+    (org-link-open-from-string "[[documents:/todo/gtd/daily.org::Todos][In List]]")
+    (org-link-open-from-string "[[documents:/todo/gtd/next-actions.org::Next Actions][Next Actions]]"))
+#+END_SRC
+
+** Secret service
+
+#+BEGIN_SRC emacs-lisp
+  (use-package secrets
+    :defer t
+    :commands (secrets-search-items
+               secrets-get-secret
+               secrets-get-attributes)
+    :config
+    ;; Adds a patch to fix behavior with KeepassXC
+    (defun secrets-unlock-item (collection item)
+      "Unlock item labeled ITEM from collection labeled COLLECTION.
+      If successful, return the object path of the item."
+      (let ((item-path (secrets-item-path collection item)))
+        (unless (secrets-empty-path item-path)
+          (secrets-prompt
+           (cadr
+            (dbus-call-method
+             :session secrets-service secrets-path secrets-interface-service
+             "Unlock" `(:array :object-path ,item-path)))))
+        item-path))
+
+    (defun secrets-lock-item (collection item)
+      "Lock collection item labeled ITEM in COLLECTION.
+  If successful, return the object path of the item. Does not lock
+  the collection."
+      (let ((item-path (secrets-item-path collection item)))
+        (unless (secrets-empty-path item-path)
+          (secrets-prompt
+           (cadr
+            (dbus-call-method
+             :session secrets-service secrets-path secrets-interface-service
+             "Lock" `(:array :object-path ,item-path)))))
+        item-path))
+
+    (defun secrets-get-secret (collection item)
+      "Return the secret of item labeled ITEM in COLLECTION.
+      If there are several items labeled ITEM, it is undefined which
+      one is returned.  If there is no such item, return nil.
+
+      ITEM can also be an object path, which is used if contained in COLLECTION."
+      (let ((item-path (secrets-unlock-item collection item)))
+        (unless (secrets-empty-path item-path)
+          (dbus-byte-array-to-string
+           (nth 2
+                (dbus-call-method
+                 :session secrets-service item-path secrets-interface-item
+                 "GetSecret" :object-path secrets-session-path)))))))
+#+END_SRC
+
+Other modes
 
 ** Markdown
 
 #+BEGIN_SRC emacs-lisp
+  (defun md-screenshot ()
+    "Take a screenshot into a time stamped unique-named file in the same
+    directory as the md-buffer and insert
+    a link to this file."
+    (interactive)
+    (insert (concat "![screenshot](" (save-screenshot) ")"))
+    (markdown-display-inline-images))
+
   (use-package markdown-mode
     :mode "\\.md\\'"
     :ensure t
@@ -1219,6 +1379,7 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
 
       ("L" markdown-insert-link "Link" :color blue :column "Insert")
       ("U" markdown-insert-uri "Uri" :color blue)
+      ("i" md-screenshot "Screenshot" :color blue)
       ("F" markdown-insert-footnote "Footnote" :color blue)
       ("W" markdown-insert-wiki-link "Wiki-link" :color blue)
       ("R" markdown-insert-reference-link-dwim "Reference-link-dwim" :color blue))
@@ -1226,7 +1387,22 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
     (add-hook
      'markdown-mode-hook
      #'(lambda ()
-         (local-unset-key (my-key "Go 3 lines forward"))
-         (local-unset-key (my-key "Go 3 lines backward"))
-         (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body))))
+	 (local-unset-key (my-key "Go 3 lines forward"))
+	 (local-unset-key (my-key "Go 3 lines backward"))
+	 (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body)
+	 (languagetool-server-mode))))
+#+END_SRC
+
+** ChatGPT
+
+#+BEGIN_SRC emacs-lisp
+  (use-package gptel
+    :ensure t
+    :config
+    (require 'gptel-transient)
+    (setq gptel-api-key #'(lambda nil
+        (plist-get
+         (nth 0
+        (auth-source-search :Title "Chat GPT"))
+         :API\ Key))))
 #+END_SRC

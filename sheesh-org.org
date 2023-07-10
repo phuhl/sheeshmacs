@@ -411,49 +411,7 @@ schedule) add a corresponding end-hour.
   directory as the org-buffer and insert
   a link to this file."
     (interactive)
-    (setq tilde-buffer-filename
-          (if (eq system-type 'gnu/linux)
-              buffer-file-name
-            (replace-regexp-in-string "/" "\\" (buffer-file-name) t t)))
-    (unless (file-exists-p (concat tilde-buffer-filename ".img"))
-      (make-directory (concat tilde-buffer-filename ".img")))
-    (setq filename
-          (concat
-           (make-temp-name
-            (concat tilde-buffer-filename
-                    (if (eq system-type 'gnu/linux)
-                        ".img/org_"
-                      ".img\\org_")
-                    (format-time-string "%Y%m%d_%H%M%S_")) )
-                    (if (eq system-type 'gnu/linux) ".png" ".jpg")
-                    ))
-    (if (eq system-type 'gnu/linux)
-        ;;; Linux: ImageMagick
-        ;; (progn
-        ;;   (message "3...")
-        ;;   (sleep-for 1)
-        ;;   (message "2..")
-        ;;   (sleep-for 1)
-        ;;   (message "1.")
-        ;;   (sleep-for 1)
-        ;;   (message "Snap!")
-        ;;   (call-process "import" nil nil nil filename))
-
-        ;; New Linux:
-        (if (eq window-system 'x)
-            (call-process "xclip" nil `(:file ,filename) nil
-                          "-selection" "clipboard" "-t" "image/png" "-o")
-            (call-process "wl-paste" nil `(:file ,filename) nil "-t" "image/png" "-n"))
-    
-      ;; Windows: Irfanview
-      (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
-                    (concat "/clippaste /convert=" filename)))
-    (insert (concat "[[file:"
-                    (file-relative-name
-                     (if (eq system-type 'gnu/linux)
-                         filename
-                       (replace-regexp-in-string "\\\\" "/" filename t t))
-                     (file-name-directory (buffer-file-name))) "]]"))
+    (insert (concat "[[file:" (save-screenshot) "]]"))
     (org-display-inline-images))
 #+END_SRC
 

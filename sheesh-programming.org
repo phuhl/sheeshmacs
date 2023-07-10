@@ -36,7 +36,7 @@ a lambda doesn't already exist in the list.
     (auto-fill-mode t))
 
   (defun sheesh-local-linum-mode ()
-    (linum-mode t))
+    (display-line-numbers-mode t))
 
   (defun sheesh-turn-on-save-place-mode ()
     (setq save-place t))
@@ -50,7 +50,7 @@ a lambda doesn't already exist in the list.
   (defun sheesh-turn-on-braces-color-mode ()
     (rainbow-delimiters-mode t))
 
-  (defun sheesh-turn-on-smartparen-mode ()
+  (defun sheesh-turn-on-structural-editing-mode ()
     (turn-on-smartparens-mode))
 
   (defun sheesh-dont-brake-long-lines ()
@@ -69,7 +69,7 @@ a lambda doesn't already exist in the list.
   (add-hook 'sheesh-coding-hook 'sheesh-dont-brake-long-lines)
   (add-hook 'sheesh-coding-hook 'sheesh-add-font-lock-keywords)
   (add-hook 'sheesh-coding-hook 'sheesh-turn-on-braces-color-mode)
-  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-smartparen-mode)
+  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-structural-editing-mode)
 
   (defun run-sheesh-coding-hook ()
     "Enable things that are convenient across all coding buffers."
@@ -120,6 +120,15 @@ a lambda doesn't already exist in the list.
      '(rainbow-delimiters-depth-9-face
        ((t (:inherit rainbow-delimiters-base-face :foreground "tomato"))))))
 #+END_SRC
+
+** Structural Editing
+
+Smartparens does a good job in some modes, but not in all. The new kid
+in town is combobulate which is in alpha, not feature complete and not
+available for all programming languages. But it is based on
+tree-sitter, hence can be a lot more precise.
+
+Let's use combobulate, where it is available and smartparens as a fallback.
 
 **** Smartparens
 
@@ -208,49 +217,76 @@ a lambda doesn't already exist in the list.
 
 #+BEGIN_SRC emacs-lisp
   (use-package combobulate
-    ;; Ensure `combobulate-mode` is activated when you launch a mode it supports
-    :hook ((python-mode . combobulate-mode)
-           (js-mode . combobulate-mode)
-           (typescript-mode . combobulate-mode))
+    :init
+    ;; Remove default key map content. We want to set the keys ourselfs.
+    (setq combobulate-key-map (let ((map (make-sparse-keymap "Combobulate"))) map))
     :config
-    (defhydra combobulate-my-menu (:color red :hint nil)
+    ;; Jsx attributes will by default have {} instead of ""
+    ;; autocompleted when typing =
+    ;; Can also be set to nil to disable autocompleting the envelope
+    (setq combobulate-js-ts-attribute-envelope-default "attr-expression")
+    (defhydra hydra-combobulate (:color blue :hint nil)
       "Combobulate"
-      ("i" combobulate-navigate-down "Navigate In" :column "Navigation")
-      ("o" combobulate-navigate-up "Navigate Out")
-      ("n" combobulate-navigate-next "Navigate Next")
-      ("p" combobulate-navigate-previous "Navigate Prev")
-      ("f" combobulate-navigate-forward "Navigate Forward")
-      ("b" combobulate-navigate-backward "Navigate Backward")
+      ("C-M-i" combobulate-navigate-down-list-maybe
+       "Navigate In" :color red                              :column "Navigation")
+      ("C-M-o" combobulate-navigate-up-list-maybe "Navigate Out" :color red      )
+      ("C-M-n" combobulate-navigate-next "Navigate Next" :color red              )
+      ("C-M-p" combobulate-navigate-previous "Navigate Prev" :color red          )
+      ("C-M-f" combobulate-navigate-forward "Navigate Forward" :color red        )
+      ("C-M-b" combobulate-navigate-backward "Navigate Backward" :color red      )
+      ("" nil ""                                                                 )
+      ("C-M-a" combobulate-navigate-beginning-of-defun "Beginning of defun"      )
+      ("C-M-e" combobulate-navigate-end-of-defun "End of defun"                  )
 
 
-      ("C-p" combobulate-drag-up "Drag backwards" :column "Marking and Editing")
-      ("C-n" combobulate-drag-down "Drag forwards")
-      ("" nil "")
-      ("M-k" combobulate-kill-node-dwim "Kill Node DWIM")
-      ("m" combobulate-mark-node-dwim "Mark DWIM")
-      ("" nil "")
-      ("s" sp-split-sexp "Split Group" :color blue)
-      ("j" sp-join-sexp "Join Group" :color blue)
+      ("M-P" combobulate-drag-up "Drag backwards"   :column "Marking and Editing")
+      ("M-N" combobulate-drag-down "Drag forwards"                               )
+      ("" nil ""                                                                 )
+      ("M-k" combobulate-kill-node-dwim "Kill Node DWIM"                         )
+      ("SPC" combobulate-mark-node-dwim "Mark DWIM"                          )
+      ("C-M-t" combobulate-transpose-sexps "Transpose nodes"                     )
+      ("" nil ""                                                                 )
+      ("s" sp-split-sexp "Split Group"                                           )
+      ("j" sp-join-sexp "Join Group"                                             )
+      ("u" combobulate-vanish-node "Unmantle JSX"                   :column "JSX")
+      ("w" combobulate-envelop "Wrap"                                            )
+      ("e" combobulate-edit-cluster-dwim "Edit node cluster"                                  )
 
-      ("u" combobulate-javascript-jsx-vanish-node "Unmantle JSX" :column "JSX")
-      ("{" combobulate-javascript-jsx-element-to-expression "<div/> -> {<div/>}")
-      (";" combobulate-javascript-jsx-element-to-comment "Comment")
-      ("r" combobulate-javascript-jsx-rename-element "Rename element")
-
-      ("q" nil :column "Other")
-      ("h" (hydra-toggle-menu 'combobulate-my-menu)))
+      ("q" nil                                                   :column "Other"))
     (add-hook
      'combobulate-mode-hook
      (lambda ()
-       (local-set-key (my-key "Combobulate Hydra Prefix") 'combobulate-my-menu/body)))
+       (local-set-key (my-key "Combobulate Hydra Prefix") 'hydra-combobulate/body)
+       (local-set-key (my-key "Forwards into sexp") 'combobulate-navigate-down-list-maybe)
+       (local-set-key (my-key "Backwards into sexp") 'combobulate-navigate-down-list-backward-maybe)
+
+       (local-set-key (my-key "Forwards out of sexp") 'combobulate-navigate-up-list-backward-maybe)
+       (local-set-key (my-key "Backwards out of sexp") 'combobulate-navigate-up-list-maybe)
+
+       ;; Does not work right...
+       ;; (local-set-key (my-key "Go forward over sexp") 'combobulate-navigate-forward)
+       ;; (local-set-key (my-key "Go backwards over sexp") 'combobulate-navigate-backward)
+
+       (local-set-key (my-key "Go to start of next sexp") 'combobulate-navigate-next)
+       (local-set-key (my-key "Go to end of previous sexp") 'combobulate-navigate-previous)
+
+       ;; No good equivalents as of now
+       ;; (local-set-key (my-key "Backwards out of sexp") 'sp-backward-up-sexp)
+       ;; (local-set-key (my-key "Go to beginning of sexp") ')
+       ;; (local-set-key (my-key "Go to ending of sexp") 'sp-end-of-sexp)
+
+       ;; Not great
+       ;;(local-set-key (my-key "Mark expression") 'combobulate-mark-node-dwim)
+       ))
+
+
+
     :load-path
     (lambda () (list (file-name-concat
                       (file-name-directory (or load-file-name (buffer-file-name)))
-                      "src" "combobulate" "combobulate-master" "combobulate-master" "combobulate.el"))))
-
-
-
+                      "src" "combobulate" "combobulate.el"))))
 #+END_SRC
+
 
 ** Vimish fold
 
@@ -334,6 +370,7 @@ https://github.com/mrkkrp/vimish-fold
 
       (define-key yas-keymap [(tab)]       nil)
       (define-key yas-keymap (kbd "TAB")   nil)
+      (define-key yas-keymap [tab] nil)
       (define-key yas-keymap [(shift tab)] nil)
       (define-key yas-keymap [backtab]     nil)
       (define-key yas-keymap (my-key "_Yasnippet_ - Go to next field or expand") 
@@ -350,9 +387,10 @@ https://github.com/mrkkrp/vimish-fold
   (defun yas/org-setup ()
     ;; yasnippet (using the new org-cycle hooks)
     (make-variable-buffer-local 'yas/trigger-key)
-    (setq yas/trigger-key [tab])
+    ;; (setq yas/trigger-key [tab])
     (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
-    (define-key yas/keymap [tab] 'yas/next-field))
+    ;; (define-key yas/keymap [tab] 'yas/next-field)
+    )
 
   ;; See https://github.com/eschulte/emacs24-starter-kit/issues/80.
   (setq org-src-tab-acts-natively nil)
@@ -571,17 +609,24 @@ original, but with different calls to open a file.
 ** Auto complete
 
 #+BEGIN_SRC emacs-lisp
-(use-package company
-  :ensure
-  :custom
-  (company-idle-delay 0.5) ;; how long to wait until popup
-  ;; (company-begin-commands nil) ;; uncomment to disable popup
-  :bind
-  (:map company-active-map
-        ("C-n". company-select-next)
-        ("C-p". company-select-previous)
-        ("M-<". company-select-first)
-        ("M->". company-select-last)))
+    (use-package company
+      :ensure
+      :custom
+      (company-idle-delay 0.5) ;; how long to wait until popup
+      ;; (company-begin-commands nil) ;; uncomment to disable popup
+      :config
+      (add-hook
+       'company-mode-hook
+       #'(lambda ()
+           (local-set-key (my-key "Autocomplete")
+                          'company-indent-or-complete-common)))
+
+      :bind
+      (:map company-active-map
+            ("C-n". company-select-next)
+            ("C-p". company-select-previous)
+            ("M-<". company-select-first)
+            ("M->". company-select-last)))
 #+END_SRC
 
 ** LSP
@@ -613,12 +658,51 @@ original, but with different calls to open a file.
     (lsp-ui-doc-enable nil))
 #+END_SRC
 
+** Tree Sitter
+
+#+BEGIN_SRC emacs-lisp
+  (use-package treesit
+    :commands (treesit-install-language-grammar nf/treesit-install-all-languages)
+    :init
+    (setq treesit-language-source-alist
+     '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+       (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+       (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+       (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+       (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+       (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+       (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+       (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+       (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+       (make . ("https://github.com/alemuller/tree-sitter-make"))
+       (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" "ocaml/src" "ocaml"))
+       (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+       (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+       (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
+       (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
+       (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+       (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+       (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+       (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+       (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
+    :config
+    (defun nf/treesit-install-all-languages ()
+      "Install all languages specified by `treesit-language-source-alist'."
+      (interactive)
+      (let ((languages (mapcar 'car treesit-language-source-alist)))
+        (dolist (lang languages)
+          (treesit-install-language-grammar lang)
+          (message "`%s' parser was installed." lang)
+          (sit-for 0.25)))))
+#+END_SRC
+
 * Language Specific
 
 ** Lisp
 
 #+BEGIN_SRC emacs-lisp
   (global-set-key (my-key "Run lisp and replace with result") 'eval-and-replace)
+  (add-hook 'lisp-mode-hook 'sheesh-turn-on-smartparen-mode)
 #+END_SRC
 
 ** Prolog
@@ -745,6 +829,9 @@ original, but with different calls to open a file.
 #+END_SRC
 ** Python
 
+Issues?
+- =peculiar error: "exited abnormally with code 1"= :: Try running =M-x elpy-rpc-reinstall-virtualenv=
+
 #+BEGIN_SRC emacs-lisp
 (use-package python
   :ensure t
@@ -780,7 +867,7 @@ original, but with different calls to open a file.
 #+BEGIN_SRC emacs-lisp
   (use-package rjsx-mode
     :ensure t
-    ;;  :mode ("\\.js$" . rjsx-mode)
+    ;; :mode ("\\.c?js$" . rjsx-mode)
     :interpreter ("node" . rjsx-mode)
     :init
     ;; Set indentation to 2 spaces
@@ -789,6 +876,7 @@ original, but with different calls to open a file.
      '(js-indent-level 2))
 
     :config
+    (add-hook 'tsx-ts-mode-hook 'emmet-mode)
     (add-hook 'rjsx-mode-hook 'run-sheesh-coding-hook)
     (add-hook 'rjsx-mode-hook 'flycheck-mode)
     (add-hook 'rjsx-mode-hook
@@ -816,7 +904,9 @@ original, but with different calls to open a file.
       :mode "\\.vue\\'"
       :ensure t
       :config
-      (add-hook 'vue-mode-hook #'lsp))
+      (add-hook 'vue-mode-hook #'lsp)
+      (add-hook 'vue-mode-hook #'prettier-js-mode)
+      (add-hook 'vue-mode-hook 'run-sheesh-coding-hook))
 #+END_SRC
 
 *** Prettier
@@ -830,7 +920,7 @@ npm i -g prettier
 #+BEGIN_SRC emacs-lisp
   (use-package prettier-js
     :ensure t
-    :hook ((web-mode vue-mode rjsx-mode typescript-mode json-mode yaml-mode)
+    :hook ((web-mode rjsx-mode typescript-ts-mode tsx-ts-mode json-mode yaml-mode)
            . prettier-js-mode))
 #+END_SRC
 
@@ -986,12 +1076,16 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.as[cp]x\\'" . web-mode)
            ("\\.erb\\'" . web-mode)
            ("\\.mustache\\'" . web-mode)
+           ("\\.njk\\'" . web-mode)
            ("\\.djhtml\\'" . web-mode)
            ("\\.html?\\'" . web-mode)
+           ("\\.cjs$" . web-mode)
            ("\\.js$" . web-mode)
            ("\\.jsx\\'" . web-mode)
            ("\\.ftl\\'" . web-mode))
     :config
+    (setq web-mode-enable-front-matter-block t)
+
     (defun pretify-afterwards (fun)
       (interactive)
       (funcall fun)
@@ -1124,50 +1218,80 @@ See [[Spellchecking in JS]].
 ** Typescript
 
 #+BEGIN_SRC emacs-lisp
-  (flycheck-add-mode 'javascript-eslint 'typescript-mode)
-  
-  (use-package typescript-mode
-    :ensure t
-    :mode ("\\.tsx?\\'" . typescript-mode)
+  (use-package typescript-ts-mode
+    :mode (("\\.ts\\'" . typescript-ts-mode)
+           ("\\.tsx\\'" . tsx-ts-mode))
     :init
-    (setq tide-always-show-documentation t)
     ;; Set indentation to 2 spaces
-    (custom-set-variables
-     '(typescript-indent-level 2))
-  
+                                          ; (custom-set-variables
+                                          ;  '(typescript-indent-level 2))
+
     :config
-    (add-hook 'typescript-mode-hook 'run-sheesh-coding-hook)
-    (add-hook 'typescript-mode-hook 'flycheck-mode)
-    (add-hook 'typescript-mode-hook #'(lambda () (setup-cycle-quotes)))
+    (flycheck-add-mode 'javascript-eslint 'typescript-ts-mode)
+    (flycheck-add-mode 'javascript-eslint 'tsx-ts-mode)
+    (defhydra hydra-tsx-ts-mode (:hint nil :color blue)
+      "Typescript"
+      ("X" tide-restart-server "Restart Tide"                     )
+      ("c" hydra-combobulate/body "Combobulate" :column "Basic"   )
+      ("e" tide-error-at-point "Error"          :column "Show"    )
+      ("E" tide-project-errors "Project errors"                   )
+      ("d" tide-documentation-at-point "Doc at point"             )
+      ("," tide-references "References"                           )
+      ("r" tide-rename-symbol "Rename item"     :column "Refactor")
+      ("F" tide-rename-file "Rename file"                         )
+      ("i" tide-organize-imports "Organize imports"               )
+      ("." tide-fix "Fix"                       :column "Do"      )
+
+      ("s" sp-split-sexp "Split Group"              :column "Edit")
+      ("j" sp-join-sexp "Join Group"                              )
+      ("u" combobulate-vanish-node "Unmantle JSX"                 )
+      ("w" combobulate-envelop "Wrap"                             )
+      ("R" combobulate-edit-cluster-dwim "Edit node cluster"      )
+      ("t" tide-add-tslint-disable-next-line "TSLint disable"     )
+
+      ("TAB" emmet-expand-line "Expand XML"        :column "Emmet"))
+
+
+    (use-package tide
+      :ensure t
+      :hook ((typescript-ts-mode . tide-setup)
+             (tsx-ts-mode . tide-setup))
+      :config
+      (setq tide-always-show-documentation t)
+      (setq company-tooltip-align-annotations t)
+      (flycheck-add-next-checker 'tsx-tide 'javascript-eslint)
+      ;; (setq flycheck-check-syntax-automatically '(save-mode-enabled))
+      (add-hook
+       'tide-mode-hook
+       #'(lambda ()
+           (eldoc-mode +1)
+           (tide-hl-identifier-mode +1)
+           (company-mode +1)
+           (flycheck-mode +1)
+           (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
+           (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append))))
+
+
+    (add-hook 'typescript-ts-mode-hook 'setup-ts-mode)
+    (add-hook 'tsx-ts-mode-hook 'setup-ts-mode)
+
+    (defun setup-ts-mode ()
+      (run-sheesh-coding-hook)
+      (combobulate-mode)
+      (flycheck-mode)
+      (emmet-mode)
+      (setup-cycle-quotes)
+      (local-set-key (my-key "Mode hydra") 'hydra-tsx-ts-mode/body))
+
+
     (require 'ansi-color)
     (defun colorize-compilation-buffer ()
-    (ansi-color-filter-region compilation-filter-start (point-max)))
-    ;(ansi-color-apply-on-region compilation-filter-start (point-max)))
-    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
-    ;;    (add-hook 'typescript-mode-hook #'lsp)
-    )
-  
-  (defun setup-tide-mode ()
-    "Set up Tide mode."
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (flycheck-add-next-checker 'typescript-tide 'javascript-eslint)
-    ;; (setq flycheck-checker 'javascript-eslint)
-    ;; (setq flycheck-check-syntax-automatically '(save-mode-enabled))
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-   (company-mode +1)
-    (local-set-key (my-key "(Refactor) Rename item")
-                   'tide-rename-symbol)
-    (local-set-key (my-key "Fix at place")
-                   'tide-fix))
-  
-  (use-package tide
-    :ensure t
-    :config
-    (setq company-tooltip-align-annotations t)
-    (add-hook 'typescript-mode-hook #'setup-tide-mode))
+      (ansi-color-filter-region compilation-filter-start (point-max))
+      ;; (ansi-color-apply-on-region compilation-filter-start (point-max)))
+      )
+
+    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+
 #+END_SRC
 
 *** Flycheck for Web Mode
@@ -1265,4 +1389,12 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
       (setq-local buffer-save-without-query t))
     (add-hook 'before-save-hook 'lsp-format-buffer nil t)
     (local-set-key (my-key "Mode hydra") 'hydra-rust/body))
+#+END_SRC
+
+** Terraform
+
+#+BEGIN_SRC emacs-lisp
+  (use-package hcl-mode
+    :ensure t
+    :mode ("\\.tf?\\'" . hcl-mode))
 #+END_SRC
