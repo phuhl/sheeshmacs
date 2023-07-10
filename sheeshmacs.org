@@ -126,7 +126,7 @@ automatically regenerated when you next start emacs.
 
 ** Org mode
   #+BEGIN_SRC emacs-lisp
-  (require 'cl)
+  (require 'cl-lib)
   #+END_SRC
 
 ** Load path (=src= + subdirs, =elpa= for packages) and custom-file (=custom.el=)

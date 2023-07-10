@@ -173,8 +173,8 @@ information.
   (setq global-keybindings keybindings)
 
   (defun find-keybindings-in-table (table term)
-    (first (find-if #'(lambda (e)
-                       (string= (second e) term))
+    (cl-first (cl-find-if #'(lambda (e)
+                        (string= (cl-second e) term))
                     table)))
 
   (defun my-key (term)
