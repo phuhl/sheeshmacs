@@ -1100,7 +1100,9 @@ Install the required dictionaries!
   (eval
    `(use-package emojify
       :ensure t
-      :bind (,(cons "C-; )" 'emojify-insert-emoji))))
+      :bind (,(cons "C-; )" 'emojify-insert-emoji))
+      :init
+      (setq emojify-emoji-styles '(unicode))))
 #+END_SRC
 
 *** Ox-Clip: Formatted copy/past from org-mode
