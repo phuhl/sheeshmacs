@@ -296,7 +296,9 @@ Currently free(ish) bindings:
                (propertize " %b " 'face `(:inherit face-strong))
              (propertize " %b " 'face `(:inherit face-faded)))
            (if (and buffer-file-name (buffer-modified-p))
-               (propertize "* " 'face `(:inherit face-faded)))))
+               (propertize "* " 'face `(:inherit face-faded)))
+           (if (window-dedicated-p)
+               (propertize "(d) " 'face `(:inherit face-faded)))))
          (format-mode-line
           (propertize "%4l:%2c" 'face `(:inherit face-faded)))))))
 
@@ -696,6 +698,25 @@ Set font size relative to DPI.
 #+BEGIN_SRC emacs-lisp
 (global-set-key (my-key "Go to next buffer") "\C-x\o")
 (global-set-key (my-key "Go to previous buffer") 'previous-multiframe-window)
+#+END_SRC
+
+*** Dedicated Windows
+
+A dedicated window will not be overwritten by help windows and such.
+
+#+BEGIN_SRC emacs-lisp
+(define-minor-mode dedicated-mode
+  "Minor mode for dedicating windows.
+This minor mode dedicates the current window to the current buffer.
+The code is taken from here: https://github.com/skeeto/.emacs.d/blob/master/lisp/extras.el"
+  :init-value nil
+  :lighter " [D]"
+  (let* ((window (selected-window))
+         (dedicated (window-dedicated-p window)))
+    (set-window-dedicated-p window (not dedicated))
+    (message "Window %sdedicated to %s"
+             (if dedicated "no longer " "")
+             (buffer-name))))
 #+END_SRC
 
 *** Toggle Split 
