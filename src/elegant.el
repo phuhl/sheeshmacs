@@ -226,10 +226,11 @@ background color that is barely perceptible."
   (set-face 'info-title-3                                'face-strong)
   (set-face 'info-title-4                               'face-strong))
 
-;; Bookmarks
-(with-eval-after-load 'bookmark
-  (set-face 'bookmark-menu-heading                       'face-strong)
-  (set-face 'bookmark-menu-bookmark                    'face-salient))
+;; Bookmarks (Removed, does not exist in Emacs 29?)
+;; (with-eval-after-load 'bookmark
+;;   (set-face 'bookmark-menu-heading                       'face-strong)
+;;   (set-face 'bookmark-menu-bookmark                    'face-salient))
+
 
 ;; Message
 (with-eval-after-load 'message
@@ -499,6 +500,10 @@ background color that is barely perceptible."
   (set-face 'mu4e-view-body-face                             'default)
   (set-face 'mu4e-warning-face                            'face-faded))
 ;;; -------------------------------------------------------------------
+
+;;; Vue-mode requires this change to be readable
+(with-eval-after-load 'mmm-mode
+  (set-face-background 'mmm-default-submode-face         'unspecified))
 
 
 ;;;;###autoload
