@@ -20,6 +20,7 @@ information.
 |            |                                             |
 | M-x        | M-x with _Counsel_                            |
 | C-x C-f    | Find file with _Counsel_                      |
+| C-z        | C-x as hydra                                |
 |------------+---------------------------------------------|
 |            | *Navigation*                                  |
 |            |                                             |
@@ -35,9 +36,12 @@ information.
 |            |                                             |
 | C-x C-b    | (standart) Buffer list                      |
 | C-x M-b    | Buffer list with only buffers visiting file |
+|            |                                             |
+| <f2>       | Change text size                            |
 |------------+---------------------------------------------|
 |            | *Editing*                                     |
 |            |                                             |
+| M-y        | Yank interactive                            |
 | M-Y        | Go forward in kill ring                     |
 | C-=        | Expend selection to region                  |
 | C-; ,      | Go to next error with _Flyspell_              |
@@ -78,17 +82,14 @@ information.
 |            |                                             |
 | C-; g      | _Magit_ status                                |
 |------------+---------------------------------------------|
-|            | *Vimish Fold*                                 |
-|            |                                             |
-| C-; f      | _Vimish_ - fold region                        |
-| C-; F      | _Vimish_ - delete region                      |
-| M-<tab>    | _Vimish_ - toggle region                      |
-| C-M-<tab>  | _Vimish_ - toggle all                         |
-|------------+---------------------------------------------|
 |            | *Yasnippet*                                   |
 |            |                                             |
 | <C-tab>    | _Yasnippet_ - Go to next field or expand      |
 | <C-M-tab>  | _Yasnippet_ - Go to previous field            |
+|            |                                             |
+|------------+---------------------------------------------|
+|            | *Auto complete*                               |
+| C-M-<tab>  | Auto complete hydra                         |
 |------------+---------------------------------------------|
 |            |                                             |
 |            | *LOCAL KEY BINDINGS*                          |
@@ -199,7 +200,10 @@ information.
         key)))
 #+END_SRC
 
-** Find free keybindings
+#+RESULTS:
+: my-bind
+
+** Find (free) keybindings
 
 Currently free(ish) bindings:
 - C-' :: more or less free (bound in e.g. org mode, js/ts mode)
@@ -207,6 +211,7 @@ Currently free(ish) bindings:
 - C-z :: suspend-frame
 - C-\ :: toggle-input-method
 
+To see all keybindings in a buffer, use =counsel-descbinds=.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (load-file "~/.emacs.d/src/free-keys.el")
@@ -236,6 +241,8 @@ Currently free(ish) bindings:
   (blink-cursor-mode 0)
 
   (tooltip-mode 0)
+
+  (pixel-scroll-precision-mode)
 
   (setq
    ring-bell-function 'ignore
@@ -468,15 +475,16 @@ Set font size relative to DPI.
   ;; (when (> (/ (display-pixel-width) (/ (display-mm-width) 25.4)) 200)
   ;; (set-face-attribute 'default nil :height 80))
 
-  (set-face-attribute 'default nil :height
-                      (round
-                       (*
-                        (/
-                         (/
-                          (display-pixel-width)
-                          (/ (display-mm-width) 25.4)) ;; mm -> inch
-                         200) ;; dpi
-                        75))) ;; font size at 200 dpi
+  ;; (set-face-attribute 'default nil :height
+  ;;                     (round
+  ;;                      (*
+  ;;                       (/
+  ;;                        (/
+  ;;                         (display-pixel-width)
+  ;;                         (/ (display-mm-width) 25.4)) ;; mm -> inch
+  ;;                        200) ;; dpi
+  ;;                       60)))
+  ;; font size should be at 6pt for 200 dpi
 
   (when (>= emacs-major-version 27)
     (setq gamegrid-glyph-height-mm 8.0))
@@ -673,6 +681,8 @@ Set font size relative to DPI.
     ("G" dired-do-chgrp "chgrp")
     ("Q" dired-do-find-regexp-and-replace "Find/replace")
     ("q" dired-toggle-read-only "Edit buffer" :color blue)
+    ("&" dired-do-async-shell-command "Shell command on")
+
 
     ("m" dired-mark "Mark" :column "Mark")
     ("u" dired-unmark "Unmark")
@@ -819,6 +829,17 @@ TransposeWindows. There may well be better ways to write this."
                   #'(lambda () (interactive) (buffer-menu t)))
 #+END_SRC
 
+*** Text Size
+
+#+BEGIN_SRC emacs-lisp
+  (defhydra hydra-zoom ()
+    "Text size"
+    ("+" text-scale-increase "in")
+    ("-" text-scale-decrease "out")
+    ("0" (text-scale-increase 0) "reset"))
+  (global-set-key (my-key "Change text size") 'hydra-zoom/body)
+#+END_SRC
+
 ** Status Bar
 
 *** Ido mode
@@ -826,59 +847,141 @@ TransposeWindows. There may well be better ways to write this."
 - [ ] TODO: Check: Has it been replaced by Ivy?
 
 #+BEGIN_SRC emacs-lisp 
-  (when (> emacs-major-version 21)
-    (ido-mode t)
-    (setq
-     ;; if t ido matches only if entered text is prefix of filename
-     ido-enable-prefix nil
-     ;; flexible matching
-     ido-enable-flex-matching t
-     ;; ask if new buffer should be created (prompt), dont ask (always), dont create buffers (never)
-                                          ;        ido-create-new-buffer 'always
-     ;; maximum number of matches
-     ido-max-prospects 10
-     ido-everywhere t))
+  ;; (when (> emacs-major-version 21)
+  ;;   (ido-mode t)
+  ;;   (setq
+  ;;    ;; if t ido matches only if entered text is prefix of filename
+  ;;    ido-enable-prefix nil
+  ;;    ;; flexible matching
+  ;;    ido-enable-flex-matching t
+  ;;    ;; ask if new buffer should be created (prompt), dont ask (always), dont create buffers (never)
+  ;;                                         ;        ido-create-new-buffer 'always
+  ;;    ;; maximum number of matches
+  ;;    ido-max-prospects 10
+  ;;    ido-everywhere t))
 
-  (use-package ido-vertical-mode
-    :ensure t
-    :config
-    (ido-vertical-mode 1)
-    (setq ido-vertical-define-keys 'C-n-and-C-p-only))
+  ;; (use-package ido-vertical-mode
+  ;;   :ensure t
+  ;;   :config
+  ;;   (ido-vertical-mode 1)
+  ;;   (setq ido-vertical-define-keys 'C-n-and-C-p-only))
 #+END_SRC
 
 *** Ivy
 
 #+BEGIN_SRC emacs-lisp
-  (use-package swiper
-    :ensure t
-    :config
-    (global-set-key (my-key "Search with _Swiper_") 'swiper)
-    :bind (:map swiper-map
-                (("C-M-s" . ivy-previous-history-element))))
-  (use-package ivy
-    :ensure t
-    :config (progn
-              '(ivy-sort-matches-functions-alist
-                (quote
-                 ((t)
-                  (ivy-completion-in-region . ivy--shorter-matches-first)
-                  (ivy-switch-buffer . ivy--shorter-matches-first)
-                  (counsel-find-file . ivy--shorter-matches-first)
-                  (counsel-M-x . ivy--shorter-matches-first))))
-              (custom-set-variables
-               '(ivy-extra-directories nil))
-              (ivy-mode 1)
+    ;; Search interactively in current buffer
+    (use-package swiper
+      :ensure t
+      :config
+      (global-set-key (my-key "Search with _Swiper_") 'swiper)
+      :bind (:map swiper-map
+                  (("C-M-s" . ivy-previous-history-element))))
 
-              (setq ivy-use-virtual-buffers t)
-              (setq enable-recursive-minibuffers t)
-              (setq ivy-count-format "(%d/%d) ")))
-  (use-package counsel
-    :ensure t
-    :config
-    (custom-set-variables
-     '(counsel-preselect-current-file t))
-    (global-set-key (my-key "M-x with _Counsel_") 'counsel-M-x)
-    (global-set-key (my-key "Find file with _Counsel_") 'counsel-find-file))
+    ;; Ivy is the completion framework that powers swiper and counsel.
+    (use-package ivy
+      :ensure t
+      :config (progn
+                (defun ivy--mixed-matches-sort (name candidates)
+                  (if (or (string= name "")
+                          (= (aref name 0) ?^))
+                      candidates
+                    (let ((space-split-string (split-string name " ")))
+                      (let ((re-prefix (concat "\\`" (ivy-re-to-str (funcall ivy--regex-function (car space-split-string)))))
+                            res-prefix
+                            res-noprefix)
+                        (dolist (s candidates)
+                          (if (string-match-p re-prefix s)
+                              (push s res-prefix)
+                            (push s res-noprefix)))
+                        (nconc
+                         (ivy--shorter-matches-first name (nreverse res-prefix))
+                         (ivy--shorter-matches-first name (nreverse res-noprefix)))))))
+                ;; (defun ivy--mixed-matches-sort (name cands)
+                ;;   (if (> (length (ivy--split-spaces name)) 1)
+                ;;       (ivy--shorter-matches-first name cands)
+                ;;     (ivy--prefix-sort name cands)))
+                (custom-set-variables
+                 '(ivy-extra-directories nil)
+                 '(ivy-sort-matches-functions-alist
+                   (quote
+                    ((t . nil)
+                     (ivy-completion-in-region . ivy--mixed-matches-sort)
+                     (ivy-switch-buffer . ivy--mixed-matches-sort)
+                     (counsel-find-file . ivy--mixed-matches-sort)
+                     (counsel-M-x . ivy--mixed-matches-sort)))))
+
+                ;; Enables generic ivy completion.
+                ;; Probably mostly overwritten by counsel, see below.
+                (ivy-mode 1)
+
+                ;; number of result lines to display
+                ;; (setq ivy-height 10)
+                (setq ivy-use-virtual-buffers t)
+                (setq enable-recursive-minibuffers t)
+                (setq ivy-count-format "(%d/%d) ")
+                ;; configure regexp engine.
+                (setq ivy-re-builders-alist
+                      ;; Allow input not in order ivy--regex-ignore-order.
+                      '(
+                        ;; Requires the use of ivy-re-to-str when used with
+                        ;; counseas it does not return a string but a list
+                        ;; of strings.
+                        ;; UPDATE: I wrote my own sort function in which I fixed
+                        ;; this issue. I don't need this anymore, but I'll leave
+                        ;; it for future reference.
+                        ;; (counsel-find-file . (lambda (str) (ivy-re-to-str (ivy--regex-ignore-order str))))
+
+                        ;; For other applications use the normal function
+                        (t . ivy--regex-ignore-order)))))
+
+    ;; Adds lot's of additional functions to ivy that can be assigned to
+    ;; key bindings. It overwrites certain emacs commands with it's own
+    ;; version
+    (use-package counsel
+      :ensure t
+      :config
+      (custom-set-variables
+       '(counsel-preselect-current-file t))
+      (global-set-key (my-key "M-x with _Counsel_") 'counsel-M-x)
+      (global-set-key (my-key "Find file with _Counsel_") 'counsel-find-file)
+      (global-set-key (my-key "Yank interactive") 'counsel-yank-pop)
+
+      (defun crgrep ()
+        "Search in current buffers directory with counsel-rg."
+        (interactive)
+        (let ((current-directory (file-name-directory (buffer-file-name))))
+          (counsel-rg nil current-directory))))
+
+  ;; (defun ivy-display-function-window (text)
+  ;;   (let ((buffer (get-buffer-create "*ivy-candidate-window*"))
+  ;;         (str (with-current-buffer (get-buffer-create " *Minibuf-1*")
+  ;;                (let ((point (point))
+  ;;                      (string (concat (buffer-string) "  " text)))
+  ;;                  (add-face-text-property
+  ;;                   (- point 1) point 'ivy-cursor t string)
+  ;;                  string))))
+  ;;     (with-current-buffer buffer
+  ;;       (let ((inhibit-read-only t))
+  ;;         (erase-buffer)
+  ;;         (insert str)))
+  ;;     (with-ivy-window
+  ;;       (display-buffer
+  ;;        buffer
+  ;;        `((display-buffer-reuse-window
+  ;;           display-buffer-below-selected)
+  ;;          (window-height . ,(1+ (ivy--height (ivy-state-caller ivy-last)))))))))
+
+  ;; Probably not needed as to the discovery of C-c C-o
+  ;; (defun display-fn-in-window (fn)
+  ;;   (let ((old-function (cdr (assoc fn ivy-display-functions-alist))))
+  ;;     (add-to-list 'ivy-display-functions-alist (cons fn 'ivy-display-function-window))
+  ;;     (funcall fn)
+  ;;     (setq ivy-display-functions-alist
+  ;;           (remove (assoc fn ivy-display-functions-alist) ivy-display-functions-alist))
+  ;;     (if old-function
+  ;;         (add-to-list 'ivy-display-functions-alist (cons fn old-function)))))
+
 #+END_SRC
 
 ** Editing
@@ -1114,37 +1217,6 @@ Install the required dictionaries!
       (setq emojify-emoji-styles '(unicode))))
 #+END_SRC
 
-*** Ox-Clip: Formatted copy/past from org-mode
-
-On Wayland: Requires a script "ox-clip" to be in the path:
-
-#+CAPTION: ox-clip
-#+BEGIN_SRC sh
-#!/bin/bash
-
-wl-copy -t text/html < "$1"
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (use-package ox-clip :ensure t
-    :config
-    (if (eq (detect-os-display-type) 'wayland)
-        (setq ox-clip-linux-cmd "ox-clip \"%f\"")))
-#+END_SRC
-
-From the documentation:
-
-#+BEGIN_EXAMPLE
-The main command is `ox-clip-formatted-copy' that should work across
-Windows, Mac and Linux. By default, it copies as html.
-
-Note: Images/equations may not copy well in html. Use `ox-clip-image-to-clipboard' to
-copy the image or latex equation at point to the clipboard as an image. The
-default latex scale is too small for me, so the default size for this is set
-to 3 in `ox-clip-default-latex-scale'. This overrides the settings in
-`org-format-latex-options'.
-#+END_EXAMPLE
-
 *** Langtool (Spellchecking)
 
 Requires languagetool to be installed.
@@ -1184,6 +1256,17 @@ yay -S languagetool
     (setq languagetool-server-has-been-started t)
     (languagetool-server-mode))
 
+#+END_SRC
+
+*** Insert date in sortable format
+
+Good for file system naming. Format is YYYY-MM-DD, hence behaves well
+on alphabetical sorting.
+
+#+BEGIN_SRC emacs-lisp
+(defun insert-date-year-first ()
+    (interactive)
+    (insert (org-read-date nil nil nil "Date:  ")))
 #+END_SRC
 
 ** Macros
@@ -1347,6 +1430,20 @@ Other modes
     :mode "\\.md\\'"
     :ensure t
     :init
+
+    (load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
+    (enable-theme 'md-beautify)
+    (setq markdown-fontify-code-blocks-natively t)
+    (font-lock-add-keywords 'markdown-mode
+                            '(("^[ 	]+\\([*]\\) "
+                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "◦"))))))
+    (font-lock-add-keywords 'markdown-mode
+                            '(("^[ 	]*\\([+]\\) "
+                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "✧"))))))
+    (font-lock-add-keywords 'markdown-mode
+                            '(("^[ 	]*\\([-]\\) "
+                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
     (defhydra hydra-markdown-mode-formatting (:hint nil) "MD Formatting/Headings"
       ("h" markdown-insert-header-dwim "Header dwim" :column "Heading")
       ("1" markdown-insert-header-atx-1 "Header 1")
@@ -1387,10 +1484,10 @@ Other modes
     (add-hook
      'markdown-mode-hook
      #'(lambda ()
-	 (local-unset-key (my-key "Go 3 lines forward"))
-	 (local-unset-key (my-key "Go 3 lines backward"))
-	 (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body)
-	 (languagetool-server-mode))))
+         (local-unset-key (my-key "Go 3 lines forward"))
+         (local-unset-key (my-key "Go 3 lines backward"))
+         (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body)
+         (languagetool-server-mode))))
 #+END_SRC
 
 ** ChatGPT
@@ -1406,3 +1503,34 @@ Other modes
         (auth-source-search :Title "Chat GPT"))
          :API\ Key))))
 #+END_SRC
+
+** C-x hydro (C-z)
+
+#+BEGIN_SRC emacs-lisp
+    (defhydra hydra-C-z (:hint nil :color blue)
+      "C-x"
+
+      ("r"  hydra-registers/body "Registers" :column "Text")
+
+      ("x t"  toggle-truncate-lines "Truncate linets" :column "Display")
+      ("x N"  display-line-numbers-mode "Line numbers")
+
+      ("x r"  rename-buffer "Rename" :column "Buffer"))
+
+  (global-set-key (my-key "C-x as hydra") 'hydra-C-z/body)
+#+END_SRC
+
+*** Registers
+
+#+BEGIN_SRC emacs-lisp
+  (defhydra hydra-registers (:hint nil :color blue)
+    "registers"
+
+
+    ("s"  copy-to-register "Store" :column "Text")
+    ("i"  insert-register "Insert" )
+
+    ("SPC"  point-to-register "Store" :column "Point")
+    ("j"  jump-to-register "Jump to" ))
+#+END_SRC
+

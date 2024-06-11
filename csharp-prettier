@@ -1,0 +1,26 @@
+#!/bin/bash
+
+input="$(< /dev/stdin)"
+dir="$(dirname "$3")"
+tmpfile=$(mktemp "$dir/.csharp-prettier.XXXXXX.cs")
+echo "$input" > "$tmpfile"
+
+# captures stderr and stdout
+{
+    IFS=$'\n' read -r -d '' CAPTURED_STDERR;
+    IFS=$'\n' read -r -d '' CAPTURED_STDOUT;
+} < <((printf '\0%s\0' "$(dotnet tool run dotnet-csharpier --write-stdout "$tmpfile")" 1>&2) 2>&1)
+
+
+if [ "$CAPTURED_STDERR" == "" ]; then
+    echo "$CAPTURED_STDOUT"
+    rm "$tmpfile"
+else
+    # Error case
+    >&2 echo "$CAPTURED_STDERR"
+    rm "$tmpfile"
+    exit 1
+fi
+
+
+# (--stdin --stdin-filepath /home/philipp/git/souse/api2.igetnow/igetnow.api/Scopes/SelfCheckout/Controllers/SelfCheckoutController.cs)

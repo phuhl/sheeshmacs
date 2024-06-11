@@ -8,14 +8,26 @@
         backward-sexp
         capitalize-first-char
         combobulate-javascript-jsx-rename-element
+        combobulate-maybe-auto-close-tag
+        combobulate-maybe-insert-attribute
         combobulate-my-menu/combobulate-javascript-jsx-rename-element
+        combobulate-navigate-down-list-backward-maybe
+        combobulate-navigate-down-list-maybe
+        comment-dwim
+        company-indent-or-complete-common
         complete-symbol
+        counsel-yank-pop
+        cycle-spacing
+        dap-tooltip-mouse-motion
         delete-horizontal-space
+        dired-toggle-read-only
         end-of-buffer
+        end-of-defun
         eval-and-replace
         eval-last-sexp
         fill-paragraph
         forward-sexp
+        haskell-indentation-common-electric-command
         hydra-multiple-cursors/lambda-s-and-exit
         hydra-phi-search/lambda-C-v
         hydra-phi-search/lambda-C-w
@@ -60,6 +72,7 @@
       '(
         beginning-of-buffer
         combobulate-menu/combobulate-edit-cluster-dwim-and-exit
+        compose-mail
         counsel-M-x
         dired-ranger-paste
         hydra-multiple-cursors/body

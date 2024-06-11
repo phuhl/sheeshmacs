@@ -1,5 +1,6 @@
 # Compiled
 *.elc
+eln-cache/*
 
 # Packaging
 .cask
@@ -42,6 +43,8 @@ tmp/*
 mentor/*
 games/*
 elpy/
+tree-sitter/*
+node_modules/*
 
 ## exported and encrypted files
 *gpg
@@ -86,3 +89,5 @@ src/gamegrid.el
 startupbuffer.org
 
 !.mc-lists.el
+
+.dap-breakpoints

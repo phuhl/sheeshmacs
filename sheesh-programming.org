@@ -11,6 +11,7 @@
   (set-default 'indicate-empty-lines t)
   (set-default 'tab-width 2)
   (set-default 'c-basic-offset 2)
+  (set-default 'csharp-ts-mode-indent-offset 2)
 #+END_SRC
 
 ** All purpose Coding Hook
@@ -27,49 +28,30 @@ a lambda doesn't already exist in the list.
   (defvar sheesh-coding-hook nil
     "Hook that gets run on activation of any programming mode.")
 
-  (defun sheesh-local-column-number-mode ()
+  (defun sheesh-setup-coding-mode ()
+    ;; local-column-number-mode
     (make-local-variable 'column-number-mode)
-    (column-number-mode t))
+    (column-number-mode t)
+    (display-line-numbers-mode t)
 
-  (defun sheesh-local-comment-auto-fill ()
+    ;; Comment auto fill mode, add line brakes in comments
     (set (make-local-variable 'comment-auto-fill-only-comments) t)
-    (auto-fill-mode t))
+    (auto-fill-mode t)
 
-  (defun sheesh-local-linum-mode ()
-    (display-line-numbers-mode t))
-
-  (defun sheesh-turn-on-save-place-mode ()
-    (setq save-place t))
-
-  (defun sheesh-turn-on-whitespace ()
-    (whitespace-mode t))
-
-  (defun sheesh-turn-on-hex-color-mode ()
-    (rainbow-mode t))
-
-  (defun sheesh-turn-on-braces-color-mode ()
-    (rainbow-delimiters-mode t))
-
-  (defun sheesh-turn-on-structural-editing-mode ()
-    (turn-on-smartparens-mode))
-
-  (defun sheesh-dont-brake-long-lines ()
-    (setq truncate-lines t))
-
-  (defun sheesh-add-font-lock-keywords ()
+    (editorconfig-mode 1)
+    (setq save-place t)
+    (whitespace-mode t)
+    (rainbow-mode t)
+    (rainbow-delimiters-mode t)
+    (turn-on-smartparens-mode)
+    (setq truncate-lines t)
     (font-lock-add-keywords major-mode
                             '(("\\(FIX\\|TODO\\|BUG\\|HACK\\|REFACTOR\\)"
+
                                1 font-lock-warning-face t))))
 
-  (add-hook 'sheesh-coding-hook 'sheesh-local-column-number-mode)
-  (add-hook 'sheesh-coding-hook 'sheesh-local-comment-auto-fill)
-  (add-hook 'sheesh-coding-hook 'sheesh-local-linum-mode)
-  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-whitespace)
-  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-hex-color-mode)
-  (add-hook 'sheesh-coding-hook 'sheesh-dont-brake-long-lines)
-  (add-hook 'sheesh-coding-hook 'sheesh-add-font-lock-keywords)
-  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-braces-color-mode)
-  (add-hook 'sheesh-coding-hook 'sheesh-turn-on-structural-editing-mode)
+
+  (add-hook 'sheesh-coding-hook 'sheesh-setup-coding-mode)
 
   (defun run-sheesh-coding-hook ()
     "Enable things that are convenient across all coding buffers."
@@ -81,7 +63,15 @@ a lambda doesn't already exist in the list.
 
 #+BEGIN_SRC emacs-lisp
   (setq
-   whitespace-style '(trailing tabs lines-tail indentation face)
+   whitespace-style '(
+                      ;; Means, that a font face is used to highlight issues
+                      face
+                      ;; Means, when indent-tabs-mode
+                      ;; - is t, ;; only spaces will be highlighted
+                      ;; - is nil, ;; only tabs will be highlighted
+                      indentation
+                      ;; Other highlightable offenses:
+                      trailing lines-tail)
    whitespace-line-column 80
    whitespace-global-modes '(not org-mode))
 #+END_SRC
@@ -119,6 +109,39 @@ a lambda doesn't already exist in the list.
        ((t (:inherit rainbow-delimiters-base-face :foreground "sea green"))))
      '(rainbow-delimiters-depth-9-face
        ((t (:inherit rainbow-delimiters-base-face :foreground "tomato"))))))
+#+END_SRC
+
+** Editorconfig
+
+#+BEGIN_SRC emacs-lisp
+  (use-package editorconfig
+    :ensure t
+    :config
+    ;; When tab mode is specified in editor config, should be able to
+    ;; use our desired tab size as it is just a display issue. So let's
+    ;; make sure, the correct tab size (2) is in use.
+    (add-hook 'editorconfig-after-apply-functions
+              (lambda (props)
+                (if (and (gethash 'tab_width props) (gethash 'indent_size props))
+                    (let ((indent-style (gethash 'indent_style props))
+                      (indent-size (string-to-number (gethash 'indent_size props)))
+                      (my-tab-width (string-to-number  (gethash 'tab_width props))))
+                  (if (and (equal "tab" indent-style)
+                           (/= my-tab-width 2)
+                           (= 0 (mod indent-size 2)))
+                   (progn
+                     (editorconfig-set-indentation
+                      indent-style
+                      (number-to-string (/ indent-size 2))
+                      "2")
+                     (setq tab-width 2)))))))
+    ;; Set correct line length for whitespace mode
+    (add-hook 'editorconfig-after-apply-functions
+              (lambda (props)
+                (if (gethash 'max_line_length props)
+                    (let ((line-length (string-to-number (gethash 'max_line_length props))))
+                      (when (> line-length 0)
+                        (setq whitespace-line-column line-length)))))))
 #+END_SRC
 
 ** Structural Editing
@@ -287,27 +310,34 @@ Let's use combobulate, where it is available and smartparens as a fallback.
                       "src" "combobulate" "combobulate.el"))))
 #+END_SRC
 
-
 ** Vimish fold
 
 https://github.com/mrkkrp/vimish-fold
 
 #+BEGIN_SRC emacs-lisp
-  (use-package vimish-fold
-    :ensure t
-    :init (vimish-fold-global-mode 1)
-    :config
-      (global-set-key (my-key "_Vimish_ - fold region") #'vimish-fold)
-      (global-set-key (my-key "_Vimish_ - delete region") #'vimish-fold-delete)
-      (global-set-key (my-key "_Vimish_ - toggle region") #'vimish-fold-toggle)
-      (global-set-key (my-key "_Vimish_ - toggle all") #'vimish-fold-toggle-all)
-
-    (custom-set-variables '(vimish-fold-header-width 50))
-    (custom-set-faces
-     '(vimish-fold-fringe ((t (:inherit nil
-                                        :background "dark cyan"
-                                        :foreground "spring green"))))))
+;;  (use-package vimish-fold
+;;    :ensure t
+;;    :init (vimish-fold-global-mode 1)
+;;    :config
+;;      (global-set-key (my-key "_Vimish_ - fold region") #'vimish-fold)
+;;      (global-set-key (my-key "_Vimish_ - delete region") #'vimish-fold-delete)
+;;      (global-set-key (my-key "_Vimish_ - toggle region") #'vimish-fold-toggle)
+;;      (global-set-key (my-key "_Vimish_ - toggle all") #'vimish-fold-toggle-all)
+;;
+;;    (custom-set-variables '(vimish-fold-header-width 50))
+;;    (custom-set-faces
+;;     '(vimish-fold-fringe ((t (:inherit nil
+;;                                        :background "dark cyan"
+;;                                        :foreground "spring green"))))))
 #+END_SRC
+
+|------------+---------------------------------------------|
+|            | *Vimish Fold*                                 |
+|            |                                             |
+| C-; f      | _Vimish_ - fold region                        |
+| C-; F      | _Vimish_ - delete region                      |
+| M-<tab>    | _Vimish_ - toggle region                      |
+| C-M-<tab>  | _Vimish_ - toggle all                         |
 
 ** Colored Hex/color-named Colors
 
@@ -422,12 +452,22 @@ https://github.com/mrkkrp/vimish-fold
 ** Magit
 
 #+BEGIN_SRC emacs-lisp
-    (eval
-     `(use-package magit
+  (eval
+   `(use-package magit
       :ensure t
       :defer t
       :bind
-      (,(cons (my-bind "_Magit_ status") 'magit-status))))
+      (,(cons (my-bind "_Magit_ status") 'magit-status))
+      :config
+      (define-key magit-mode-map (kbd "TAB") 'magit-section-cycle)
+
+      ;; Opens log buffer with all commits from me between two dates
+      (defun magit-log-all-me-from-until ()
+        (interactive)
+        (magit-log-all-branches (list (concat "--since=\"" (org-read-date 'with-time) "\"")
+                                      (concat "--until=\"" (org-read-date 'with-time) "\"")
+                                      "--author=uhl")))))
+
 #+END_SRC
 
 ** Flycheck
@@ -440,8 +480,64 @@ https://github.com/mrkkrp/vimish-fold
 ** Prettify
 
 #+BEGIN_SRC emacs-lisp
-(use-package web-beautify
-  :ensure t)
+  ;; (use-package web-beautify :ensure t)
+
+
+  ;; Uses prettier-js to beautify the current buffer
+  (defun beautify-with-custom-buffer (file-extension)
+    "Beautify the current buffer or region using prettier-js.
+
+  Parameter FILE-EXTENSION: The file extension of the buffer to beautify. It defines the
+    prettier-js parser to use.
+
+  Requires `prettier-js' to be installed."
+    (setq prev-buffer (current-buffer))
+    (setq prev-point (point))
+    (setq prev-mark (mark))
+    (setq temp-buffer (generate-new-buffer "*beautify-temp-buffer*"))
+    (if (use-region-p)
+        (copy-region-as-kill (region-beginning) (region-end))
+      (copy-region-as-kill (point-min) (point-max)))
+    (switch-to-buffer temp-buffer)
+    (cd user-emacs-directory)
+    (yank)
+    (setq buffer-file-name (concat (make-temp-name "beautify") file-extension))
+    (prettier-js)
+    (setq buffer-file-name nil)
+    (switch-to-buffer prev-buffer)
+    (if (use-region-p)
+        (delete-region (region-beginning) (region-end))
+      (delete-region (point-min) (point-max)))
+    (insert-buffer-substring temp-buffer)
+    (kill-buffer temp-buffer)
+    (goto-char prev-point)
+    (set-mark prev-mark))
+
+
+  (defun beautify-xml ()
+    (interactive)
+    (beautify-with-custom-buffer ".xml"))
+
+  (defun beautify-html ()
+    (interactive)
+    (beautify-with-custom-buffer ".html"))
+
+  (defun beautify-js ()
+    (interactive)
+    (beautify-with-custom-buffer ".js"))
+
+  (defun beautify-json ()
+    (interactive)
+    (beautify-with-custom-buffer ".json"))
+
+  (defun beautify-css ()
+    (interactive)
+    (beautify-with-custom-buffer ".css"))
+
+  (defun beautify-sql ()
+    (interactive)
+    (beautify-with-custom-buffer ".sql"))
+
 #+END_SRC
 
 ** Faster Macros
@@ -622,7 +718,6 @@ such a way that it uses RFC 4648 decoding.
      start end))
 #+END_SRC
 
-
 ** Auto complete
 
 #+BEGIN_SRC emacs-lisp
@@ -646,33 +741,135 @@ such a way that it uses RFC 4648 decoding.
             ("M->". company-select-last)))
 #+END_SRC
 
+** Autocomplete UI
+
+#+BEGIN_SRC emacs-lisp
+  (eval `(defhydra hydra-autocomplete
+           (global-map ,(my-bind "Auto complete hydra") :hint nil :color blue)
+           "Complete"
+           ("c" copilot-accept-completion "Accept" :column "Copilot")
+           ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
+           ("C-c" copilot-complete "Show completion")
+           ("C" hydra-copilot/body "Copilot")
+
+           ("s" yas-next-field-or-maybe-expand "Snippet" :column "Yas")
+
+           ("h" hydra-autocomplete/body "Help" :column nil)
+           ("?" hydra-autocomplete/body "Help" :column nil)))
+
+
+
+
+  (defun bind-custom-tab-hydra (custom-completions mode-name)
+    (eval `(defhydra ,(intern (concat "hydra-autocomplete-" mode-name))
+             (local-map ,(my-bind "Auto complete hydra") :hint nil :color blue :timeout 3)
+             "Complete"
+             ("c" copilot-accept-completion "Accept" :column "Copilot")
+             ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
+             ("C-c" copilot-complete "Show completion")
+             ("C" hydra-copilot/body "Copilot")
+
+             ("s" yas-next-field-or-maybe-expand "Snippet" :column "Yas")
+
+             ("h" ,(intern (concat "hydra-autocomplete-" mode-name "/body")) "Help" :column nil)
+             ("?" ,(intern (concat "hydra-autocomplete-" mode-name "/body")) "Help" :column nil)
+
+             ,@(mapcar (lambda (x)
+                         (list (car x) (cadr x) (caddr x) :column (cadddr x)))
+                       custom-completions)))
+    ;; Important to use define-key instead of local-set-key because the
+    ;; hydra will not show up if using define-key, which allows stuff
+    ;; like copilot to work
+    (define-key current-local-map (my-key "Auto complete hydra") (intern (concat "hydra-autocomplete-" mode-name "/body"))))
+
+  ;; Usage:
+
+  ;; (bind-custom-tab-hydra
+  ;;  '(("f" . ( company-files "Files" "Company")))
+  ;;  "test")
+#+END_SRC
+
 ** LSP
 
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-mode
-    :ensure t
-    :commands lsp
-    :custom
-    (lsp-eldoc-render-all t)
-    (lsp-idle-delay 0.6)
-    ;; enable / disable the hints as you prefer:
-    (lsp-rust-analyzer-server-display-inlay-hints t)
-    (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
-    (lsp-rust-analyzer-display-chaining-hints t)
-    (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
-    (lsp-rust-analyzer-display-closure-return-type-hints t)
-    (lsp-rust-analyzer-display-parameter-hints nil)
-    (lsp-rust-analyzer-display-reborrow-hints nil)
-    :config
-    (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+    (use-package lsp-mode
+      :ensure t
+      :commands lsp
+      :init
+      (setq lsp-keymap-prefix "C-; l")
+      :custom
+      (lsp-eldoc-render-all t)
+      (lsp-idle-delay 0.6)
+      ;; enable / disable the hints as you prefer:
+      (lsp-rust-analyzer-server-display-inlay-hints t)
+      (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+      (lsp-rust-analyzer-display-chaining-hints t)
+      (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
+      (lsp-rust-analyzer-display-closure-return-type-hints t)
+      (lsp-rust-analyzer-display-parameter-hints nil)
+      (lsp-rust-analyzer-display-reborrow-hints nil)
+      :config
+      (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+      (defhydra hydra-lsp-mode (:hint nil :color blue)
+        "LSP Mode"
+        ("X" lsp-workspace-restart "Restart LSP" :column "Server")
+        ("d" lsp-describe-session "Describe Session")
+        ("R" lsp-workspace-restart "Restart Workspace")
 
-  (use-package lsp-ui
-    :ensure
-    :commands lsp-ui-mode
-    :custom
-    (lsp-ui-peek-always-show t)
-    (lsp-ui-sideline-show-hover t)
-    (lsp-ui-doc-enable nil))
+        ("a" lsp-workspace-folders-add "Folders add" :column "Workspace")
+        ("b" lsp-workspace-blacklist-remove "Blacklist remove")
+        ("r" lsp-workspace-folders-remove "Folders remove")
+
+        ("S" lsp-ui-sideline-mode           "Ui Sideline Mode" :column "Toggle")
+        ("M" lsp-modeline-diagnostics-mode  "Modeline Diagnostics Mode" )
+        ("L" lsp-toggle-trace-io            "Toggle Trace Io")
+        ("A" lsp-modeline-code-actions-mode "Modeline Code Actions Mode")
+        ("B" lsp-headerline-breadcrumb-mode "Headerline Breadcrumb Mode")
+        ("D" lsp-ui-doc-mode                "Ui Doc Mode")
+        ("h" lsp-toggle-symbol-highlight    "Toggle Symbol Highlight")
+        ("l" lsp-lens-mode                  "Lens Mode")))
+
+    (use-package lsp-ui
+      :ensure
+      :commands lsp-ui-mode
+      :custom
+      (lsp-ui-peek-always-show t)
+      (lsp-ui-sideline-show-hover nil)
+      (lsp-ui-sideline-enable nil)
+      (lsp-ui-doc-enable nil)
+      (lsp-headerline-breadcrumb-enable nil))
+  (use-package lsp-ivy :ensure :commands lsp-ivy-workspace-symbol)
+
+  (use-package ivy-xref
+    :ensure t
+    :init
+    ;; xref initialization is different in Emacs 27 - there are two different
+    ;; variables which can be set rather than just one
+    (when (>= emacs-major-version 27)
+      (setq xref-show-definitions-function #'ivy-xref-show-defs))
+    ;; Necessary in Emacs <27. In Emacs 27 it will affect all xref-based
+    ;; commands other than xref-find-definitions (e.g. project-find-regexp)
+    ;; as well
+    (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+#+END_SRC
+
+** Debugging with DAP-mode
+
+#+BEGIN_SRC emacs-lisp
+(use-package dap-mode
+  ;; Uncomment the config below if you want all UI panes to be hidden by default!
+  ;; :custom
+  ;; (lsp-enable-dap-auto-configure nil)
+  ;; :config
+
+
+  :config
+  (dap-ui-mode 1)
+  ;; Set up Node debugging
+  (require 'dap-node)
+  (require 'dap-netcore)
+  ;;(dap-node-setup) ;; Automatically installs Node debug adapter if needed
+)
 #+END_SRC
 
 ** Tree Sitter
@@ -686,6 +883,7 @@ such a way that it uses RFC 4648 decoding.
        (c . ("https://github.com/tree-sitter/tree-sitter-c"))
        (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
        (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+       (c-sharp . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
        (go . ("https://github.com/tree-sitter/tree-sitter-go"))
        (html . ("https://github.com/tree-sitter/tree-sitter-html"))
        (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
@@ -713,6 +911,84 @@ such a way that it uses RFC 4648 decoding.
           (sit-for 0.25)))))
 #+END_SRC
 
+** UUID
+
+#+BEGIN_SRC emacs-lisp
+  (defun uuid ()
+    (let ((xstr (md5 (format "%s%s%s%s%s%s%s%s%s%s"
+                                (user-uid)
+                                (emacs-pid)
+                                (system-name)
+                                (user-full-name)
+                                (current-time)
+                                (emacs-uptime)
+                                (garbage-collect)
+                                (buffer-string)
+                                (random)
+                                (recent-keys)))))
+      ( format "%s-%s-4%s-%s%s-%s"
+        (substring xstr 0 8)
+        (substring xstr 8 12)
+        (substring xstr 13 16)
+        (format "%x" (+ 8 (random 4)))
+        (substring xstr 17 20)
+        (substring xstr 20 32))))
+
+  (uuid)
+
+
+  (defun insert-uuid ()
+    "Insert a UUID."
+    (interactive)
+    (insert (uuid)))
+#+END_SRC
+
+** Programming Mode Hydras
+
+#+BEGIN_SRC emacs-lisp
+(defhydra hydra-prog-mode-search (:hint nil :color blue)
+      "Find"
+      ("s" lsp-ivy-workspace-symbol "Find symbol in file" :column "LSP")
+      ("S" lsp-ivy-global-workspace-symbol "Find symbol in project")
+      ("M" lsp-ui-imenu "Show symbols in file")
+      ("g" counsel-git-grep "Grep in current project" :column "Git")
+      ("f" counsel-git "Find file in project"))
+#+END_SRC
+(display-fn-in-window 'counsel-git-grep)
+
+** Copilot
+
+#+BEGIN_SRC emacs-lisp
+  (use-package copilot
+    :load-path (lambda ()
+                 (list (file-name-concat
+                        user-emacs-directory
+                        "src" "copilot" "copilot.el" "copilot.el")))
+    :hook (prog-mode . copilot-mode))
+
+
+    (defhydra hydra-copilot (:color blue :hint nil)
+      "Copilot"
+      ("TAB" copilot-complete "Complete" :column "Sugest" :color red)
+
+      ("c" copilot-accept-completion "Accept" :column "Completion")
+      ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
+      ("n" copilot-next-completion "Next completion" :color red)
+      ("p" copilot-previous-Completion "Prev completion" :color red))
+#+END_SRC
+
+** Indentation guides
+
+To be enabled by the programing language specific mode.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package highlight-indent-guides
+    :init
+    (setq highlight-indent-guides-method 'fill)
+    (setq highlight-indent-guides-responsive nil)
+    (setq highlight-indent-guides-delay 0)
+    :ensure t)
+#+END_SRC
 * Language Specific
 
 ** Lisp
@@ -764,12 +1040,30 @@ such a way that it uses RFC 4648 decoding.
     (add-hook 'haskell-mode-hook 'flyspell-prog-mode)
     (add-hook 'haskell-mode-hook 'haskell-indentation-mode)
     (add-hook 'haskell-mode-hook #'lsp)
-    (add-hook 'haskell-literate-mode-hook #'lsp))
+    (add-hook 'haskell-literate-mode-hook #'lsp)
+
+    (defhydra hydra-haskell-mode (:hint nil :color blue)
+      ("L" hydra-lsp-mode/body "LSP")
+      ("E" lsp-treemacs-errors-list "Project errors"    :column "Show")
+      ("d" lsp-describe-thing-at-point "Doc at point")
+      ("." xref-find-definitions-other-window "Goto Definition (other buf)")
+      ("," lsp-find-references "References")
+      ("?" lsp-find-type-definition "Type definition")
+      ("r" lsp-rename "Rename item"                     :column "Refactor")
+      ("i" lsp-organize-imports "Organize imports")
+      ("P" lsp-format-buffer "Prettify buffer"          :column "Do")
+      ("p" lsp-format-region "Prettify region")
+      ("s" sp-split-sexp "Split Group"                  :column "Edit")
+      ("j" sp-join-sexp "Join Group"))
+
+    (defun setup-haskell-mode ()
+      (local-set-key (my-key "Mode hydra") 'hydra-haskell-mode/body))
+    (add-hook 'haskell-mode-hook 'setup-haskell-mode))
 
 
 
-    ;; Ignore compiled Haskell files in filename completions
-    (add-to-list 'completion-ignored-extensions ".hi")
+  ;; Ignore compiled Haskell files in filename completions
+  (add-to-list 'completion-ignored-extensions ".hi")
 #+END_SRC
 
 *** Intero Mode
@@ -810,6 +1104,7 @@ such a way that it uses RFC 4648 decoding.
   (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
   (add-hook 'emacs-lisp-mode-hook 'run-sheesh-coding-hook)
   (add-hook 'emacs-lisp-mode-hook 'starter-kit-remove-elc-on-save)
+  (add-hook 'emacs-lisp-mode-hook 'highlight-indent-guides-mode)
   ;;  (add-hook 'emacs-lisp-mode-hook 'idle-highlight)
   ;;  (add-hook 'emacs-lisp-mode-hook 'turn-on-paredit)
   (define-key emacs-lisp-mode-map (kbd "C-c v") 'eval-buffer)
@@ -853,7 +1148,9 @@ Issues?
 (use-package python
   :ensure t
   :defer t
-  :mode ("\\.py\\'" . python-mode))
+  :mode ("\\.py\\'" . python-mode)
+  :config
+    (add-hook 'python-mode-hook 'highlight-indent-guides-mode))
 
 (use-package elpy
   :ensure t
@@ -871,6 +1168,31 @@ Issues?
 #+BEGIN_SRC emacs-lisp
   (add-hook 'css-mode-hook 'run-sheesh-coding-hook)
 #+END_SRC
+** CSV
+
+#+BEGIN_SRC emacs-lisp
+  (use-package csv-mode
+    :ensure t
+    :defer t
+    :config
+    (defhydra hydra-csv-mode (:hint nil :color blue)
+      "CSV"
+      ("s" csv-sort-fields "Sort fields" :column "Display")
+      ("n" csv-sort-numeric-fields "Sort numberic fields" )
+      ("a" csv-align-fields "Align fields" )
+      ("u" csv-unalign-fields "Unalign fields" )
+      ("t" csv-transpose "Transpose" )
+
+      ("k" csv-kill-fields "Kill fields" :column "Edit" )
+      ("y" csv-yank-fields "Yank fields" )
+      ("r" csv-reverse-region "Reverse region" )
+
+      (";" csv-set-separator "Set Separator" :column "Setup" ))
+    (defun setup-csv-mode ()
+      (local-set-key (my-key "Mode hydra") 'hydra-csv-mode/body))
+    (add-hook 'csv-mode-hook 'setup-csv-mode))
+#+END_SRC
+
 ** JS
 
 #+BEGIN_SRC emacs-lisp
@@ -930,14 +1252,25 @@ Issues?
 
 To install prettier on your system you have to manually run:
 #+BEGIN_SRC sh
-npm i -g prettier
+cd ~/.emacs.d
+npm i
 #+END_SRC
 
 
 #+BEGIN_SRC emacs-lisp
   (use-package prettier-js
-    :ensure t
-    :hook ((web-mode rjsx-mode typescript-ts-mode tsx-ts-mode json-mode yaml-mode)
+    :load-path
+    (lambda () (list (file-name-concat
+                      (file-name-directory (or load-file-name (buffer-file-name)))
+                      "src" "prettier-js.el")))
+    :hook ((web-mode
+            rjsx-mode
+            typescript-ts-mode
+            tsx-ts-mode
+            json-mode
+            yaml-ts-mode
+            glsl-mode
+            yaml-mode)
            . prettier-js-mode))
 #+END_SRC
 
@@ -1098,6 +1431,7 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.html?\\'" . web-mode)
            ("\\.cjs$" . web-mode)
            ("\\.js$" . web-mode)
+           ("\\.mjs$" . web-mode)
            ("\\.jsx\\'" . web-mode)
            ("\\.ftl\\'" . web-mode))
     :config
@@ -1151,13 +1485,13 @@ Use =C-j= to expand emmet-code to html/css code.
 
                 ;; Auto indent on certain characters
                 (local-set-key (kbd "}") #'(lambda ()
-                                            (interactive)
-                                            (insert "}")
-                                            (indent-for-tab-command)))
+                                             (interactive)
+                                             (insert "}")
+                                             (indent-for-tab-command)))
                 (local-set-key (kbd ";") #'(lambda ()
-                                            (interactive)
-                                            (insert ";")
-                                            (indent-for-tab-command)))
+                                             (interactive)
+                                             (insert ";")
+                                             (indent-for-tab-command)))
                 (set (make-local-variable 'comment-auto-fill-only-comments) nil)
                 (auto-fill-mode t)
 
@@ -1180,7 +1514,10 @@ Use =C-j= to expand emmet-code to html/css code.
                 (local-set-key (my-key "Split (unGroup) sexp")
                                'web-mode-sp-split-sexp)
                 (local-set-key (my-key "Join (Group) sexp")
-                               'web-mode-sp-join-sexp)))
+                               'web-mode-sp-join-sexp)
+                (bind-custom-tab-hydra
+                 '(("e" . ( emmet-expand-line "Expand Line" "Emmet")))
+                 "web-mode" )))
 
     :init
     (setq web-mode-engines-alist
@@ -1207,6 +1544,12 @@ See [[Spellchecking in JS]].
 (flycheck-add-mode 'javascript-eslint 'web-mode)
 #+END_SRC
 
+** CSS
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'css-mode-hook #'prettier-js-mode)
+#+END_SRC
+
 ** JSON
 
 #+BEGIN_SRC emacs-lisp
@@ -1228,8 +1571,8 @@ See [[Spellchecking in JS]].
     :mode (("\\.yml$" . yaml-mode)
            ("\\.yaml$" . yaml-mode))
     :config
-    (add-hook 'yaml-mode-hook 'run-sheesh-coding-hook))
-
+    (add-hook 'yaml-mode-hook 'run-sheesh-coding-hook)
+    (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode))
 #+END_SRC
 
 ** Typescript
@@ -1254,6 +1597,7 @@ See [[Spellchecking in JS]].
       ("E" tide-project-errors "Project errors"                   )
       ("d" tide-documentation-at-point "Doc at point"             )
       ("," tide-references "References"                           )
+      ("?" hydra-prog-mode-search/body "Search"                   )
       ("r" tide-rename-symbol "Rename item"     :column "Refactor")
       ("F" tide-rename-file "Rename file"                         )
       ("i" tide-organize-imports "Organize imports"               )
@@ -1319,6 +1663,13 @@ See [[Spellchecking in JS]].
 ; (flycheck-add-mode 'javascript-eslint 'typescript-mode)
 #+END_SRC
 
+** Tailwind CSS
+
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-tailwindcss
+    :ensure t)
+#+END_SRC
+
 ** SQL
 
 #+BEGIN_SRC emacs-lisp
@@ -1331,6 +1682,12 @@ See [[Spellchecking in JS]].
   (add-hook 'sql-mode-hook 'run-sheesh-coding-hook)
   (add-hook 'sql-mode-hook 'sheesh-launch-sql-submodes)
 #+END_SRC
+
+SQL LSP:
+- https://bitspook.in/blog/using-org-mode-as-an-sql-playground/
+  - For now, I had to use sqls as lsp-mode does not support
+    https://github.com/joe-re/sql-language-server
+  - Discussion: https://github.com/emacs-lsp/lsp-mode/discussions/3971
 
 ** Rust
 
@@ -1369,43 +1726,46 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
 
 
 #+BEGIN_SRC emacs-lisp
-(use-package rustic
-    :ensure
+  (use-package rustic
+      :ensure
 
-    :config
-    ;; uncomment for less flashiness
-    ;; (setq lsp-eldoc-hook nil)
-    ;; (setq lsp-enable-symbol-highlighting nil)
-    ;; (setq lsp-signature-auto-activate nil)
+      :config
+      ;; uncomment for less flashiness
+      ;; (setq lsp-eldoc-hook nil)
+      ;; (setq lsp-enable-symbol-highlighting nil)
+      ;; (setq lsp-signature-auto-activate nil)
 
-    ;; comment to disable rustfmt on save
-    (setq rustic-format-on-save t)
-    (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook)
-    :hydra
-    (hydra-rust (:hint nil)
-    "rust"
-    ("j" lsp-ui-imenu "Menu")
-    ("." lsp-find-references "Reference" :column "Code")
-    ("l" flycheck-list-errors "List errors")
-    ("a" lsp-execute-code-action "Code action")
-    ("r" lsp-rename "Rename")
-    ("q" lsp-workspace-restart "restart" :column "Server")
-    ("Q" lsp-workspace-shutdown "shutdown")
-    ("s" lsp-rust-analyzer-status "Analyzer status")
-    ("R" rustic-cargo-run "Run")
-    ("t" rustic-cargo-current-test "Run current test")))
-    
+      ;; comment to disable rustfmt on save
+      (setq rustic-format-on-save t)
+      (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook)
+      (add-hook 'rustic-mode-hook 'run-sheesh-coding-hook)
+
+      :hydra
+      (hydra-rust (:hint nil)
+      "rust"
+      ("j" lsp-ui-imenu "Menu")
+      ("." lsp-find-references "Reference" :column "Code")
+      ("l" flycheck-list-errors "List errors")
+      ("a" lsp-execute-code-action "Code action")
+      ("r" lsp-rename "Rename")
+      ("q" lsp-workspace-restart "restart" :column "Server")
+      ("Q" lsp-workspace-shutdown "shutdown")
+      ("s" lsp-rust-analyzer-status "Analyzer status")
+      ("R" rustic-cargo-run "Run")
+      ("t" rustic-cargo-current-test "Run current test")
+      ("?" hydra-prog-mode-search/body "Search" :color blue)))
 
 
-  (defun rk/rustic-mode-hook ()
-    ;; so that run C-c C-c C-r works without having to confirm, but don't try to
-    ;; save rust buffers that are not file visiting. Once
-    ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
-    ;; no longer be necessary.
-    (when buffer-file-name
-      (setq-local buffer-save-without-query t))
-    (add-hook 'before-save-hook 'lsp-format-buffer nil t)
-    (local-set-key (my-key "Mode hydra") 'hydra-rust/body))
+
+    (defun rk/rustic-mode-hook ()
+      ;; so that run C-c C-c C-r works without having to confirm, but don't try to
+      ;; save rust buffers that are not file visiting. Once
+      ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
+      ;; no longer be necessary.
+      (when buffer-file-name
+        (setq-local buffer-save-without-query t))
+      (add-hook 'before-save-hook 'lsp-format-buffer nil t)
+      (local-set-key (my-key "Mode hydra") 'hydra-rust/body))
 #+END_SRC
 
 ** Terraform
@@ -1414,4 +1774,97 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
   (use-package hcl-mode
     :ensure t
     :mode ("\\.tf?\\'" . hcl-mode))
+#+END_SRC
+
+** C Sharp
+Requires [[https://csharpier.com/][CSharpier]] to do the prettification. Install it like this:
+
+#+BEGIN_SRC sh
+dotnet tool install csharpier -g
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+  (use-package csharp-mode
+    :config
+    (add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-ts-mode))
+    (defun lsp-find-references-window ()
+      (interactive)
+      (let ((old-xref-show-xrefs-function xref-show-xrefs-function))
+        (setq xref-show-xrefs-function 'xref--show-xref-buffer)
+        (lsp-find-references)
+        (setq xref-show-xrefs-function old-xref-show-xrefs-function)
+        ))
+    (defhydra hydra-csharp-ts-mode (:hint nil :color blue)
+      "C#"
+      ("L" hydra-lsp-mode/body "LSP")
+      ("c" hydra-combobulate/body "Combobulate"         :column "Basic")
+      ("E" lsp-treemacs-errors-list "Project errors"    :column "Show")
+      ("d" lsp-describe-thing-at-point "Doc at point")
+      ("?" hydra-prog-mode-search/body "Search")
+
+      ("M-." xref-find-definitions-other-window "Goto Definition (other buf)")
+      ("," lsp-find-references "References")
+      ("C-," lsp-find-references-window "References (buffer)") 
+      ("r" lsp-rename "Rename item"                     :column "Refactor")
+      ("P" lsp-format-buffer "Prettify buffer")
+      ("p" lsp-format-region "Prettify region")
+      ("." lsp-execute-code-action "Fix"                :column "Edit")
+      ("s" sp-split-sexp "Split Group")
+      ("j" sp-join-sexp "Join Group")
+
+      ("TAB" hydra-copilot/body "Copilot"))
+    :init
+    (add-hook 'csharp-ts-mode-hook #'company-mode)
+    (add-hook 'csharp-ts-mode-hook #'rainbow-delimiters-mode)
+    (add-hook 'csharp-ts-mode-hook #'lsp)
+    (add-hook 'csharp-ts-mode-hook 'run-sheesh-coding-hook)
+    (add-hook 'csharp-ts-mode-hook 'flycheck-mode)
+    (defun setup-csharp-mode ()
+      (local-set-key (my-key "Mode hydra") 'hydra-csharp-ts-mode/body)
+      (local-unset-key (my-key "Go 3 lines forward"))
+      (local-unset-key (my-key "Go 3 lines backward"))
+
+
+      ;; disable lsp-ui-sideline-mode ?
+
+      (setq comment-insert-comment-function (lambda ()
+                                              (indent-according-to-mode)
+                                              (insert "/*  */")
+                                              (backward-char 3)))
+
+      (set (make-local-variable 'prettier-js-command)
+           (expand-file-name "csharp-prettier" user-emacs-directory))
+      (set (make-local-variable 'prettier-js-args) '())
+      (prettier-js-mode))
+    (add-hook 'csharp-ts-mode-hook 'setup-csharp-mode))
+
+#+END_SRC
+
+*** Unity
+
+Install https://github.com/elizagamedev/rider2emacs and set the unity
+editor to that.
+
+Then start the emacs server using =M-x server-start=.
+
+Not tested, but maybe useful: https://github.com/elizagamedev/unity.el
+
+** XML
+
+#+BEGIN_SRC emacs-lisp
+  (use-package xml-mode
+        :mode
+        (("\\.xml$" . xml-mode)
+         ("\\.csproj$" . xml-mode)))
+#+END_SRC
+
+** KDL Config files
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist
+               '("\\.kdl\\'" . (lambda ()
+                                 (conf-mode)
+                                 (setq-local comment-start "//")
+                                 (setq-local comment-end   ""))))
 #+END_SRC

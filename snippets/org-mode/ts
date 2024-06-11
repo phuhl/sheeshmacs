@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: ts
+# key: ts
+# --
+#+BEGIN_SRC typescript
+$0
+#+END_SRC

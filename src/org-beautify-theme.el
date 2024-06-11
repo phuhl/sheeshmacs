@@ -67,10 +67,11 @@ really bad under some circumstances."
    `(org-document-title
      ((t (:inherit org-level-1 :height 2.0 :underline nil :box ,padding))))
    `(org-block-begin-line
-     ((t :foreground ,base-font-color :background, background-color)))
+     ((t :foreground ,base-font-color :background, background-color :weight bold)))
    `(org-block-end-line
-     ((t :foreground ,base-font-color :background, background-color)))
-   `(org-block ((t (:box nil))))
+     ((t :foreground ,base-font-color :background, background-color  :weight bold)))
+   `(org-block ((t (:box nil :background ,(face-background 'face-backlit)))))
+   `(org-code ((t :background ,(face-background 'face-backlit))))
    `(org-checkbox
      ((t (:foreground "#000000", :background "#93a1a1"
                       :box (:line-width -3 :color "#93a1a1" :style "released-button")))))

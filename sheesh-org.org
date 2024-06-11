@@ -170,6 +170,28 @@ Disabling some commands that are confusing or destructive:
 (put 'org-kill-note-or-show-branches 'disabled t)
 #+END_SRC
 
+** Org mode specific hydra
+
+#+BEGIN_SRC emacs-lisp
+  (defhydra hydra-org-mode (:hint nil :color blue)
+    "Org"
+    ("I" org-screenshot "Insert Screenshot from Clipboard" :column "Edit")
+    ("*" org-wrap-bold "Make bold")
+    ("/" org-wrap-italic "Make italic")
+    ("=" org-wrap-code "Make code")
+    ("_" org-wrap-underline "Make underline")
+
+    ("c" ox-clip-formatted-copy "Copy formated" :column "Export/Import")
+
+    ("i" org-toggle-inline-images "Toggle inline images" :column "Display")
+    ("n" org-toggle-narrow-to-subtree "Toggle narrow subtree")
+
+    ("S" org-table-shrink-to-row-width "Shrink to current row width" :column "Table")
+    ("s" org-table-shrink "Shrink")
+    ("M-s" org-table-expand "Expand")
+    ("C-c TAB" org-table-toggle-column-width))
+#+END_SRC
+
 ** Keybindings
 
 #+BEGIN_SRC emacs-lisp
@@ -200,7 +222,8 @@ Disabling some commands that are confusing or destructive:
                 (local-set-key (my-key "Go to previous buffer")
                                'previous-multiframe-window)
                 (local-set-key (kbd "C-;") nil)
-                (local-set-key (kbd "C-,") nil)))
+                (local-set-key (kbd "C-,") nil)
+                (local-set-key (my-key "Mode hydra") 'hydra-org-mode/body)))
     (define-key global-map (my-key "_Org Mode_ - Org capture") 'org-capture)
 #+END_SRC
 ** Behavior of Todo with lists
@@ -336,6 +359,75 @@ HTLM export with CSS
     )
 #+END_SRC
 
+** Tables
+
+*** Set table widths to header width
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-table-shrink-to-row-width ()
+    "Shrinks the table to the width of the current row. Each column is
+  set to the width of the respective cell in the current row."
+    (interactive)
+    (save-excursion
+      (let ((beg (org-table-begin))
+            (widths nil))
+
+        (org-table-with-shrunk-columns
+         (let* ((my-row (- (org-table-current-line) 1))
+                (table (org-table-to-lisp))
+                (rows (remq 'hline table))
+                (row (nth my-row rows)))
+           (setq columns-number (apply #'max (mapcar #'length rows)))
+           (dotimes (i columns-number)
+             (let ((max-width 1))
+               (let ((cell (or (nth i row) "")))
+                 (setq max-width (max max-width (org-string-width cell))))
+               (push max-width widths)))))
+        (setq widths (nreverse widths))
+        (goto-char beg)
+        (let ((columns-count (length widths))
+              (new-row ""))
+          (dotimes (i columns-count)
+            (setq new-row (concat new-row "|" "<" (number-to-string (+ 1 (nth i widths))) ">"))
+            ;; (when (>= (nth i widths) max-width)
+            ;;   (insert (concat "<" (number-to-string max-width) ">")))
+            )
+          (insert (concat new-row "|" "\n"))))
+      (org-table-align)
+      (org-table-shrink)))
+#+END_SRC
+
+** Formatting
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-wrap-in (char)
+    (let (p1 p2)
+      (if (use-region-p)
+          (setq p1 (region-beginning) p2 (region-end))
+        (setq p1 (point) p2 (point)))
+      (goto-char p2)
+      (insert char)
+      (goto-char p1)
+      (insert char)
+      (goto-char p2)
+      (forward-char 1)))
+
+  (defun org-wrap-bold ()
+    (interactive)
+    (org-wrap-in "*"))
+
+  (defun org-wrap-italic ()
+    (interactive)
+    (org-wrap-in "/"))
+
+  (defun org-wrap-code ()
+    (interactive)
+    (org-wrap-in "="))
+
+  (defun org-wrap-underline ()
+    (interactive)
+    (org-wrap-in "_"))
+#+END_SRC
 * Features
 ** Schedule Effort
 
@@ -460,3 +552,34 @@ schedule) add a corresponding end-hour.
                     "\n\n** Montag\n\n** Dienstag\n\n** Mittwoch\n\n** Donnerstag\n\n** Freitag"
                     )))
 #+END_SRC
+
+** Ox-Clip: Formatted copy/paste
+
+On Wayland: Requires a script "ox-clip" to be in the path:
+
+#+CAPTION: ox-clip
+#+BEGIN_SRC sh
+#!/bin/bash
+
+wl-copy -t text/html < "$1"
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-clip :ensure t
+    :config
+    (if (eq (detect-os-display-type) 'wayland)
+        (setq ox-clip-linux-cmd "ox-clip \"%f\"")))
+#+END_SRC
+
+From the documentation:
+
+#+BEGIN_EXAMPLE
+The main command is `ox-clip-formatted-copy' that should work across
+Windows, Mac and Linux. By default, it copies as html.
+
+Note: Images/equations may not copy well in html. Use `ox-clip-image-to-clipboard' to
+copy the image or latex equation at point to the clipboard as an image. The
+default latex scale is too small for me, so the default size for this is set
+to 3 in `ox-clip-default-latex-scale'. This overrides the settings in
+`org-format-latex-options'.
+#+END_EXAMPLE
