@@ -47,6 +47,7 @@
         org-shiftmetaright
         org-yank
         phi-search
+        reposition-window
         slime-autodoc-space
         sp-backward-down-sexp
         sp-backward-sexp

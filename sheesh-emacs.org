@@ -208,7 +208,6 @@ information.
 Currently free(ish) bindings:
 - C-' :: more or less free (bound in e.g. org mode, js/ts mode)
 - C-q :: quoted-insert
-- C-z :: suspend-frame
 - C-\ :: toggle-input-method
 
 To see all keybindings in a buffer, use =counsel-descbinds=.
@@ -840,6 +839,28 @@ TransposeWindows. There may well be better ways to write this."
   (global-set-key (my-key "Change text size") 'hydra-zoom/body)
 #+END_SRC
 
+*** Buffer management hydra
+
+#+BEGIN_SRC emacs-lisp
+  (defun ensure-n-windows-balanced (count)
+    (while (/= (count-windows) count)
+      (if (> (count-windows) count)
+          (delete-window)
+        (split-window-right)))
+    (balance-windows))
+
+  (defhydra hydra-buffer-management
+              (:color blue :hint nil)
+              "Buffer Management"
+              ("-" shrink-window-horizontally "Shrink window" :column "Size" :color red)
+              ("+" enlarge-window-horizontally "Grow window" :color red)
+              ("=" balance-windows "Balance windows")
+
+              ("?" toggle-window-split "Toggle split direction" :column "Layout")
+              ("3" (lambda () (interactive) (ensure-n-windows-balanced 3))  "Create three columns")
+              ("4" (lambda () (interactive) (ensure-n-windows-balanced 4))  "Create three columns"))
+#+END_SRC
+
 ** Status Bar
 
 *** Ido mode
@@ -1146,6 +1167,50 @@ Install the required dictionaries!
     (global-auto-complete-mode t)
     :config
     (ac-config-default))
+#+END_SRC
+
+*** Grep
+
+#+BEGIN_SRC emacs-lisp
+  ;; wgrep - Edit grep buffers
+  (eval
+   `(use-package wgrep
+      :ensure t
+      :bind
+      (:map wgrep-mode-map
+	    (,(cons (my-bind "Mode hydra") 'hydra-wgrep/body)))))
+
+  (defhydra hydra-grep
+   (:color blue :hint nil)
+   "Grep"
+   ("M-n" compilation-next-error "Next" :column "Navigation" :color red)
+   ("M-p" compilation-previous-error "Previous" :color red)
+   ("M-{" compilation-previous-file "Next file" :color red)
+   ("M-}" compilation-next-file "Previous file" :color red)
+
+   ("g" recompile "Refresh" :column "Edit")
+   ("w" wgrep-change-to-wgrep-mode "Edit file content")
+   ("q" nil "Quit"))
+
+  (defhydra hydra-wgrep
+    (:color blue :hint nil)
+    "Grep"
+    ("M-n" compilation-next-error "Next" :column "Navigation" :color red)
+    ("M-p" compilation-previous-error "Previous" :color red)
+    ("M-{" compilation-previous-file "Next file" :color red)
+    ("M-}" compilation-next-file "Previous file" :color red)
+
+    ("a" wgrep-finish-edit "Apply changes" :column "wgrep")
+
+    ("C-u" wgrep-remove-all-change "Unmark/ignore all changes")
+    ("C-d" wgrep-mark-deletion "Delete to current line (including newline).")
+    ("C-r" wgrep-remove-change "Unmark/ignore all changes in region")
+    ("q" wgrep-exit "Quit wgrep"))
+
+  (add-hook
+    'grep-mode-hook
+    #'(lambda ()
+	(local-set-key (my-key "Mode hydra") 'hydra-grep/body)))
 #+END_SRC
 
 ** Features
@@ -1504,7 +1569,7 @@ Other modes
          :API\ Key))))
 #+END_SRC
 
-** C-x hydro (C-z)
+** C-x hydra (C-z)
 
 #+BEGIN_SRC emacs-lisp
     (defhydra hydra-C-z (:hint nil :color blue)
@@ -1515,7 +1580,10 @@ Other modes
       ("x t"  toggle-truncate-lines "Truncate linets" :column "Display")
       ("x N"  display-line-numbers-mode "Line numbers")
 
-      ("x r"  rename-buffer "Rename" :column "Buffer"))
+      ("x r"  rename-buffer "Rename" :column "Buffer")
+
+      ("w"  hydra-buffer-management/body "Buffer management" :column "Buffer")
+      ("C-q" read-only-mode "Toggle Readonly" :column "Buffer"))
 
   (global-set-key (my-key "C-x as hydra") 'hydra-C-z/body)
 #+END_SRC
