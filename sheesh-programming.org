@@ -812,6 +812,8 @@ such a way that it uses RFC 4648 decoding.
       (add-hook 'lsp-mode-hook 'lsp-ui-mode)
       (defhydra hydra-lsp-mode (:hint nil :color blue)
         "LSP Mode"
+        ("C-S-SPC" lsp-signature-activate "Show function signature" :column "Show")
+
         ("X" lsp-workspace-restart "Restart LSP" :column "Server")
         ("d" lsp-describe-session "Describe Session")
         ("R" lsp-workspace-restart "Restart Workspace")
