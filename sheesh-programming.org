@@ -1263,6 +1263,7 @@ npm i
     (lambda () (list (file-name-concat
                       (file-name-directory (or load-file-name (buffer-file-name)))
                       "src" "prettier-js.el")))
+    :commands prettier-js
     :hook ((web-mode
             rjsx-mode
             typescript-ts-mode
