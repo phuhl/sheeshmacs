@@ -760,9 +760,9 @@ such a way that it uses RFC 4648 decoding.
 
 
 
-  (defun bind-custom-tab-hydra (custom-completions mode-name)
+  (defun bind-custom-tab-hydra (custom-completions mode-name mode-keymap)
     (eval `(defhydra ,(intern (concat "hydra-autocomplete-" mode-name))
-             (local-map ,(my-bind "Auto complete hydra") :hint nil :color blue :timeout 3)
+             (mode-keymap ,(my-bind "Auto complete hydra") :hint nil :color blue :timeout 3)
              "Complete"
              ("c" copilot-accept-completion "Accept" :column "Copilot")
              ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
@@ -780,7 +780,7 @@ such a way that it uses RFC 4648 decoding.
     ;; Important to use define-key instead of local-set-key because the
     ;; hydra will not show up if using define-key, which allows stuff
     ;; like copilot to work
-    (define-key current-local-map (my-key "Auto complete hydra") (intern (concat "hydra-autocomplete-" mode-name "/body"))))
+    (define-key mode-keymap (my-key "Auto complete hydra") (intern (concat "hydra-autocomplete-" mode-name "/body"))))
 
   ;; Usage:
 
@@ -1517,7 +1517,8 @@ Use =C-j= to expand emmet-code to html/css code.
                                'web-mode-sp-join-sexp)
                 (bind-custom-tab-hydra
                  '(("e" . ( emmet-expand-line "Expand Line" "Emmet")))
-                 "web-mode" )))
+                 "web-mode" web-mode-map )
+                ))
 
     :init
     (setq web-mode-engines-alist
