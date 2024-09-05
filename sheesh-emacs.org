@@ -20,7 +20,7 @@ information.
 |            |                                             |
 | M-x        | M-x with _Counsel_                            |
 | C-x C-f    | Find file with _Counsel_                      |
-| C-z        | C-x as hydra                                |
+| C-\        | C-x as hydra                                |
 |------------+---------------------------------------------|
 |            | *Navigation*                                  |
 |            |                                             |
@@ -200,15 +200,13 @@ information.
         key)))
 #+END_SRC
 
-#+RESULTS:
-: my-bind
-
 ** Find (free) keybindings
 
 Currently free(ish) bindings:
 - C-' :: more or less free (bound in e.g. org mode, js/ts mode)
 - C-q :: quoted-insert
 - C-\ :: toggle-input-method
+- C-z :: 
 
 To see all keybindings in a buffer, use =counsel-descbinds=.
 
