@@ -331,31 +331,6 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
   ;;; Set modeline at the top
   (setq-default header-line-format mode-line-format)
   (setq-default mode-line-format'(""))
-
-  ;;; Modeline
-  (defun set-modeline-faces ()
-    "Mode line at top."
-    (set-face 'header-line                                 'face-strong)
-    (set-face-attribute 'header-line nil
-                                  :underline (face-foreground 'default))
-    (set-face-attribute 'mode-line nil
-                        :height 10
-                        :underline (face-foreground 'default)
-                        :overline nil
-                        :box nil
-                        :foreground (face-background 'default)
-                        :background (face-background 'default))
-    (set-face 'mode-line-inactive                            'mode-line)
-    (set-face-attribute 'cursor nil
-                        :background (face-foreground 'default))
-    (set-face-attribute 'window-divider nil
-                        :foreground (face-background 'mode-line))
-    (set-face-attribute 'window-divider-first-pixel nil
-                        :foreground (face-background 'default))
-    (set-face-attribute 'window-divider-last-pixel nil
-                        :foreground (face-background 'default)))
-
-  (set-modeline-faces)
 #+END_SRC
 
 ** Window
@@ -437,23 +412,23 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
   (setq x-underline-at-descent-line t)
   (setq widget-image-enable nil)
 
-  (custom-set-faces
-   '(default ((t (
-                  :inherit nil
-                  :extend nil
-                  :stipple nil
-                  :background "#ffffff"
-                  :foreground "#111111"
-                  :inverse-video nil
-                  :box nil
-                  :strike-through nil
-                  :overline nil
-                  :underline nil
-                  :slant normal
-                  :weight light
-                  :width normal
-                  :foundry "GOOG"
-                  :family "Roboto Mono")))))
+  ;; (custom-set-faces
+  ;;  '(default ((t (
+  ;;                 :inherit nil
+  ;;                 :extend nil
+  ;;                 :stipple nil
+  ;;                 :background "#ffffff"
+  ;;                 :foreground "#111111"
+  ;;                 :inverse-video nil
+  ;;                 :box nil
+  ;;                 :strike-through nil
+  ;;                 :overline nil
+  ;;                 :underline nil
+  ;;                 :slant normal
+  ;;                 :weight light
+  ;;                 :width normal
+  ;;                 :foundry "GOOG"
+  ;;                 :family "Roboto Mono")))))
 #+END_SRC
 
 ** Parentheses
