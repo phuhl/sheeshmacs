@@ -528,8 +528,10 @@ schedule) add a corresponding end-hour.
   (eval
    `(use-package get-org-buffer-list
       :load-path "src"
+      :commands (show-org-file-list)
       :bind
-      (,(cons (my-bind "_Org Mode_ - Quick jump to Org-file") 'show-org-file-list)
+      (
+      ;; ,(cons (my-bind "_Org Mode_ - Quick jump to Org-file") 'show-org-file-list)
        ,(cons (my-bind "_Org Mode_ - Show agenda") 'run-agenda-with-agenda-files)
        ,(cons (my-bind "_Org Mode_ - Show all TODOs") 'run-todo-with-agenda-files))))
 #+END_SRC

@@ -293,34 +293,17 @@ Let's use combobulate, where it is available and smartparens as a fallback.
                       "src" "combobulate" "combobulate.el"))))
 #+END_SRC
 
-** Vimish fold
-
-https://github.com/mrkkrp/vimish-fold
+** Code hiding
 
 #+BEGIN_SRC emacs-lisp
-;;  (use-package vimish-fold
-;;    :ensure t
-;;    :init (vimish-fold-global-mode 1)
-;;    :config
-;;      (global-set-key (my-key "_Vimish_ - fold region") #'vimish-fold)
-;;      (global-set-key (my-key "_Vimish_ - delete region") #'vimish-fold-delete)
-;;      (global-set-key (my-key "_Vimish_ - toggle region") #'vimish-fold-toggle)
-;;      (global-set-key (my-key "_Vimish_ - toggle all") #'vimish-fold-toggle-all)
-;;
-;;    (custom-set-variables '(vimish-fold-header-width 50))
-;;    (custom-set-faces
-;;     '(vimish-fold-fringe ((t (:inherit nil
-;;                                        :background "dark cyan"
-;;                                        :foreground "spring green"))))))
+(defhydra hydra-hs-mode (:hint nil :color blue)
+      "Collapse Region"
+      ("b" hs-hide-block  "Hide block" )
+      ("l" hs-hide-level  "Hide level" )
+      ("TAB" hs-toggle-hiding  "Toggle region" )
+      (">" hs-show-all  "Show all" )
+      ("<" hs-hide-all  "Hide all" ))
 #+END_SRC
-
-|------------+---------------------------------------------|
-|            | *Vimish Fold*                                 |
-|            |                                             |
-| C-; f      | _Vimish_ - fold region                        |
-| C-; F      | _Vimish_ - delete region                      |
-| M-<tab>    | _Vimish_ - toggle region                      |
-| C-M-<tab>  | _Vimish_ - toggle all                         |
 
 ** Colored Hex/color-named Colors
 
@@ -439,8 +422,8 @@ https://github.com/mrkkrp/vimish-fold
    `(use-package magit
       :ensure t
       :defer t
-      :bind
-      (,(cons (my-bind "_Magit_ status") 'magit-status))
+      ;; :bind
+      ;; (,(cons (my-bind "_Magit_ status") 'magit-status))
       :config
       (define-key magit-mode-map (kbd "TAB") 'magit-section-cycle)
 
@@ -779,7 +762,8 @@ such a way that it uses RFC 4648 decoding.
       :ensure t
       :commands lsp
       :init
-      (setq lsp-keymap-prefix "C-; l")
+      ;; (setq lsp-keymap-prefix "C-; l") Conflicts with C-; hydra, if
+      ;; needed in future, re assign to something else
       :custom
       (lsp-eldoc-render-all t)
       (lsp-idle-delay 0.6)

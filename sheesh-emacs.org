@@ -21,6 +21,7 @@ information.
 | M-x        | M-x with _Counsel_                            |
 | C-x C-f    | Find file with _Counsel_                      |
 | C-\        | C-x as hydra                                |
+| C-;        | C-; hydra                                   |
 |------------+---------------------------------------------|
 |            | *Navigation*                                  |
 |            |                                             |
@@ -1609,3 +1610,36 @@ Other modes
     ("j"  jump-to-register "Jump to" ))
 #+END_SRC
 
+** C-; hydra
+
+
+#+BEGIN_SRC emacs-lisp
+    (defhydra hydra-C-semicollon (:hint nil :color blue)
+      "C-;"
+
+      ("," flyspell-goto-next-error "Next error" :column "Flyspell")
+      ("." toggle-truncate-lines "Autocorrect word")
+
+      (")" emojify-insert-emoji "Insert Emoji" :column "Editing")
+
+      (">" hydra-hs-mode/body "Manage Collapse Region" :column "Show")
+      ("TAB" hs-toggle-hiding "Toggle Collapse Region")
+
+      ("C-o" show-org-file-list "Show org files" :column "Org")
+
+      ("g" magit-status "Magit" :column "Project")
+      ("f" projectile-find-file "Find project file")
+      ("?" projectile-grep "Grep")
+      ("r" projectile-dired "Root dir")
+      ("/" projectile-replace-regexp "Replace Regexp")
+      ("k" projectile-kill-buffers "Kill project buffers"))
+
+
+  (global-set-key (my-key "C-; hydra") 'hydra-C-semicollon/body)
+#+END_SRC
+
+** So-long mode
+
+#+BEGIN_SRC emacs-lisp
+ (global-so-long-mode 1)
+#+END_SRC
