@@ -1744,7 +1744,9 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
 #+BEGIN_SRC emacs-lisp
   (use-package hcl-mode
     :ensure t
-    :mode ("\\.tf?\\'" . hcl-mode))
+    :mode ("\\.tf?\\'" . hcl-mode)
+    :config
+    (add-hook 'hcl-mode-hook 'run-sheesh-coding-hook))
 #+END_SRC
 
 ** C Sharp
