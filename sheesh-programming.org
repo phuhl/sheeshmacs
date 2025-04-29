@@ -687,24 +687,28 @@ such a way that it uses RFC 4648 decoding.
 ** Auto complete
 
 #+BEGIN_SRC emacs-lisp
-    (use-package company
-      :ensure
-      :custom
-      (company-idle-delay 0.5) ;; how long to wait until popup
-      ;; (company-begin-commands nil) ;; uncomment to disable popup
-      :config
-      (add-hook
-       'company-mode-hook
-       #'(lambda ()
-           (local-set-key (my-key "Autocomplete")
-                          'company-indent-or-complete-common)))
+  (use-package company
+    :ensure
+    :custom
+    (company-idle-delay 0.5) ;; how long to wait until popup
+    ;; (company-begin-commands nil) ;; uncomment to disable popup
+    :config
+    (add-hook
+     'company-mode-hook
+     #'(lambda ()
+         (local-set-key (my-key "Autocomplete")
+                        'company-indent-or-complete-common)))
 
-      :bind
-      (:map company-active-map
-            ("C-n". company-select-next)
-            ("C-p". company-select-previous)
-            ("M-<". company-select-first)
-            ("M->". company-select-last)))
+    :bind
+    (:map company-active-map
+          ("C-n". company-select-next)
+          ("C-p". company-select-previous)
+          ("M-<". company-select-first)
+          ("M->". company-select-last)))
+
+  (use-package company-box
+    :ensure
+    :hook (company-mode . company-box-mode))
 #+END_SRC
 
 ** Autocomplete UI
