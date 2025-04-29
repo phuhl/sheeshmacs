@@ -2,6 +2,6 @@
 # name: it
 # key: it
 # --
-it("$1", async () => {
+it("should $1", async () => {
     expect($0)
 });
