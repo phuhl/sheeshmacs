@@ -1175,7 +1175,7 @@ Issues?
 #+BEGIN_SRC emacs-lisp
   (use-package rjsx-mode
     :ensure t
-    ;; :mode ("\\.c?js$" . rjsx-mode)
+    :mode ("\\.c?m?js$" . rjsx-mode)
     :interpreter ("node" . rjsx-mode)
     :init
     ;; Set indentation to 2 spaces
@@ -1399,10 +1399,10 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.njk\\'" . web-mode)
            ("\\.djhtml\\'" . web-mode)
            ("\\.html?\\'" . web-mode)
-           ("\\.cjs$" . web-mode)
-           ("\\.js$" . web-mode)
-           ("\\.mjs$" . web-mode)
-           ("\\.jsx\\'" . web-mode)
+;;           ("\\.cjs$" . web-mode)
+;;           ("\\.js$" . web-mode)
+;;           ("\\.mjs$" . web-mode)
+;;           ("\\.jsx\\'" . web-mode)
            ("\\.ftl\\'" . web-mode))
     :config
     (setq web-mode-enable-front-matter-block t)
