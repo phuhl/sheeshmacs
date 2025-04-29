@@ -44,6 +44,7 @@ information.
 |            |                                             |
 | M-y        | Yank interactive                            |
 | M-Y        | Go forward in kill ring                     |
+| C-M-w      | Delete w/o adding to kill ring              |
 | C-=        | Expend selection to region                  |
 | C-; ,      | Go to next error with _Flyspell_              |
 | C-; .      | Autocorrect word with _Flyspell_              |
@@ -1015,7 +1016,8 @@ TransposeWindows. There may well be better ways to write this."
 
 ** Editing
 
-*** Killring backwards
+*** Killring
+
   #+BEGIN_SRC emacs-lisp
     ;; Killring backwards
     (defun yank-pop-forwards (arg)
@@ -1023,6 +1025,10 @@ TransposeWindows. There may well be better ways to write this."
       (yank-pop (- arg)))
 
     (global-set-key (my-key "Go forward in kill ring") 'yank-pop-forwards)
+
+
+    ;; Kill w/o adding to kill ring
+    (global-set-key (my-key "Delete w/o adding to kill ring") 'delete-region)
   #+END_SRC
 *** Multiple cursors
   #+BEGIN_SRC emacs-lisp

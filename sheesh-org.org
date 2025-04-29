@@ -216,6 +216,7 @@ Disabling some commands that are confusing or destructive:
                                'previous-multiframe-window)
                 (local-set-key (kbd "C-;") nil)
                 (local-set-key (kbd "C-,") nil)
+                (local-set-key (my-key "Delete w/o adding to kill ring") nil)
                 (local-set-key (my-key "Mode hydra") 'hydra-org-mode/body)))
     (define-key global-map (my-key "_Org Mode_ - Org capture") 'org-capture)
 #+END_SRC
