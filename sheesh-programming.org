@@ -1560,48 +1560,75 @@ See [[Spellchecking in JS]].
     :config
     (flycheck-add-mode 'javascript-eslint 'typescript-ts-mode)
     (flycheck-add-mode 'javascript-eslint 'tsx-ts-mode)
+
     (defhydra hydra-tsx-ts-mode (:hint nil :color blue)
       "Typescript"
-      ("X" tide-restart-server "Restart Tide"                     )
+      ("L" hydra-lsp-mode/body "LSP")
+
       ("c" hydra-combobulate/body "Combobulate" :column "Basic"   )
       ("e" tide-error-at-point "Error"          :column "Show"    )
       ("E" tide-project-errors "Project errors"                   )
-      ("d" tide-documentation-at-point "Doc at point"             )
-      ("," tide-references "References"                           )
+      ("d" lsp-describe-thing-at-point "Doc at point"             )
+      ("," lsp-find-references "References"                           )
+      ("C-," lsp-find-references-window "References (buffer)") 
       ("?" hydra-prog-mode-search/body "Search"                   )
-      ("r" tide-rename-symbol "Rename item"     :column "Refactor")
-      ("F" tide-rename-file "Rename file"                         )
-      ("i" tide-organize-imports "Organize imports"               )
-      ("." tide-fix "Fix"                       :column "Do"      )
+      ("r" lsp-rename "Rename item"     :column "Refactor")
+  ;;    ("F" tide-rename-file "Rename file"                         )
+      ("i" lsp-organize-imports "Organize imports"               )
+      ("." lsp-execute-code-action "Fix"                       :column "Do"      )
 
       ("s" sp-split-sexp "Split Group"              :column "Edit")
       ("j" sp-join-sexp "Join Group"                              )
       ("u" combobulate-vanish-node "Unmantle JSX"                 )
       ("w" combobulate-envelop "Wrap"                             )
       ("R" combobulate-edit-cluster-dwim "Edit node cluster"      )
-      ("t" tide-add-tslint-disable-next-line "TSLint disable"     )
+    ;;  ("t" tide-add-eslint-disable-next-line "ESLint disable"     )
 
       ("TAB" emmet-expand-line "Expand XML"        :column "Emmet"))
 
+    ;; (defhydra hydra-tsx-ts-mode (:hint nil :color blue)
+    ;;   "Typescript"
+    ;;   ("X" tide-restart-server "Restart Tide"                     )
+    ;;   ("c" hydra-combobulate/body "Combobulate" :column "Basic"   )
+    ;;   ("e" tide-error-at-point "Error"          :column "Show"    )
+    ;;   ("E" tide-project-errors "Project errors"                   )
+    ;;   ("d" tide-documentation-at-point "Doc at point"             )
+    ;;   ("," tide-references "References"                           )
+    ;;   ("?" hydra-prog-mode-search/body "Search"                   )
+    ;;   ("r" tide-rename-symbol "Rename item"     :column "Refactor")
+    ;;   ("F" tide-rename-file "Rename file"                         )
+    ;;   ("i" tide-organize-imports "Organize imports"               )
+    ;;   ("." tide-fix "Fix"                       :column "Do"      )
 
-    (use-package tide
-      :ensure t
-      :hook ((typescript-ts-mode . tide-setup)
-             (tsx-ts-mode . tide-setup))
-      :config
-      (setq tide-always-show-documentation t)
-      (setq company-tooltip-align-annotations t)
-      (flycheck-add-next-checker 'tsx-tide 'javascript-eslint)
-      ;; (setq flycheck-check-syntax-automatically '(save-mode-enabled))
-      (add-hook
-       'tide-mode-hook
-       #'(lambda ()
-           (eldoc-mode +1)
-           (tide-hl-identifier-mode +1)
-           (company-mode +1)
-           (flycheck-mode +1)
-           (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
-           (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append))))
+    ;;   ("s" sp-split-sexp "Split Group"              :column "Edit")
+    ;;   ("j" sp-join-sexp "Join Group"                              )
+    ;;   ("u" combobulate-vanish-node "Unmantle JSX"                 )
+    ;;   ("w" combobulate-envelop "Wrap"                             )
+    ;;   ("R" combobulate-edit-cluster-dwim "Edit node cluster"      )
+    ;;   ("t" tide-add-eslint-disable-next-line "ESLint disable"     )
+
+    ;;   ("TAB" emmet-expand-line "Expand XML"        :column "Emmet"))
+
+
+
+    ;; (use-package tide
+    ;;   :ensure t
+    ;;   :hook ((typescript-ts-mode . tide-setup)
+    ;;          (tsx-ts-mode . tide-setup))
+    ;;   :config
+    ;;   (setq tide-always-show-documentation t)
+    ;;   (setq company-tooltip-align-annotations t)
+    ;;   (flycheck-add-next-checker 'tsx-tide 'javascript-eslint)
+    ;;   ;; (setq flycheck-check-syntax-automatically '(save-mode-enabled))
+    ;;   (add-hook
+    ;;    'tide-mode-hook
+    ;;    #'(lambda ()
+    ;;        (eldoc-mode +1)
+    ;;        (tide-hl-identifier-mode +1)
+    ;;        (company-mode +1)
+    ;;        (flycheck-mode +1)
+    ;;        (flycheck-add-next-checker 'tsx-tide 'javascript-eslint 'append)
+    ;;        (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append))))
 
 
     (add-hook 'typescript-ts-mode-hook 'setup-ts-mode)
@@ -1611,6 +1638,7 @@ See [[Spellchecking in JS]].
       (run-sheesh-coding-hook)
       (combobulate-mode)
       (flycheck-mode)
+      (lsp-mode)
       (emmet-mode)
       (setup-cycle-quotes)
       (local-set-key (my-key "Mode hydra") 'hydra-tsx-ts-mode/body))
