@@ -1839,3 +1839,21 @@ Not tested, but maybe useful: https://github.com/elizagamedev/unity.el
                                  (setq-local comment-start "//")
                                  (setq-local comment-end   ""))))
 #+END_SRC
+
+** Groovy
+
+#+BEGIN_SRC emacs-lisp
+  (use-package groovy-mode
+    :ensure t
+    :config
+    (add-hook 'groovy-mode-hook 'run-sheesh-coding-hook))
+#+END_SRC
+
+** GLSL
+
+#+BEGIN_SRC emacs-lisp
+  (use-package glsl-mode
+    :ensure t
+    :config
+    (add-hook 'glsl-mode-hook 'run-sheesh-coding-hook))
+#+END_SRC
