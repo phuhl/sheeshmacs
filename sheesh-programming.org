@@ -928,6 +928,13 @@ such a way that it uses RFC 4648 decoding.
 ** Copilot
 
 #+BEGIN_SRC emacs-lisp
+  ;;(use-package copilot
+  ;;  :vc (:url "https://github.com/copilot-emacs/copilot.el"
+  ;;            :rev :newest
+  ;;            :branch "main")
+  ;;            :hook (prog-mode . copilot-mode)
+  ;;            )
+  ;;
   (use-package copilot
     :load-path (lambda ()
                  (list (file-name-concat
@@ -936,14 +943,14 @@ such a way that it uses RFC 4648 decoding.
     :hook (prog-mode . copilot-mode))
 
 
-    (defhydra hydra-copilot (:color blue :hint nil)
-      "Copilot"
-      ("TAB" copilot-complete "Complete" :column "Sugest" :color red)
+  (defhydra hydra-copilot (:color blue :hint nil)
+    "Copilot"
+    ("TAB" copilot-complete "Complete" :column "Sugest" :color red)
 
-      ("c" copilot-accept-completion "Accept" :column "Completion")
-      ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
-      ("n" copilot-next-completion "Next completion" :color red)
-      ("p" copilot-previous-Completion "Prev completion" :color red))
+    ("c" copilot-accept-completion "Accept" :column "Completion")
+    ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
+    ("n" copilot-next-completion "Next completion" :color red)
+    ("p" copilot-previous-Completion "Prev completion" :color red))
 #+END_SRC
 
 ** Indentation guides
