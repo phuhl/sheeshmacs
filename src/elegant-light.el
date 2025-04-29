@@ -43,37 +43,91 @@
 
 ;;; General colors
 ;;; -------------------------------------------------------------------
-(set-background-color "#ffffff")
-(set-foreground-color "#111111")
-(set-face-attribute 'default nil
-        :foreground (face-foreground 'default)
-        :background (face-background 'default)
-        :weight 'light)
-(set-face-attribute 'face-critical nil :foreground "#ffffff"
-        :background "#ff6347")
-(set-face-attribute 'face-popout nil :foreground "#ffa07a")
-(set-face-attribute 'face-strong nil :foreground "#222222"
-                    :weight 'bold)
-(set-face-attribute 'italic nil :slant 'italic)
-(set-face-attribute 'bold-italic nil :slant 'italic)
-(set-face-attribute 'face-salient nil :foreground "#a0008b"
-        :weight 'light)
-(set-face-attribute 'face-salient-strong nil :foreground "#a0008b"
-        :weight 'bold)
-(set-face-attribute 'face-faded nil :foreground  "#999999"
-        :weight 'light)
-(set-face-attribute 'face-subtle nil :background "#e0e0e0")
-(set-face-attribute 'face-backlit nil :background "#f0f0f0" :foreground "#000000")
+(custom-theme-set-faces
+  'elegant-light
 
-(set-face-attribute 'face-underline-error nil
-                    :underline '(:color "#f00" :style wave))
-(set-face-attribute 'face-underline-warning nil
-                    :underline '(:color "#ffa07a" :style wave))
+  '(cursor ((t (:foreground "#111111" :background "#ffffff"))))
+  '(outline-box ((t (:line-width 5 :color "#ffffff"))))
+
+  '(default (( nil (
+                    :background "#ffffff"
+                    :foreground "#111111"
+                    :weight light
 
 
-(elegant-buttons)
+                    :inherit nil :extend nil :stipple nil
+                    :inverse-video nil :box nil :strike-through nil
+                    :overline nil :underline nil :slant normal
+                    :width normal :foundry "GOOG"
+                    :family "Roboto Mono"))))
+  '(face-critical (( nil ( :foreground "#ffffff"
+                           :background "#ff6347"))))
+  '(face-popout ((nil ( :foreground "#ffa07a"
+                        :background "#ffffff"))))
+  '(face-strong (( nil ( :foreground "#222222"
+                         :background "#ffffff"
+                         :weight bold))))
+  '(italic ((nil ( :slant italic
+                   :background "#ffffff"
+                   :foreground "#111111"))))
+  '(bold-italic ((nil ( :slant italic
+                        :background "#ffffff"
+                        :foreground "#111111"))))
+  '(face-salient (( nil ( :foreground "#a0008b"
+                          :background "#ffffff"
+                          :weight light))))
+  '(face-salient-strong (( nil ( :foreground "#a0008b"
+                                 :background "#ffffff"
+                                 :weight bold))))
+  '(face-faded (( nil ( :foreground  "#999999"
+                        :background "#ffffff"
+                        :weight light))))
+  '(face-subtle ((nil ( :foreground "#111111"
+                        :background "#e0e0e0"))))
+  '(face-backlit (( nil ( :background "#f0f0f0"
+                          :foreground "#000000"))))
+
+  '(face-underline-error nil
+                         :underline (:color "#f00" :style wave))
+  '(face-underline-warning nil
+                           :underline (:color "#ffa07a" :style wave))
+
+
+  '(header-line ((nil ( :underline "#111111"))))
+  '(mode-line ((nil ( :underline "#111111"
+                      :foreground "#ffffff"
+                      :background "#ffffff"))))
+  '(window-divider ((nil ( :foreground "#ffffff"))))
+  '(window-divider-first-pixel ((nil ( :foreground "#ffffff"))))
+  '(window-divider-last-pixel ((nil ( :foreground "#ffffff"))))
+
+  '(rainbow-delimiters-depth-2-face
+    ((t (:inherit rainbow-delimiters-base-face :foreground "blue"))))
+  '(rainbow-delimiters-depth-3-face
+    ((t (:inherit rainbow-delimiters-base-face :foreground "green"))))
+  '(rainbow-delimiters-depth-4-face
+    ((t (:inherit rainbow-delimiters-base-face :foreground "goldenrod"))))
+  '(rainbow-delimiters-depth-5-face
+    ((t (:inherit rainbow-delimiters-base-face :foreground "red4"))))
+  '(rainbow-delimiters-depth-6-face
+    ((t (:inherit rainbow-delimiters-base-face :foreground "magenta"))))
+  '(rainbow-delimiters-depth-7-face
+    ((t (:inherit rainbow-delimiters-base-face :foreground "cyan"))))
+  '(rainbow-delimiters-depth-8-face
+    ((t (:inherit rainbow-delimiters-base-face :foreground "sea green"))))
+  '(rainbow-delimiters-depth-9-face
+    ((t (:inherit rainbow-delimiters-base-face :foreground "tomato"))))
+  )
+
+
+;;(elegant-buttons)
 ;;; -------------------------------------------------------------------
 
+
+;;;###autoload
+(when load-file-name
+  (add-to-list 'custom-theme-load-path
+               (file-name-as-directory (file-name-directory load-file-name))))
 
 ;;; Provide the elegant-emacs-dark theme
 ;;; -------------------------------------------------------------------

@@ -153,12 +153,17 @@ background color that is barely perceptible."
 
 ;; General
 ;;; -------------------------------------------------------------------
+(set-face 'header-line                                   'face-strong)
+(set-face 'mode-line-inactive                            'mode-line)
+(set-face-attribute 'mode-line nil                       :height 10
+                                                         :overline nil
+                                                         :box nil)
 (set-face 'buffer-menu-buffer                            'face-strong)
 (set-face 'minibuffer-prompt                             'face-strong)
-(set-face 'link                                         'face-salient)
-(set-face 'fringe                                         'face-faded)
+(set-face 'link                                          'face-salient)
+(set-face 'fringe                                        'face-faded)
 (set-face 'isearch                                       'face-strong)
-(set-face 'isearch-fail                                   'face-faded)
+(set-face 'isearch-fail                                  'face-faded)
 (set-face 'lazy-highlight                                'face-subtle)
 (set-face 'trailing-whitespace                           'face-subtle)
 (set-face 'show-paren-match                              'face-popout)
@@ -192,6 +197,10 @@ background color that is barely perceptible."
 
 ;;; -------------------------------------------------------------------
 
+
+;;; Dired
+(with-eval-after-load 'dired
+  (set-face 'dired-directory                       'face-strong))
 
 
 ;;; Dired subtree

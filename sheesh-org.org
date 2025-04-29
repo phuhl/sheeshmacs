@@ -73,13 +73,6 @@ much more like reading and editing of code using its major mode.
     :config (setq org-bullets-bullet-list (quote ("●" "◎" "○" "■" "□" "◆" "◇"))))
 #+end_src
 
-** Org-sub-Theme
-
-#+begin_src emacs-lisp
- (load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
- (enable-theme 'org-beautify)
-#+end_src
-
 ** Clock-information
 
 https://gist.github.com/rougier/baaf4ff6e0461680e3f070c5c32b64a2

@@ -256,6 +256,15 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
 
 #+BEGIN_SRC emacs-lisp
 (load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
+(load-file (concat sheeshmacs-dir "/src/elegant-dark.el"))
+(load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
+;; (enable-theme 'elegant-dark)
+
+(use-package auto-dark
+  :ensure t
+  :init (auto-dark-mode)
+  :custom
+  (auto-dark-themes '((elegant-dark org-beautify) (elegant-light org-beautify))))
 #+END_SRC
 
 ** Modeline

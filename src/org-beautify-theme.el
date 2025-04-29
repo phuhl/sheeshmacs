@@ -36,11 +36,8 @@ really bad under some circumstances."
                         ((x-list-fonts "Verdana") '(:font "Verdana"))
                         ((x-family-fonts "Sans Serif") '(:family "Sans Serif"))
                         (nil (warn "Cannot find a Sans Serif Font.  Please report at: https://github.com/jonnay/org-beautify-theme/issues"))))
-       (base-font-color (face-foreground 'default  nil 'default))
-       (background-color (face-background 'default nil 'default))
-       (headline `(:inherit default :foreground ,base-font-color))
        (padding (if org-beautify-theme-use-box-hack
-                    `(:line-width 5 :color ,background-color)
+                    `:inherit outline-box
                     nil)))
   (custom-theme-set-faces
    'org-beautify
@@ -48,33 +45,33 @@ really bad under some circumstances."
      ((t (:inherit org-agenda-structure :foreground "#666666" :height 0.8))))
    `(org-agenda-date-today
      ((t (:inherit org-agenda-date
-                   :background ,(face-foreground 'org-agenda-done nil 'default)
-                   :foreground "#000000" :box nil
+                   :box nil
                    :underline nil :weight bold :height 1.1))))
    `(org-agenda-structure
      ((t (:inherit default
                    :box nil
                    :underline nil :weight bold
                    :height 1.2))))
-   `(org-level-8 ((t (,@headline ,@sans-font :height 1.1))))
-   `(org-level-7 ((t (,@headline ,@sans-font :height 1.1))))
-   `(org-level-6 ((t (,@headline ,@sans-font :height 1.1))))
-   `(org-level-5 ((t (,@headline ,@sans-font :height 1.1))))
-   `(org-level-4 ((t (,@headline ,@sans-font :height 1.1))))
-   `(org-level-3 ((t (,@headline ,@sans-font :height 1.2 :box ,padding))))
-   `(org-level-2 ((t (,@headline ,@sans-font :height 1.3 :box ,padding))))
-   `(org-level-1 ((t (,@headline ,@sans-font :height 1.5  :box ,padding ))))
+   `(org-level-8 ((t (:inherit default ,@sans-font :height 1.1))))
+   `(org-level-7 ((t (:inherit default ,@sans-font :height 1.1))))
+   `(org-level-6 ((t (:inherit default ,@sans-font :height 1.1))))
+   `(org-level-5 ((t (:inherit default ,@sans-font :height 1.1))))
+   `(org-level-4 ((t (:inherit default ,@sans-font :height 1.1))))
+   `(org-level-3 ((t (:inherit default ,@sans-font :height 1.2 ,padding))))
+   `(org-level-2 ((t (:inherit default ,@sans-font :height 1.3 ,padding))))
+   `(org-level-1 ((t (:inherit default ,@sans-font :height 1.5 ,padding ))))
    `(org-document-title
-     ((t (:inherit org-level-1 :height 2.0 :underline nil :box ,padding))))
+     ((t (:inherit org-level-1 :height 2.0 :underline nil ,padding))))
    `(org-block-begin-line
-     ((t :foreground ,base-font-color :background, background-color :weight bold)))
+     ((t :inherit default :weight bold)))
    `(org-block-end-line
-     ((t :foreground ,base-font-color :background, background-color  :weight bold)))
-   `(org-block ((t (:box nil :background ,(face-background 'face-backlit)))))
-   `(org-code ((t :background ,(face-background 'face-backlit))))
+     ((t :inherit default :weight bold)))
+   `(org-block ((t (:box nil :inherit face-backlit ))))
+   `(org-code ((t :inherit face-backlit )))
    `(org-checkbox
-     ((t (:foreground "#000000", :background "#93a1a1"
-                      :box (:line-width -3 :color "#93a1a1" :style "released-button")))))
+     ((t (:foreground "#000000"
+                      :background "#93a1a1"
+                      :box (:line-width -3 :color "#93a1a1")))))
 
    `(org-headline-done ((t (:strike-through t))))
    `(org-done ((t (:strike-through t))))))
