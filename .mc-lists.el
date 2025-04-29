@@ -13,11 +13,15 @@
         combobulate-my-menu/combobulate-javascript-jsx-rename-element
         combobulate-navigate-down-list-backward-maybe
         combobulate-navigate-down-list-maybe
+        combobulate-navigate-next
+        combobulate-navigate-up-list-backward-maybe
+        combobulate-navigate-up-list-maybe
         comment-dwim
         company-indent-or-complete-common
         complete-symbol
         counsel-yank-pop
         cycle-spacing
+        dabbrev-expand
         dap-tooltip-mouse-motion
         delete-horizontal-space
         dired-toggle-read-only
@@ -28,9 +32,15 @@
         fill-paragraph
         forward-sexp
         haskell-indentation-common-electric-command
+        hydra-combobulate/combobulate-edit-cluster-dwim-and-exit
+        hydra-combobulate/combobulate-navigate-backward
+        hydra-combobulate/combobulate-navigate-forward
+        hydra-combobulate/combobulate-navigate-next
         hydra-multiple-cursors/lambda-s-and-exit
         hydra-phi-search/lambda-C-v
         hydra-phi-search/lambda-C-w
+        hydra-tsx-ts-mode/body
+        hydra-tsx-ts-mode/hydra-combobulate/body-and-exit
         indent-for-tab-command
         kill-region
         mark-sexp
@@ -48,6 +58,7 @@
         org-yank
         phi-search
         reposition-window
+        rjsx-delete-creates-full-tag
         slime-autodoc-space
         sp-backward-down-sexp
         sp-backward-sexp
@@ -56,6 +67,7 @@
         sp-down-sexp
         sp-forward-sexp
         sp-forward-slurp-sexp
+        sp-next-sexp
         sp-unwrap-sexp
         sp-up-sexp
         split-line
