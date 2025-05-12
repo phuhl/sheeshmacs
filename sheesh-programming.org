@@ -1806,11 +1806,37 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
 ** Terraform
 
 #+BEGIN_SRC emacs-lisp
-  (use-package hcl-mode
-    :ensure t
-    :mode ("\\.tf?\\'" . hcl-mode)
-    :config
-    (add-hook 'hcl-mode-hook 'run-sheesh-coding-hook))
+  ;; (use-package hcl-mode
+  ;;   :ensure t
+  ;;   :mode ("\\.tf?\\'" . hcl-mode)
+  ;;   :config
+  ;;   (add-hook 'hcl-mode-hook 'run-sheesh-coding-hook))
+
+
+  (use-package terraform-mode
+      :ensure t
+      :custom
+      (terraform-format-on-save t)
+      :config
+      (add-hook 'terraform-mode-hook 'run-sheesh-coding-hook)
+      (add-hook 'terraform-mode-hook
+                (lambda ()
+                  (local-set-key (my-key "Mode hydra") 'hydra-terraform/body)
+                  (lsp-mode)))
+      :hydra
+      (hydra-terraform (:hint nil)
+                       "terraform"
+        ("L" hydra-lsp-mode/body "LSP")
+        ("j" lsp-ui-imenu "Menu")
+        ("." lsp-execute-code-action "Fix" :column "Do")
+        ("r" lsp-rename "Rename")
+        ("R" terraform-format-buffer "Format buffer")
+        ("," lsp-find-references "Reference" :column "Show")
+        ("C-," lsp-find-references-window "References (buffer)"     ) 
+        ("M-." xref-find-definitions-other-window "Goto Definition (other buf)")
+        ("d" terraform-open-doc "Open Doc for Block")
+        ("l" flycheck-list-errors "List errors")
+        ("?" hydra-prog-mode-search/body "Search" :color blue)))
 #+END_SRC
 
 ** C Sharp
