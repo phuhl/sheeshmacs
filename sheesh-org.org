@@ -156,6 +156,17 @@ https://gist.github.com/rougier/baaf4ff6e0461680e3f070c5c32b64a2
   ;; Sets default clock report table properties
   (setq org-clock-clocktable-default-properties
         '(:maxlevel 10 :scope tree :properties ("Effort") :compact t))
+
+  ;; Custom agenda view: regular agenda + unscheduled TODOs
+  (setq org-agenda-custom-commands
+        '(("n" "Agenda + Unscheduled TODOs"
+           ((agenda "" nil)
+            (tags-todo "TIMESTAMP>=\"<-7d>\"&TIMESTAMP<=\"<-1d>\""
+                       ((org-agenda-overriding-header "Past Timestamped TODOs")))
+            (alltodo ""
+                     ((org-agenda-overriding-header "Unscheduled TODOs")
+                      (org-agenda-skip-function
+                       '(org-agenda-skip-entry-if 'scheduled 'deadline 'timestamp))))))))
 #+END_SRC
 
 Disabling some commands that are confusing or destructive:
