@@ -257,10 +257,10 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
 ** Theme
 
 #+BEGIN_SRC emacs-lisp
-(load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
-(load-file (concat sheeshmacs-dir "/src/elegant-dark.el"))
-(load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
-(load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/elegant-dark.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
 
 ;; (enable-theme 'elegant-dark)
 
@@ -1277,7 +1277,7 @@ Install the required dictionaries!
     :ensure t
     :mode ("restclient\\'" . restclient-mode)
     :config
-    (load-file (concat sheeshmacs-dir "/src/restclient-jq.el")))
+    (sheeshmacs-load-file (concat sheeshmacs-dir "/src/restclient-jq.el")))
   (use-package ob-restclient
     :ensure t)
   (use-package jq-mode

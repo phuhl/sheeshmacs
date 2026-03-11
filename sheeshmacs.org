@@ -144,7 +144,27 @@ automatically regenerated when you next start emacs.
   #+END_SRC
 
 ** Load-sheeshmacs-config function
-Function for loading other parts of sheeshmacs
+Helper for byte-compiling and loading individual .el files.
+  #+name: sheeshmacs-load-file
+  #+BEGIN_SRC emacs-lisp
+    (defun sheeshmacs-load-file (file)
+      "Byte-compile FILE if needed, then load the compiled version.
+    FILE should be an absolute path to an .el file.
+    Respects the `no-byte-compile' file-local variable."
+      (let* ((elc (concat file "c"))
+             (no-compile (with-temp-buffer
+                           (insert-file-contents file)
+                           (goto-char (point-max))
+                           (search-backward "no-byte-compile: t" nil t))))
+        (when (and (not no-compile)
+                   (or (not (file-exists-p elc))
+                       (file-newer-than-file-p file elc)))
+          (ignore-errors (byte-compile-file file)))
+        (load-file (if (file-exists-p elc) elc file))))
+  #+END_SRC
+
+Function for loading other parts of sheeshmacs.
+Tangles .org to .el (only when needed), byte-compiles, then loads.
   #+name: sheeshmacs-load
   #+BEGIN_SRC emacs-lisp
     (defun sheeshmacs-load (file &optional header-or-tag)
@@ -156,40 +176,47 @@ Function for loading other parts of sheeshmacs
 
     For example, to load all of sheesh-org.org simply
     add (sheeshmacs-load \"org\") to your configuration."
-      (let ((file (expand-file-name (if (string-match "sheesh-.+\.org" file)
-                                        file
-                                      (format "sheesh-%s.org" file))
-                                    sheeshmacs-dir)))
-        (org-babel-load-file
-         (if header-or-tag
-             (let* ((base (file-name-nondirectory file))
-                    (dir  (file-name-directory file))
-                    (partial-file (expand-file-name
-                                   (concat "." (file-name-sans-extension base)
-                                           ".part." header-or-tag ".org")
-                                   dir)))
-               (unless (file-exists-p partial-file)
-                 (with-temp-file partial-file
-                   (insert
-                    (with-temp-buffer
-                      (insert-file-contents file)
-                      (save-excursion
-                        (condition-case nil ;; collect as a header
-                            (progn
-                              (org-link-search (concat"#"header-or-tag))
-                              (org-narrow-to-subtree)
-                              (buffer-string))
-                          (error ;; collect all entries with as tags
-                           (let (body)
-                             (org-map-entries
-                              (lambda ()
-                                (save-restriction
-                                  (org-narrow-to-subtree)
-                                  (setq body (concat body "\n" (buffer-string)))))
-                              header-or-tag)
-                             body))))))))
-               partial-file)
-           file))))
+      (let* ((org-file (expand-file-name (if (string-match "sheesh-.+\.org" file)
+                                             file
+                                           (format "sheesh-%s.org" file))
+                                         sheeshmacs-dir))
+             (org-file (if header-or-tag
+                           (let* ((base (file-name-nondirectory org-file))
+                                  (dir  (file-name-directory org-file))
+                                  (partial-file (expand-file-name
+                                                 (concat "." (file-name-sans-extension base)
+                                                         ".part." header-or-tag ".org")
+                                                 dir)))
+                             (unless (file-exists-p partial-file)
+                               (with-temp-file partial-file
+                                 (insert
+                                  (with-temp-buffer
+                                    (insert-file-contents org-file)
+                                    (save-excursion
+                                      (condition-case nil ;; collect as a header
+                                          (progn
+                                            (org-link-search (concat"#"header-or-tag))
+                                            (org-narrow-to-subtree)
+                                            (buffer-string))
+                                        (error ;; collect all entries with as tags
+                                         (let (body)
+                                           (org-map-entries
+                                            (lambda ()
+                                              (save-restriction
+                                                (org-narrow-to-subtree)
+                                                (setq body (concat body "\n" (buffer-string)))))
+                                            header-or-tag)
+                                           body))))))))
+                             partial-file)
+                         org-file))
+             (el-file (concat (file-name-sans-extension org-file) ".el")))
+        ;; Tangle .org → .el only when needed
+        (when (or (not (file-exists-p el-file))
+                  (file-newer-than-file-p org-file el-file))
+          (require 'ob-tangle)
+          (org-babel-tangle-file org-file el-file "emacs-lisp"))
+        ;; Byte-compile if needed, then load
+        (sheeshmacs-load-file el-file)))
   #+END_SRC
 
 ** Polyfills
