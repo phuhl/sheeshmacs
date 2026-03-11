@@ -185,7 +185,8 @@ Disabling some commands that are confusing or destructive:
     ("=" org-wrap-code "Make code")
     ("_" org-wrap-underline "Make underline")
 
-    ("c" ox-clip-formatted-copy "Copy formated" :column "Export/Import")
+    ("c" ox-clip-formatted-copy "Copy formatted" :column "Export/Import")
+    ("y" org-paste-html-clipboard "Paste HTML as Org" :column "Export/Import")
 
     ("i" org-toggle-inline-images "Toggle inline images" :column "Display")
     ("n" org-toggle-narrow-to-subtree "Toggle narrow subtree")
@@ -558,6 +559,36 @@ schedule) add a corresponding end-hour.
                      (+ 1 (string-to-number (format-time-string "%W"))))
                     "\n\n** Montag\n\n** Dienstag\n\n** Mittwoch\n\n** Donnerstag\n\n** Freitag"
                     )))
+#+END_SRC
+
+** Paste HTML as Org
+
+Pastes HTML from the system clipboard as org-mode markup using pandoc.
+Falls back to plain text if no HTML is available.
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-paste-html-clipboard ()
+    "Paste HTML from clipboard as org-mode markup via pandoc.
+  Falls back to regular yank if no HTML is on the clipboard."
+    (interactive)
+    (let* ((raw (string-trim
+                  (shell-command-to-string
+                   "powershell -command \"Get-Clipboard -TextFormatType Html\"")))
+            (html (if (string-match "^Version:.*\n\\(?:[A-Za-z].*\n\\)*" raw)
+                      (substring raw (match-end 0))
+                    raw)))
+      (if (or (string-empty-p html) (string-match-p "is not valid" raw))
+          (yank)
+        (insert (string-trim
+                 (with-temp-buffer
+                   (insert html)
+                   (shell-command-on-region (point-min) (point-max)
+                                           "pandoc -f html -t org --wrap=none"
+                                           t t)
+                   (goto-char (point-min))
+                   (while (search-forward "\u00a0" nil t)
+                     (replace-match " "))
+                   (buffer-string)))))))
 #+END_SRC
 
 ** Ox-Clip: Formatted copy/paste
