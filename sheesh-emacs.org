@@ -952,6 +952,27 @@ TransposeWindows. There may well be better ways to write this."
       (global-set-key (my-key "Find file with _Counsel_") 'counsel-find-file)
       (global-set-key (my-key "Yank interactive") 'counsel-yank-pop)
 
+      ;; "/" enters the highlighted directory if it is one, but inserts
+      ;; a literal "/" when typing path components like ../ or ~/
+      (defun counsel-find-file-slash ()
+        "Enter highlighted directory, or navigate up for ../"
+        (interactive)
+        (cond
+         ;; ../ → go up a directory
+         ((string= ivy-text "..")
+          (ivy--cd (file-name-directory
+                    (directory-file-name ivy--directory))))
+         ;; ./ or ~/ → insert literal /
+         ((string-match-p "\\(^\\|/\\)\\.$\\|^~$" ivy-text)
+          (self-insert-command 1))
+         ;; highlighted item is a directory → enter it
+         ((let ((current (ivy-state-current ivy-last)))
+            (and current (string-suffix-p "/" current)))
+          (ivy-alt-done))
+         ;; default → insert literal /
+         (t (self-insert-command 1))))
+      (define-key counsel-find-file-map (kbd "/") 'counsel-find-file-slash)
+
       (defun crgrep ()
         "Search in current buffers directory with counsel-rg."
         (interactive)
