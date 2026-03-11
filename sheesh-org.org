@@ -606,7 +606,41 @@ wl-copy -t text/html < "$1"
   (use-package ox-clip :ensure t
     :config
     (if (eq (detect-os-display-type) 'wayland)
-        (setq ox-clip-linux-cmd "ox-clip \"%f\"")))
+        (setq ox-clip-linux-cmd "ox-clip \"%f\""))
+
+    ;; On Windows, override ox-clip's synchronous shell-command-on-region
+    ;; with an async start-process approach to avoid clipboard deadlock
+    (when (eq system-type 'windows-nt)
+      (defvar ox-clip-w32-ps1
+        (expand-file-name "src/html-clip-w32.ps1" sheeshmacs-dir))
+
+      (advice-add 'ox-clip-formatted-copy :around
+        (lambda (orig-fun r1 r2 &optional subtreep)
+          (if (null subtreep)
+              (copy-region-as-kill r1 r2)
+            (org-mark-subtree)
+            (org-copy-subtree))
+          (save-window-excursion
+            (let* ((html-buf (if (equal major-mode 'org-mode)
+                                 (org-export-to-buffer 'html "*Formatted Copy*"
+                                   nil subtreep (not subtreep) t)
+                               (let ((buf (generate-new-buffer "*Formatted Copy*")))
+                                 (with-current-buffer buf
+                                   (insert (htmlize-region-for-paste r1 r2)))
+                                 buf)))
+                   (tmpfile (make-temp-file "ox-clip-" nil ".html"
+                              (with-current-buffer html-buf (buffer-string))))
+                   (proc (start-process "ox-clip" "*ox-clip*"
+                           "powershell" "-NoProfile" "-STA"
+                           "-ExecutionPolicy" "Bypass"
+                           "-File" ox-clip-w32-ps1
+                           "-InputFile" tmpfile)))
+              (set-process-query-on-exit-flag proc nil)
+              (set-process-sentinel proc
+                (lambda (p e)
+                  (when (eq (process-status p) 'exit)
+                    (message "Copied to clipboard"))))
+              (kill-buffer html-buf)))))))
 #+END_SRC
 
 From the documentation:
