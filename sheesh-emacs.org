@@ -257,6 +257,7 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
 ** Theme
 
 #+BEGIN_SRC emacs-lisp
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/elegant.el"))
 (sheeshmacs-load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
 (sheeshmacs-load-file (concat sheeshmacs-dir "/src/elegant-dark.el"))
 (sheeshmacs-load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
