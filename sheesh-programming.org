@@ -857,12 +857,8 @@ such a way that it uses RFC 4648 decoding.
 #+BEGIN_SRC emacs-lisp
 (use-package dap-mode
   :ensure t
-  ;; Uncomment the config below if you want all UI panes to be hidden by default!
-  ;; :custom
-  ;; (lsp-enable-dap-auto-configure nil)
-  ;; :config
-
-
+  :defer t
+  :commands (dap-debug dap-debug-edit-template dap-breakpoint-toggle)
   :config
   (dap-ui-mode 1)
   ;; Set up Node debugging
