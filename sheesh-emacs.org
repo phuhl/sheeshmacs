@@ -1527,15 +1527,8 @@ Other modes
 ;;    (load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
 ;;    (enable-theme 'md-beautify)
     (setq markdown-fontify-code-blocks-natively t)
-    (font-lock-add-keywords 'markdown-mode
-                            '(("^[ 	]+\\([*]\\) "
-                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "◦"))))))
-    (font-lock-add-keywords 'markdown-mode
-                            '(("^[ 	]*\\([+]\\) "
-                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "✧"))))))
-    (font-lock-add-keywords 'markdown-mode
-                            '(("^[ 	]*\\([-]\\) "
-                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+    (setq markdown-hide-markup t)
+    (setq markdown-list-item-bullets '("•" "◦" "✧"))
 
     (defhydra hydra-markdown-mode-formatting (:hint nil) "MD Formatting/Headings"
       ("h" markdown-insert-header-dwim "Header dwim" :column "Heading")
@@ -1574,12 +1567,105 @@ Other modes
       ("W" markdown-insert-wiki-link "Wiki-link" :color blue)
       ("R" markdown-insert-reference-link-dwim "Reference-link-dwim" :color blue))
 
+    :config
+    ;; Override HR rendering: replace text with a full-width space
+    ;; (adapts to resize) and draw the line via face decoration.
+    ;; Style matches the HR character: --- → strike-through,
+    ;; ___ → underline, *** → overline.
+    (advice-add 'markdown--fontify-hrs-view-mode :override
+      (lambda (_hr-char)
+        (let* ((hr-text (match-string 1))
+               (face (cond
+                      ((string-match-p "^_" hr-text)
+                       '(:inherit markdown-hr-face :underline t))
+                      ((string-match-p "^\\*" hr-text)
+                       '(:inherit markdown-hr-face :overline t))
+                      (t
+                       '(:inherit markdown-hr-face :strike-through t)))))
+          (add-text-properties
+           (match-beginning 0) (match-end 0)
+           `(face ,face font-lock-multiline t
+                  display (space :align-to right-fringe))))))
+
+    ;; Reveal markup on current line, re-hide when cursor moves away.
+    ;; Works like org-appear does for org-mode.
+    (defvar-local markdown--reveal-prev-line nil
+      "Line number where markup was last revealed.")
+
+    (defun markdown--reveal-line (bol eol)
+      "Strip hiding properties from a single line BOL..EOL."
+      (remove-text-properties bol eol
+        '(invisible nil display nil composition nil))
+      (when (get-text-property bol 'markdown-hr)
+        (remove-text-properties bol eol '(face nil))))
+
+    (defun markdown--fix-markup-display (beg end)
+      "Fix hidden markup display between BEG and END.
+Tables: replace invisible markup with spaces for column alignment.
+Also re-reveals the cursor line if font-lock just re-hid it."
+      (when (bound-and-true-p markdown-hide-markup)
+        (with-silent-modifications
+          (save-excursion
+            (goto-char beg)
+            (while (< (point) end)
+              (when (markdown-table-at-point-p)
+                (let ((pos (line-beginning-position))
+                      (eol (line-end-position)))
+                  (while (< pos eol)
+                    (let ((inv  (get-text-property pos 'invisible))
+                          (disp (get-text-property pos 'display)))
+                      (when (or (eq inv 'markdown-markup)
+                                (equal disp ""))
+                        (when (eq inv 'markdown-markup)
+                          (put-text-property pos (1+ pos) 'invisible nil))
+                        (put-text-property pos (1+ pos) 'display " ")))
+                    (setq pos (1+ pos)))))
+              (forward-line 1))
+            ;; Re-reveal cursor line if it was in the fontified region
+            (when markdown--reveal-prev-line
+              (goto-char (point-min))
+              (forward-line (1- markdown--reveal-prev-line))
+              (when (and (>= (point) beg) (< (point) end))
+                (markdown--reveal-line
+                 (line-beginning-position) (line-end-position))))))))
+
+    (defun markdown--reveal-at-point ()
+      "Reveal hidden markup on the current line, re-hide the previous line."
+      (when (and (bound-and-true-p markdown-hide-markup)
+                 (derived-mode-p 'markdown-mode 'gfm-mode))
+        (let ((cur (line-number-at-pos)))
+          (unless (eq cur markdown--reveal-prev-line)
+            ;; Re-hide previous line by re-fontifying it
+            (when markdown--reveal-prev-line
+              (save-excursion
+                (goto-char (point-min))
+                (forward-line (1- markdown--reveal-prev-line))
+                (let ((bol (line-beginning-position))
+                      (eol (min (1+ (line-end-position)) (point-max))))
+                  (with-silent-modifications
+                    (font-lock-fontify-region bol eol)))))
+            ;; Update tracked line BEFORE fix-display, so it knows
+            ;; which line is current and won't re-reveal the old one
+            (setq markdown--reveal-prev-line cur)
+            ;; Fix visible tables (markup → spaces) and HRs
+            (markdown--fix-markup-display
+             (window-start) (window-end nil t)))
+          ;; Always reveal current line — even on same-line edits
+          ;; (jit-lock may re-hide markup during redisplay after
+          ;; post-command-hook, so the jit-lock function also re-reveals)
+          (with-silent-modifications
+            (markdown--reveal-line
+             (line-beginning-position) (line-end-position))))))
+
     (add-hook
      'markdown-mode-hook
      #'(lambda ()
          (local-unset-key (my-key "Go 3 lines forward"))
          (local-unset-key (my-key "Go 3 lines backward"))
          (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body)
+         (add-hook 'post-command-hook #'markdown--reveal-at-point nil t)
+         ;; Fix table and HR markup after font-lock runs
+         (jit-lock-register #'markdown--fix-markup-display)
          ;; (languagetool-server-mode)
          )))
 #+END_SRC
