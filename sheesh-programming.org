@@ -222,85 +222,90 @@ Let's use combobulate, where it is available and smartparens as a fallback.
 - Still missing lot's of features
 
 #+BEGIN_SRC emacs-lisp
-    (use-package combobulate
-      :init
-      ;; Remove default key map content. We want to set the keys ourselfs.
-      ;; (setq combobulate-key-map (let ((map (make-sparse-keymap "Combobulate"))) map))
-      :custom
-        (combobulate-key-prefix "C-c o")
+    (let ((combobulate-load-dir (file-name-concat
+                                  (file-name-directory (or load-file-name (buffer-file-name)))
+                                  "src" "combobulate")))
+      (if (file-directory-p combobulate-load-dir)
+          (use-package combobulate
+            :init
+            ;; Remove default key map content. We want to set the keys ourselfs.
+            ;; (setq combobulate-key-map (let ((map (make-sparse-keymap "Combobulate"))) map))
+            :custom
+              (combobulate-key-prefix "C-c o")
 
-      :bind
-      (:map combobulate-key-map
-            ("M-n" . nil)
-            ("M-p" . nil))
+            :bind
+            (:map combobulate-key-map
+                  ("M-n" . nil)
+                  ("M-p" . nil))
 
-      :config
-      ;; Jsx attributes will by default have {} instead of ""
-      ;; autocompleted when typing =
-      ;; Can also be set to nil to disable autocompleting the envelope
-      (setq combobulate-js-ts-attribute-envelope-default "attr-expression")
-
-
-      ;; (defhydra hydra-combobulate (:color blue :hint nil)
-      ;;   "Combobulate"
-      ;;   ("C-M-i" combobulate-navigate-down-list-maybe
-      ;;    "Navigate In" :color red                              :column "Navigation")
-      ;;   ("C-M-o" combobulate-navigate-up-list-maybe "Navigate Out" :color red      )
-      ;;   ("C-M-n" combobulate-navigate-next "Navigate Next" :color red              )
-      ;;   ("C-M-p" combobulate-navigate-previous "Navigate Prev" :color red          )
-      ;;   ("C-M-f" combobulate-navigate-forward "Navigate Forward" :color red        )
-      ;;   ("C-M-b" combobulate-navigate-backward "Navigate Backward" :color red      )
-      ;;   ("" nil ""                                                                 )
-      ;;   ("C-M-a" combobulate-navigate-beginning-of-defun "Beginning of defun"      )
-      ;;   ("C-M-e" combobulate-navigate-end-of-defun "End of defun"                  )
+            :config
+            ;; Jsx attributes will by default have {} instead of ""
+            ;; autocompleted when typing =
+            ;; Can also be set to nil to disable autocompleting the envelope
+            (setq combobulate-js-ts-attribute-envelope-default "attr-expression")
 
 
-      ;;   ("M-P" combobulate-drag-up "Drag backwards"   :column "Marking and Editing")
-      ;;   ("M-N" combobulate-drag-down "Drag forwards"                               )
-      ;;   ("" nil ""                                                                 )
-      ;;   ("M-k" combobulate-kill-node-dwim "Kill Node DWIM"                         )
-      ;;   ("SPC" combobulate-mark-node-dwim "Mark DWIM"                          )
-      ;;   ("C-M-t" combobulate-transpose-sexps "Transpose nodes"                     )
-      ;;   ("" nil ""                                                                 )
-      ;;   ("s" sp-split-sexp "Split Group"                                           )
-      ;;   ("j" sp-join-sexp "Join Group"                                             )
-      ;;   ("u" combobulate-vanish-node "Unmantle JSX"                   :column "JSX")
-      ;;   ("w" combobulate-envelop "Wrap"                                            )
-      ;;   ("e" combobulate-edit-cluster-dwim "Edit node cluster"                                  )
-
-      ;;   ("q" nil                                                   :column "Other"))
-      ;; (add-hook
-      ;;  'combobulate-mode-hook
-      ;;  (lambda ()
-      ;;    (local-set-key (my-key "Combobulate Hydra Prefix") 'hydra-combobulate/body)
-      ;;    (local-set-key (my-key "Forwards into sexp") 'combobulate-navigate-down-list-maybe)
-      ;;    (local-set-key (my-key "Backwards into sexp") 'combobulate-navigate-down-list-backward-maybe)
-
-      ;;    (local-set-key (my-key "Forwards out of sexp") 'combobulate-navigate-up-list-backward-maybe)
-      ;;    (local-set-key (my-key "Backwards out of sexp") 'combobulate-navigate-up-list-maybe)
-
-      ;;    ;; Does not work right...
-      ;;    ;; (local-set-key (my-key "Go forward over sexp") 'combobulate-navigate-forward)
-      ;;    ;; (local-set-key (my-key "Go backwards over sexp") 'combobulate-navigate-backward)
-
-      ;;    (local-set-key (my-key "Go to start of next sexp") 'combobulate-navigate-next)
-      ;;    (local-set-key (my-key "Go to end of previous sexp") 'combobulate-navigate-previous)
-
-      ;;    ;; No good equivalents as of now
-      ;;    ;; (local-set-key (my-key "Backwards out of sexp") 'sp-backward-up-sexp)
-      ;;    ;; (local-set-key (my-key "Go to beginning of sexp") ')
-      ;;    ;; (local-set-key (my-key "Go to ending of sexp") 'sp-end-of-sexp)
-
-      ;;    ;; Not great
-      ;;    ;;(local-set-key (my-key "Mark expression") 'combobulate-mark-node-dwim)
-      ;;    ))
+            ;; (defhydra hydra-combobulate (:color blue :hint nil)
+            ;;   "Combobulate"
+            ;;   ("C-M-i" combobulate-navigate-down-list-maybe
+            ;;    "Navigate In" :color red                              :column "Navigation")
+            ;;   ("C-M-o" combobulate-navigate-up-list-maybe "Navigate Out" :color red      )
+            ;;   ("C-M-n" combobulate-navigate-next "Navigate Next" :color red              )
+            ;;   ("C-M-p" combobulate-navigate-previous "Navigate Prev" :color red          )
+            ;;   ("C-M-f" combobulate-navigate-forward "Navigate Forward" :color red        )
+            ;;   ("C-M-b" combobulate-navigate-backward "Navigate Backward" :color red      )
+            ;;   ("" nil ""                                                                 )
+            ;;   ("C-M-a" combobulate-navigate-beginning-of-defun "Beginning of defun"      )
+            ;;   ("C-M-e" combobulate-navigate-end-of-defun "End of defun"                  )
 
 
+            ;;   ("M-P" combobulate-drag-up "Drag backwards"   :column "Marking and Editing")
+            ;;   ("M-N" combobulate-drag-down "Drag forwards"                               )
+            ;;   ("" nil ""                                                                 )
+            ;;   ("M-k" combobulate-kill-node-dwim "Kill Node DWIM"                         )
+            ;;   ("SPC" combobulate-mark-node-dwim "Mark DWIM"                          )
+            ;;   ("C-M-t" combobulate-transpose-sexps "Transpose nodes"                     )
+            ;;   ("" nil ""                                                                 )
+            ;;   ("s" sp-split-sexp "Split Group"                                           )
+            ;;   ("j" sp-join-sexp "Join Group"                                             )
+            ;;   ("u" combobulate-vanish-node "Unmantle JSX"                   :column "JSX")
+            ;;   ("w" combobulate-envelop "Wrap"                                            )
+            ;;   ("e" combobulate-edit-cluster-dwim "Edit node cluster"                                  )
 
-      :load-path
-      (lambda () (list (file-name-concat
-                        (file-name-directory (or load-file-name (buffer-file-name)))
-                        "src" "combobulate"))))
+            ;;   ("q" nil                                                   :column "Other"))
+            ;; (add-hook
+            ;;  'combobulate-mode-hook
+            ;;  (lambda ()
+            ;;    (local-set-key (my-key "Combobulate Hydra Prefix") 'hydra-combobulate/body)
+            ;;    (local-set-key (my-key "Forwards into sexp") 'combobulate-navigate-down-list-maybe)
+            ;;    (local-set-key (my-key "Backwards into sexp") 'combobulate-navigate-down-list-backward-maybe)
+
+            ;;    (local-set-key (my-key "Forwards out of sexp") 'combobulate-navigate-up-list-backward-maybe)
+            ;;    (local-set-key (my-key "Backwards out of sexp") 'combobulate-navigate-up-list-maybe)
+
+            ;;    ;; Does not work right...
+            ;;    ;; (local-set-key (my-key "Go forward over sexp") 'combobulate-navigate-forward)
+            ;;    ;; (local-set-key (my-key "Go backwards over sexp") 'combobulate-navigate-backward)
+
+            ;;    (local-set-key (my-key "Go to start of next sexp") 'combobulate-navigate-next)
+            ;;    (local-set-key (my-key "Go to end of previous sexp") 'combobulate-navigate-previous)
+
+            ;;    ;; No good equivalents as of now
+            ;;    ;; (local-set-key (my-key "Backwards out of sexp") 'sp-backward-up-sexp)
+            ;;    ;; (local-set-key (my-key "Go to beginning of sexp") ')
+            ;;    ;; (local-set-key (my-key "Go to ending of sexp") 'sp-end-of-sexp)
+
+            ;;    ;; Not great
+            ;;    ;;(local-set-key (my-key "Mark expression") 'combobulate-mark-node-dwim)
+            ;;    ))
+
+
+
+            :load-path
+            (lambda () (list (file-name-concat
+                              (file-name-directory (or load-file-name (buffer-file-name)))
+                              "src" "combobulate"))))
+        (warn "combobulate: not found in %s. Clone from https://github.com/mickeynp/combobulate" combobulate-load-dir)))
 #+END_SRC
 
 ** Code hiding
@@ -851,6 +856,7 @@ such a way that it uses RFC 4648 decoding.
 
 #+BEGIN_SRC emacs-lisp
 (use-package dap-mode
+  :ensure t
   ;; Uncomment the config below if you want all UI panes to be hidden by default!
   ;; :custom
   ;; (lsp-enable-dap-auto-configure nil)
@@ -960,22 +966,20 @@ such a way that it uses RFC 4648 decoding.
   ;;            :hook (prog-mode . copilot-mode)
   ;;            )
   ;;
-  (use-package copilot
-    :load-path (lambda ()
-                 (list (file-name-concat
-                        user-emacs-directory
-                        "src" "copilot" "copilot.el" "copilot.el")))
-    :hook (prog-mode . copilot-mode))
+  ;; (use-package copilot
+  ;;   :load-path (lambda ()
+  ;;                (list (file-name-concat
+  ;;                       user-emacs-directory
+  ;;                       "src" "copilot" "copilot.el" "copilot.el")))
+  ;;   :hook (prog-mode . copilot-mode))
 
-
-  (defhydra hydra-copilot (:color blue :hint nil)
-    "Copilot"
-    ("TAB" copilot-complete "Complete" :column "Sugest" :color red)
-
-    ("c" copilot-accept-completion "Accept" :column "Completion")
-    ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
-    ("n" copilot-next-completion "Next completion" :color red)
-    ("p" copilot-previous-Completion "Prev completion" :color red))
+  ;; (defhydra hydra-copilot (:color blue :hint nil)
+  ;;   "Copilot"
+  ;;   ("TAB" copilot-complete "Complete" :column "Sugest" :color red)
+  ;;   ("c" copilot-accept-completion "Accept" :column "Completion")
+  ;;   ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
+  ;;   ("n" copilot-next-completion "Next completion" :color red)
+  ;;   ("p" copilot-previous-Completion "Prev completion" :color red))
 #+END_SRC
 
 ** Indentation guides

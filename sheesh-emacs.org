@@ -260,13 +260,15 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
 (load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
 (load-file (concat sheeshmacs-dir "/src/elegant-dark.el"))
 (load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
+(load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
+
 ;; (enable-theme 'elegant-dark)
 
 (use-package auto-dark
   :ensure t
   :init (auto-dark-mode)
   :custom
-  (auto-dark-themes '((elegant-dark org-beautify) (elegant-light org-beautify))))
+  (auto-dark-themes '((elegant-dark org-beautify md-beautify) (elegant-light org-beautify md-beautify))))
 #+END_SRC
 
 ** Modeline
@@ -1155,10 +1157,26 @@ More information [[https://lists.gnu.org/archive/html/help-gnu-emacs/2014-04/msg
                 (when (eq system-type 'windows-nt)
                   (locate-file "hunspell"
                                exec-path exec-suffixes 'file-executable-p))))
-        (setq ispell-dictionary "en_US,de_DE")
-        (ispell-set-spellchecker-params)
-        (when (> emacs-major-version 24)
-          (ispell-hunspell-add-multi-dic "en_US,de_DE")))))
+        (if ispell-program-name
+            (progn
+              (when (eq system-type 'windows-nt)
+                (setenv "LANG" "en_US")
+                ;; hunspell -D on Windows doesn't list available dicts,
+                ;; so we manually register them for ispell.
+                (setq ispell-hunspell-dict-paths-alist
+                      '(("en_US" "C:/Hunspell/en_US.aff")
+                        ("de_DE" "C:/Hunspell/de_DE.aff"))))
+              (when (eq system-type 'gnu/linux)
+                (ispell-find-hunspell-dictionaries))
+              (setq ispell-dictionary "en_US,de_DE")
+              (ispell-set-spellchecker-params)
+              (when (> emacs-major-version 24)
+                (ispell-hunspell-add-multi-dic "en_US,de_DE")))
+          (warn "flyspell: hunspell not found in PATH. Install with: %s"
+                (if (eq system-type 'windows-nt)
+                    "choco install hunspell.portable"
+                  "sudo apt install hunspell (Debian/Ubuntu) or sudo pacman -S hunspell (Arch)"))))))
+
 #+END_SRC
 
 Install the required dictionaries!
@@ -1506,8 +1524,8 @@ Other modes
     :ensure t
     :init
 
-    (load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
-    (enable-theme 'md-beautify)
+;;    (load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
+;;    (enable-theme 'md-beautify)
     (setq markdown-fontify-code-blocks-natively t)
     (font-lock-add-keywords 'markdown-mode
                             '(("^[ 	]+\\([*]\\) "
@@ -1562,7 +1580,8 @@ Other modes
          (local-unset-key (my-key "Go 3 lines forward"))
          (local-unset-key (my-key "Go 3 lines backward"))
          (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body)
-         (languagetool-server-mode))))
+         ;; (languagetool-server-mode)
+         )))
 #+END_SRC
 
 ** ChatGPT

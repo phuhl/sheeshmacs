@@ -75,7 +75,10 @@
       "Set a restclient variable with the value jq expression,
        takes var & jq expression as args.
        eg. -> jq-set-var :my-token .token")
-     (define-key restclient-response-mode-map  (kbd "C-c C-j") #'restclient-jq-interactive-result)))
+     ;; restclient-response-mode-map was removed in newer versions of
+     ;; restclient.el; guard against void-variable error.
+     (when (boundp 'restclient-response-mode-map)
+       (define-key restclient-response-mode-map  (kbd "C-c C-j") #'restclient-jq-interactive-result))))
 
 (provide 'restclient-jq)
 

@@ -57,6 +57,7 @@ node_modules/*
 
 ## org stuff
 .org-id-locations
+org-persist/
 
 ## ignore mail/gnus cruft for those who keep mail in this directory
 drafts
