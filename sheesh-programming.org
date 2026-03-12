@@ -1573,9 +1573,9 @@ See [[Spellchecking in JS]].
     :mode ("\\.json$" . json-mode)
     :config
     (add-hook 'json-mode-hook 'run-sheesh-coding-hook)
-    (setq-local flycheck-json-jsonlint-executable "jsonlint")
-    (flycheck-add-mode 'json-jsonlint 'json-mode)
-    (add-hook 'json-mode-hook 'flycheck-mode))
+    (add-hook 'json-mode-hook 'flycheck-mode)
+    (with-eval-after-load 'flycheck
+      (flycheck-add-mode 'json-python-json 'json-mode)))
 #+END_SRC
 
 ** YAML
