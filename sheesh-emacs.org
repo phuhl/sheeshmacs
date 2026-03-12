@@ -1525,7 +1525,7 @@ Other modes
 ;;    (load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
 ;;    (enable-theme 'md-beautify)
     (setq markdown-fontify-code-blocks-natively t)
-    (setq markdown-hide-markup t)
+    (setq-default markdown-hide-markup t)
     (setq markdown-list-item-bullets '("•" "◦" "✧"))
 
     (defhydra hydra-markdown-mode-formatting (:hint nil) "MD Formatting/Headings"
@@ -1658,6 +1658,9 @@ Also re-reveals the cursor line if font-lock just re-hid it."
     (add-hook
      'markdown-mode-hook
      #'(lambda ()
+         ;; Ensure hide-markup is active in this buffer
+         (setq markdown-hide-markup t)
+         (add-to-invisibility-spec 'markdown-markup)
          (local-unset-key (my-key "Go 3 lines forward"))
          (local-unset-key (my-key "Go 3 lines backward"))
          (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body)
