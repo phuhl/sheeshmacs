@@ -359,18 +359,16 @@ Let's use combobulate, where it is available and smartparens as a fallback.
     (use-package yasnippet
       :ensure t
       :init
-      (progn
-        (add-hook 'after-save-hook
-                  (lambda ()
-                    (when (eql major-mode 'snippet-mode)
-                      (yas-reload-all))))
-        (setq yas-snippet-dirs (list (expand-file-name "snippets" sheeshmacs-dir)))
-        (setq yas-prompt-functions '(yas/ido-prompt))
-        (yas-global-mode 1)
-        )
+      (setq yas-snippet-dirs (list (expand-file-name "snippets" sheeshmacs-dir)))
+      (setq yas-prompt-functions '(yas/ido-prompt))
       :mode
       ("\\.yasnippet" . snippet-mode)
       :config
+      (yas-global-mode 1)
+      (add-hook 'after-save-hook
+                (lambda ()
+                  (when (eql major-mode 'snippet-mode)
+                    (yas-reload-all))))
       (define-key yas-minor-mode-map (kbd "<tab>") nil)
       (define-key yas-minor-mode-map (kbd "TAB") nil)
       (define-key yas-minor-mode-map (kbd "<C-tab>")
