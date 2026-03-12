@@ -39,7 +39,7 @@ a lambda doesn't already exist in the list.
     (auto-fill-mode t)
 
     (editorconfig-mode 1)
-    (setq save-place t)
+    (save-place-mode 1)
     (whitespace-mode t)
     (rainbow-mode t)
     (rainbow-delimiters-mode t)
@@ -360,7 +360,7 @@ Let's use combobulate, where it is available and smartparens as a fallback.
       :ensure t
       :init
       (setq yas-snippet-dirs (list (expand-file-name "snippets" sheeshmacs-dir)))
-      (setq yas-prompt-functions '(yas/ido-prompt))
+      (setq yas-prompt-functions '(yas-ido-prompt))
       :mode
       ("\\.yasnippet" . snippet-mode)
       :config
@@ -390,21 +390,17 @@ Let's use combobulate, where it is available and smartparens as a fallback.
 *** Yasnippet with Org Mode
 
 #+BEGIN_SRC emacs-lisp
-  (defun yas/org-very-safe-expand ()
-    (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+  (defun yas-org-very-safe-expand ()
+    (yas-expand))
 
-  (defun yas/org-setup ()
+  (defun yas-org-setup ()
     ;; yasnippet (using the new org-cycle hooks)
-    (make-variable-buffer-local 'yas/trigger-key)
-    ;; (setq yas/trigger-key [tab])
-    (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
-    ;; (define-key yas/keymap [tab] 'yas/next-field)
-    )
+    (add-to-list 'org-tab-first-hook 'yas-org-very-safe-expand))
 
   ;; See https://github.com/eschulte/emacs24-starter-kit/issues/80.
   (setq org-src-tab-acts-natively nil)
 
-  (add-hook 'org-mode-hook #'yas/org-setup)
+  (add-hook 'org-mode-hook #'yas-org-setup)
 #+END_SRC
 
 *** Custom Yasnippet methods
@@ -417,7 +413,7 @@ Let's use combobulate, where it is available and smartparens as a fallback.
 
   (defun yas-delete-space ()
     (goto-char yas-snippet-beg)
-    (delete-backward-char 1)
+    (delete-char -1)
     (goto-char (- yas-snippet-end 1)))
 
   (defun yas-capitalize-first-char (&optional string)
@@ -470,10 +466,10 @@ Let's use combobulate, where it is available and smartparens as a fallback.
     prettier-js parser to use.
 
   Requires `prettier-js' to be installed."
-    (setq prev-buffer (current-buffer))
-    (setq prev-point (point))
-    (setq prev-mark (mark))
-    (setq temp-buffer (generate-new-buffer "*beautify-temp-buffer*"))
+    (let ((prev-buffer (current-buffer))
+          (prev-point (point))
+          (prev-mark (mark))
+          (temp-buffer (generate-new-buffer "*beautify-temp-buffer*")))
     (if (use-region-p)
         (copy-region-as-kill (region-beginning) (region-end))
       (copy-region-as-kill (point-min) (point-max)))
@@ -490,7 +486,7 @@ Let's use combobulate, where it is available and smartparens as a fallback.
     (insert-buffer-substring temp-buffer)
     (kill-buffer temp-buffer)
     (goto-char prev-point)
-    (set-mark prev-mark))
+      (set-mark prev-mark)))
 
 
   (defun beautify-xml ()
@@ -533,7 +529,9 @@ to change it back afterwards. This affects compilation mode and dired
 mode.
 
 #+BEGIN_SRC emacs-lisp
-  (setq is-in-macro-mode nil)
+  (defvar is-in-macro-mode nil)
+  (defvar dired-find-file-orig nil)
+  (defvar compilation-find-file-orig nil)
   (defun macro-setup ()
     "Modify file opening in compilation mode to open files literally.
 
@@ -1542,11 +1540,12 @@ Use =C-j= to expand emmet-code to html/css code.
 
   ;; for better jsx syntax-highlighting in web-mode
   ;; - courtesy of Patrick @halbtuerke
-  (defadvice web-mode-highlight-part (around tweak-jsx activate)
+  (advice-add 'web-mode-highlight-part :around
+    (lambda (orig-fn &rest args)
     (if (equal web-mode-content-type "jsx")
         (let ((web-mode-enable-part-face nil))
-          ad-do-it)
-      ad-do-it))
+            (apply orig-fn args))
+        (apply orig-fn args))))
 #+END_SRC
 
 **** Tern in Web Mode

@@ -175,6 +175,7 @@ information.
 ** Setup Keybinding function
 
 #+BEGIN_SRC emacs-lisp :var keybindings=Keybindings
+  (defvar global-keybindings nil "Keybinding lookup table from sheesh-emacs.org.")
   (setq global-keybindings keybindings)
 
   (defun find-keybindings-in-table (table term)
@@ -377,8 +378,8 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
   (car (image-size (create-image (expand-file-name (concat "sheeshmacs" ext)
                                                    user-emacs-directory)))))
 (defun fancy-splash-head ()
-  (interactive)
   "Insert the head part of the splash screen into the current buffer."
+  (interactive)
   (let* ( (window-width (window-width))
           (image-file-ext (if (>= window-width (get-img-size ".svg")) ".svg"
                             (if (>= window-width   (get-img-size "_1.svg")) "_1.svg"
@@ -500,9 +501,8 @@ Set font size relative to DPI.
   
   
   (setq calendar-week-start-day 1)
-  (add-hook 'calendar-load-hook
-            (lambda ()
-              (calendar-set-date-style 'european)))
+  (with-eval-after-load 'calendar
+    (calendar-set-date-style 'european))
   
 #+END_SRC
 
@@ -575,15 +575,13 @@ Set font size relative to DPI.
       :config
       (openwith-mode t)
       ;; Prevent org-mode from opening inline images externally
-      (defadvice org-display-inline-images
-          (around handle-openwith
-                  (&optional include-linked refresh beg end) activate compile)
-        (if openwith-mode
-            (progn
-              (openwith-mode -1)
-              ad-do-it
-              (openwith-mode 1))
-          ad-do-it))))
+      (advice-add 'org-display-inline-images :around
+                  (lambda (orig-fn &rest args)
+                    (if openwith-mode
+                        (progn (openwith-mode -1)
+                               (apply orig-fn args)
+                               (openwith-mode 1))
+                      (apply orig-fn args))))))
 
 #+END_SRC
 
@@ -801,11 +799,11 @@ TransposeWindows. There may well be better ways to write this."
 
 #+BEGIN_SRC emacs-lisp
 ;; bury *scratch* buffer instead of kill it
-(defadvice kill-buffer (around kill-buffer-around-advice activate)
-  (let ((buffer-to-kill (ad-get-arg 0)))
-    (if (equal buffer-to-kill "*scratch*")
+(advice-add 'kill-buffer :around
+  (lambda (orig-fn &optional buffer-or-name)
+    (if (equal buffer-or-name "*scratch*")
         (bury-buffer)
-      ad-do-it)))
+      (funcall orig-fn buffer-or-name))))
 #+END_SRC
 
 *** Buffer Menu
@@ -1321,6 +1319,8 @@ yay -S languagetool
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
+  (defvar languagetool-server-has-been-started nil)
+
   (use-package languagetool
     :ensure t
     :defer t
@@ -1336,8 +1336,7 @@ yay -S languagetool
   (setq languagetool-java-arguments '("-Dfile.encoding=UTF-8"
                                       "-cp" "/usr/share/languagetool:/usr/share/java/languagetool/*")
         languagetool-console-command "org.languagetool.commandline.Main"
-        languagetool-server-command "org.languagetool.server.HTTPServer"
-        languagetool-server-has-been-started nil)
+        languagetool-server-command "org.languagetool.server.HTTPServer")
 
   ;; For payed account:
   ;; (setq languagetool-api-key "xxxxxxxxxxxx"
@@ -1414,13 +1413,13 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
   directory as the buffer and insert
   a link to this file."
     (interactive)
-    (setq tilde-buffer-filename
+    (let* ((tilde-buffer-filename
           (if (eq system-type 'gnu/linux)
               buffer-file-name
             (replace-regexp-in-string "/" "\\" (buffer-file-name) t t)))
-    (unless (file-exists-p (concat tilde-buffer-filename ".img"))
-      (make-directory (concat tilde-buffer-filename ".img")))
-    (setq filename
+           (_ (unless (file-exists-p (concat tilde-buffer-filename ".img"))
+                (make-directory (concat tilde-buffer-filename ".img"))))
+           (filename
           (concat
            (make-temp-name
             (concat tilde-buffer-filename
@@ -1428,14 +1427,12 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
                         ".img/"
                       ".img\\")
                     (format-time-string "%Y%m%d_%H%M%S_")) )
-                    (if (eq system-type 'gnu/linux) ".png" ".jpg")
-                    ))
+             (if (eq system-type 'gnu/linux) ".png" ".jpg"))))
     (if (eq system-type 'gnu/linux)
         (if (eq window-system 'x)
             (call-process "xclip" nil `(:file ,filename) nil
                           "-selection" "clipboard" "-t" "image/png" "-o")
             (call-process "wl-paste" nil `(:file ,filename) nil "-t" "image/png" "-n"))
-
       ;; Windows: Irfanview
       (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
                     (concat "/clippaste /convert=" filename)))
@@ -1443,7 +1440,7 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
                      (if (eq system-type 'gnu/linux)
                          filename
                        (replace-regexp-in-string "\\\\" "/" filename t t))
-                     (file-name-directory (buffer-file-name))))
+       (file-name-directory (buffer-file-name)))))
 #+END_SRC
 
 ** GTD
