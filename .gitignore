@@ -49,6 +49,7 @@ node_modules/*
 ## exported and encrypted files
 *gpg
 /*el
+!early-init.el
 *elc
 *html
 *tex
