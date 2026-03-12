@@ -34,6 +34,23 @@
                (global-whitespace-mode 0)
                ))
 #+END_SRC
+** Org Appear
+
+Automatically reveal emphasis markers, links, etc. when the cursor is
+on them. Complements =org-hide-emphasis-markers= (set in elegant.el).
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-appear
+    :ensure t
+    :hook (org-mode . org-appear-mode)
+    :custom
+    (org-appear-autoemphasis t)
+    ;; (org-appear-autolinks t)
+    (org-appear-autosubmarkers t)
+    (org-appear-autoentities t)
+    (org-appear-autokeywords t))
+#+END_SRC
+
 ** Code block fontification
 
 The following displays the contents of code blocks in Org-mode files
