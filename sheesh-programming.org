@@ -1012,7 +1012,8 @@ To be enabled by the programing language specific mode.
 
 #+BEGIN_SRC emacs-lisp
   (use-package graphql-mode
-    :ensure t)
+    :ensure t
+    :defer t)
 #+END_SRC
 
 ** Haskell
@@ -1348,7 +1349,8 @@ Once in a while it can be usefull to restart tern.
 
 #+BEGIN_SRC emacs-lisp
   (use-package eslint-fix
-    :ensure t)
+    :ensure t
+    :defer t)
   (defun js-fix ()
     (interactive)
     (setq eslint-fix-executable (my/use-eslint-from-node-modules))
@@ -1360,15 +1362,17 @@ Once in a while it can be usefull to restart tern.
 Adds a parser to compilation mode to support eslint output.
 
 #+BEGIN_SRC emacs-lisp
-(require 'compile-eslint)
-(push 'eslint compilation-error-regexp-alist)
+(with-eval-after-load 'compile
+  (require 'compile-eslint)
+  (push 'eslint compilation-error-regexp-alist))
 #+END_SRC
 
 *** Cycle Quotes
 
 #+BEGIN_SRC emacs-lisp
   (use-package cycle-quotes
-    :ensure t)
+    :ensure t
+    :defer t)
   (defun setup-cycle-quotes ()
     (setq cycle-quotes--quote-chars '(34 96 39))
     (local-set-key (my-key "Cycle quotes")
@@ -1709,7 +1713,8 @@ See [[Spellchecking in JS]].
 
 #+BEGIN_SRC emacs-lisp
   (use-package sql-indent
-    :ensure t)
+    :ensure t
+    :defer t)
 
   (defun sheesh-launch-sql-submodes ()
     (sqlind-minor-mode))
@@ -1763,7 +1768,7 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
 #+BEGIN_SRC emacs-lisp
   (use-package rustic
       :ensure
-
+      :defer t
       :config
       ;; uncomment for less flashiness
       ;; (setq lsp-eldoc-hook nil)
@@ -1815,6 +1820,7 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
 
   (use-package terraform-mode
       :ensure t
+      :defer t
       :custom
       (terraform-format-on-save t)
       :config
@@ -1849,6 +1855,7 @@ dotnet tool install csharpier -g
 
 #+BEGIN_SRC emacs-lisp
   (use-package csharp-mode
+    :defer t
     :config
     (add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-ts-mode))
     (defun lsp-find-references-window ()
@@ -1937,6 +1944,7 @@ Not tested, but maybe useful: https://github.com/elizagamedev/unity.el
 #+BEGIN_SRC emacs-lisp
   (use-package groovy-mode
     :ensure t
+    :defer t
     :config
     (add-hook 'groovy-mode-hook 'run-sheesh-coding-hook))
 #+END_SRC
@@ -1946,6 +1954,7 @@ Not tested, but maybe useful: https://github.com/elizagamedev/unity.el
 #+BEGIN_SRC emacs-lisp
   (use-package glsl-mode
     :ensure t
+    :defer t
     :config
     (add-hook 'glsl-mode-hook 'run-sheesh-coding-hook))
 #+END_SRC
