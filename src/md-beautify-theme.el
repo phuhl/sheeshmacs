@@ -21,14 +21,10 @@
    `(markdown-header-face-3 ((t (,@headline ,@sans-font :height 1.2))))
    `(markdown-header-face-2 ((t (,@headline ,@sans-font :height 1.4))))
    `(markdown-header-face-1 ((t (,@headline ,@sans-font :height 1.8))))
-   `(markdown-code-face ((t :background ,(face-background 'face-backlit)
-                            :extend t)))
-   `(markdown-pre-face ((t :background ,(face-background 'face-backlit)
-                           :extend t)))
+   `(markdown-code-face ((t :inherit face-backlit :extend t)))
+   `(markdown-pre-face ((t :inherit face-backlit :extend t)))
    `(markdown-language-keyword-face
-     ((t :background ,(face-background 'face-backlit)
-         :extend t
-         :foreground ,(face-foreground 'face-salient))))))
+     ((t :inherit (face-salient face-backlit) :extend t)))))
 
 
 ;;;###autoload
