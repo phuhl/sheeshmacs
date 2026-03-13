@@ -1540,7 +1540,7 @@ Other modes
       ("q" markdown-insert-blockquote "Block-Quote" :color blue)
       ("p" markdown-insert-pre "Pre" :color blue)
       ("c" markdown-insert-code "Code")
-      ("c" markdown-insert-code "Code")
+      ("C" markdown-insert-gfm-code-block "Code block" :color blue)
       ("~" markdown-insert-strike-through "Strike-through")
 
       ("C-g" hydra-markdown-mode/body :color blue :column "Other"))
@@ -1599,6 +1599,8 @@ Other modes
 
     (defun markdown--fix-markup-display (beg end)
       "Fix hidden markup display between BEG and END.
+Code block delimiters: unhide the line, hide just the backticks/tildes
+so the language name stays visible and the line is navigable.
 Tables: replace invisible markup with spaces for column alignment.
 Also re-reveals the cursor line if font-lock just re-hid it."
       (when (bound-and-true-p markdown-hide-markup)
@@ -1606,9 +1608,22 @@ Also re-reveals the cursor line if font-lock just re-hid it."
           (save-excursion
             (goto-char beg)
             (while (< (point) end)
-              (when (markdown-table-at-point-p)
-                (let ((pos (line-beginning-position))
+              (let ((bol (line-beginning-position))
                       (eol (line-end-position)))
+                (cond
+                 ;; Code block delimiter: entire line is invisible.
+                 ;; Unhide the line, then hide just the backticks/tildes.
+                 ((and (eq (get-text-property bol 'invisible) 'markdown-markup)
+                       (save-excursion
+                         (goto-char bol)
+                         (looking-at "^[ \t]*\\(```+\\|~~~+\\)")))
+                  (remove-text-properties bol (min (1+ eol) (point-max))
+                    '(invisible nil))
+                  (put-text-property (match-beginning 1) (match-end 1)
+                    'display ""))
+                 ;; Table row: replace invisible markup with spaces
+                 ((markdown-table-at-point-p)
+                  (let ((pos bol))
                   (while (< pos eol)
                     (let ((inv  (get-text-property pos 'invisible))
                           (disp (get-text-property pos 'display)))
@@ -1617,7 +1632,7 @@ Also re-reveals the cursor line if font-lock just re-hid it."
                         (when (eq inv 'markdown-markup)
                           (put-text-property pos (1+ pos) 'invisible nil))
                         (put-text-property pos (1+ pos) 'display " ")))
-                    (setq pos (1+ pos)))))
+                      (setq pos (1+ pos)))))))
               (forward-line 1))
             ;; Re-reveal cursor line if it was in the fontified region
             (when markdown--reveal-prev-line
@@ -1648,9 +1663,8 @@ Also re-reveals the cursor line if font-lock just re-hid it."
             ;; Fix visible tables (markup → spaces) and HRs
             (markdown--fix-markup-display
              (window-start) (window-end nil t)))
-          ;; Always reveal current line — even on same-line edits
-          ;; (jit-lock may re-hide markup during redisplay after
-          ;; post-command-hook, so the jit-lock function also re-reveals)
+          ;; Always reveal current line
+          ;; (jit-lock may re-hide during redisplay after post-command-hook)
           (with-silent-modifications
             (markdown--reveal-line
              (line-beginning-position) (line-end-position))))))
