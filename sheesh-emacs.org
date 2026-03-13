@@ -1606,28 +1606,26 @@ Other modes
       (when (get-text-property bol 'markdown-hr)
         (remove-text-properties bol eol '(face nil))))
 
-    (defun markdown--fix-markup-display (beg end)
-      "Fix hidden markup display between BEG and END.
-Code block delimiters: unhide the line, hide just the backticks/tildes
-so the language name stays visible and the line is navigable.
-Tables: replace invisible markup with spaces for column alignment.
-Also re-reveals the cursor line if font-lock just re-hid it."
-      (when (bound-and-true-p markdown-hide-markup)
-        (with-silent-modifications
+    (defun markdown--fix-code-block-delimiters ()
+      "Fix code block delimiters across the visible window.
+Font-lock makes entire delimiter lines invisible; we unhide each
+line and hide just the backticks/tildes so the language name stays
+visible and the line is navigable.  Opening delimiters get a
+full-width underline.  Scans the whole visible window because
+font-lock may extend its region beyond what jit-lock passes us."
+      (let ((win-beg (if (get-buffer-window) (window-start) (point-min)))
+            (win-end (if (get-buffer-window) (window-end nil t) (point-max))))
           (save-excursion
-            (goto-char beg)
-            (while (< (point) end)
+          (goto-char win-beg)
+          (while (< (point) win-end)
               (let ((bol (line-beginning-position))
                       (eol (line-end-position)))
-                (cond
-                 ;; Code block delimiter: entire line is invisible.
-                 ;; Unhide the line, then hide just the backticks/tildes.
-                 ((and (eq (get-text-property bol 'invisible) 'markdown-markup)
+              (when (and (eq (get-text-property bol 'invisible) 'markdown-markup)
                        (save-excursion
                          (goto-char bol)
                          (looking-at "^[ \t]*\\(```+\\|~~~+\\)")))
-                  (remove-text-properties bol (min (1+ eol) (point-max))
-                    '(invisible nil))
+                (let ((line-end (min (1+ eol) (point-max))))
+                  (remove-text-properties bol line-end '(invisible nil))
                   (put-text-property (match-beginning 1) (match-end 1)
                     'display "")
                   ;; Add full-width underline to opening delimiters only.
@@ -1637,13 +1635,32 @@ Also re-reveals the cursor line if font-lock just re-hid it."
                          (prev-is-code (if (listp prev-face)
                                            (memq 'markdown-code-face prev-face)
                                          (eq prev-face 'markdown-code-face))))
-                    (unless prev-is-code
+                    (unless (or prev-is-code
+                                (if (listp (get-text-property bol 'face))
+                                    (memq 'markdown-code-block-separator
+                                          (get-text-property bol 'face))
+                                  (eq (get-text-property bol 'face)
+                                      'markdown-code-block-separator)))
                       (font-lock-append-text-property
-                       bol (min (1+ eol) (point-max))
-                       'face 'markdown-code-block-separator))))
-                 ;; Table row: replace invisible markup with spaces
-                 ((markdown-table-at-point-p)
-                  (let ((pos bol))
+                       bol line-end
+                       'face 'markdown-code-block-separator))))))
+            (forward-line 1)))))
+
+    (defun markdown--fix-markup-display (beg end)
+      "Fix hidden markup display between BEG and END.
+Tables: replace invisible markup with spaces for column alignment.
+Also fixes code block delimiters and re-reveals the cursor line."
+      (when (bound-and-true-p markdown-hide-markup)
+        (with-silent-modifications
+          ;; Fix code block delimiters (always scans visible window)
+          (markdown--fix-code-block-delimiters)
+          (save-excursion
+            ;; Fix tables within the jit-lock region
+            (goto-char beg)
+            (while (< (point) end)
+              (when (markdown-table-at-point-p)
+                (let ((pos (line-beginning-position))
+                      (eol (line-end-position)))
                   (while (< pos eol)
                     (let ((inv  (get-text-property pos 'invisible))
                           (disp (get-text-property pos 'display)))
@@ -1652,7 +1669,7 @@ Also re-reveals the cursor line if font-lock just re-hid it."
                         (when (eq inv 'markdown-markup)
                           (put-text-property pos (1+ pos) 'invisible nil))
                         (put-text-property pos (1+ pos) 'display " ")))
-                      (setq pos (1+ pos)))))))
+                    (setq pos (1+ pos)))))
               (forward-line 1))
             ;; Re-reveal cursor line if it was in the fontified region
             (when markdown--reveal-prev-line
