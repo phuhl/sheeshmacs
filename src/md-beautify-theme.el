@@ -21,7 +21,8 @@
    `(markdown-code-face ((t :inherit face-backlit :extend t)))
    `(markdown-pre-face ((t :inherit face-backlit :extend t)))
    `(markdown-language-keyword-face
-     ((t :inherit (face-salient face-backlit) :extend t)))))
+     ((t :inherit (face-salient face-backlit) :extend t)))
+   `(markdown-table-face ((t (:inherit face-salient))))))
 
 
 ;;;###autoload

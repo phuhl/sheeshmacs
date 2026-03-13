@@ -50,6 +50,7 @@
 
  '(cursor ((t (:foreground "#3f3f3f" :background "#dcdccc"))))
  '(outline-box ((t (:line-width 5 :color "#3f3f3f"))))
+ '(org-hide ((t (:foreground "#3f3f3f"))))
 
  '(default ((nil (
                   :foreground "#dcdccc"
