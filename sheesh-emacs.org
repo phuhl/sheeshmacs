@@ -1615,15 +1615,15 @@ full-width underline.  Scans the whole visible window because
 font-lock may extend its region beyond what jit-lock passes us."
       (let ((win-beg (if (get-buffer-window) (window-start) (point-min)))
             (win-end (if (get-buffer-window) (window-end nil t) (point-max))))
-          (save-excursion
+        (save-excursion
           (goto-char win-beg)
           (while (< (point) win-end)
-              (let ((bol (line-beginning-position))
-                      (eol (line-end-position)))
+            (let ((bol (line-beginning-position))
+                  (eol (line-end-position)))
               (when (and (eq (get-text-property bol 'invisible) 'markdown-markup)
-                       (save-excursion
-                         (goto-char bol)
-                         (looking-at "^[ \t]*\\(```+\\|~~~+\\)")))
+                         (save-excursion
+                           (goto-char bol)
+                           (looking-at "^[ \t]*\\(```+\\|~~~+\\)")))
                 (let ((line-end (min (1+ eol) (point-max))))
                   (remove-text-properties bol line-end '(invisible nil))
                   (put-text-property (match-beginning 1) (match-end 1)
