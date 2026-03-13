@@ -1587,6 +1587,10 @@ Other modes
 
     ;; Reveal markup on current line, re-hide when cursor moves away.
     ;; Works like org-appear does for org-mode.
+    (defface markdown-code-block-separator
+      '((t :underline t :extend t))
+      "Face for code block opening delimiter lines (full-width underline).")
+
     (defvar-local markdown--reveal-prev-line nil
       "Line number where markup was last revealed.")
 
@@ -1594,6 +1598,11 @@ Other modes
       "Strip hiding properties from a single line BOL..EOL."
       (remove-text-properties bol eol
         '(invisible nil display nil composition nil))
+      ;; Remove code block delimiter underline when revealing
+      (let ((face (get-text-property bol 'face)))
+        (when (and (listp face) (memq 'markdown-code-block-separator face))
+          (put-text-property bol (min (1+ eol) (point-max)) 'face
+            (remq 'markdown-code-block-separator face))))
       (when (get-text-property bol 'markdown-hr)
         (remove-text-properties bol eol '(face nil))))
 
@@ -1620,7 +1629,18 @@ Also re-reveals the cursor line if font-lock just re-hid it."
                   (remove-text-properties bol (min (1+ eol) (point-max))
                     '(invisible nil))
                   (put-text-property (match-beginning 1) (match-end 1)
-                    'display ""))
+                    'display "")
+                  ;; Add full-width underline to opening delimiters only.
+                  ;; Opening = previous line is not code (i.e. not closing).
+                  (let* ((prev-pos (max (point-min) (- bol 2)))
+                         (prev-face (get-text-property prev-pos 'face))
+                         (prev-is-code (if (listp prev-face)
+                                           (memq 'markdown-code-face prev-face)
+                                         (eq prev-face 'markdown-code-face))))
+                    (unless prev-is-code
+                      (font-lock-append-text-property
+                       bol (min (1+ eol) (point-max))
+                       'face 'markdown-code-block-separator))))
                  ;; Table row: replace invisible markup with spaces
                  ((markdown-table-at-point-p)
                   (let ((pos bol))
