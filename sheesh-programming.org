@@ -443,6 +443,13 @@ Let's use combobulate, where it is available and smartparens as a fallback.
                                       (concat "--until=\"" (org-read-date 'with-time) "\"")
                                       "--author=uhl")))))
 
+  ;; Windows: remove slow status sections to speed up refresh
+  (when (eq system-type 'windows-nt)
+    (with-eval-after-load 'magit-status
+      (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent)
+      (remove-hook 'magit-status-headers-hook 'magit-insert-tags-header)
+      (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)))
+
 #+END_SRC
 
 ** Flycheck
