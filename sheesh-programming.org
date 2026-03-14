@@ -371,7 +371,6 @@ Let's use combobulate, where it is available and smartparens as a fallback.
       (define-key yas-minor-mode-map (kbd "<C-tab>")
         #'(lambda ()
            (interactive)
-           (indent-for-tab-command)
            (yas-expand)))
 
       (define-key yas-keymap [(tab)]       nil)
@@ -732,7 +731,7 @@ such a way that it uses RFC 4648 decoding.
            ("C-c" copilot-complete "Show completion")
            ("C" hydra-copilot/body "Copilot")
 
-           ("s" yas-next-field-or-maybe-expand "Snippet" :column "Yas")
+           ("y" yas-expand "Snippet" :column "Yas")
 
            ("h" hydra-autocomplete/body "Help" :column nil)
            ("?" hydra-autocomplete/body "Help" :column nil)))
