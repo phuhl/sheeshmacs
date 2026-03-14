@@ -351,36 +351,36 @@ Let's use combobulate, where it is available and smartparens as a fallback.
 ** Yasnippet
 
 #+BEGIN_SRC emacs-lisp
-    (use-package yasnippet
-      :ensure t
-      :init
-      (progn
-        (add-hook 'after-save-hook
-                  (lambda ()
-                    (when (eql major-mode 'snippet-mode)
-                      (yas-reload-all))))
-        (setq yas-snippet-dirs (list (expand-file-name "snippets" sheeshmacs-dir)))
-        (setq yas-prompt-functions '(yas/ido-prompt))
-        (yas-global-mode 1)
-        )
-      :mode
-      ("\\.yasnippet" . snippet-mode)
-      :config
-      (define-key yas-minor-mode-map (kbd "<tab>") nil)
-      (define-key yas-minor-mode-map (kbd "TAB") nil)
-      (define-key yas-minor-mode-map (kbd "<C-tab>")
-        #'(lambda ()
-           (interactive)
-           (yas-expand)))
+  (use-package yasnippet
+    :ensure t
+    :init
+    (progn
+      (add-hook 'after-save-hook
+                (lambda ()
+                  (when (eql major-mode 'snippet-mode)
+                    (yas-reload-all))))
+      (setq yas-snippet-dirs (list (expand-file-name "snippets" sheeshmacs-dir)))
+      (setq yas-prompt-functions '(yas/ido-prompt))
+      (yas-global-mode 1)
+      )
+    :mode
+    ("\\.yasnippet" . snippet-mode)
+    :config
+    (define-key yas-minor-mode-map (kbd "<tab>") nil)
+    (define-key yas-minor-mode-map (kbd "TAB") nil)
+    (define-key yas-minor-mode-map (kbd "<C-tab>")
+      #'(lambda ()
+         (interactive)
+         (yas-expand)))
 
-      (define-key yas-keymap [(tab)]       nil)
-      (define-key yas-keymap (kbd "TAB")   nil)
-      (define-key yas-keymap [tab] nil)
-      (define-key yas-keymap [(shift tab)] nil)
-      (define-key yas-keymap [backtab]     nil)
-      (define-key yas-keymap (my-key "_Yasnippet_ - Go to next field or expand") 
-        'yas-next-field-or-maybe-expand)
-      (define-key yas-keymap (my-key "_Yasnippet_ - Go to previous field") 'yas-prev-field))
+    (define-key yas-keymap [(tab)]       nil)
+    (define-key yas-keymap (kbd "TAB")   nil)
+    (define-key yas-keymap [tab] nil)
+    (define-key yas-keymap [(shift tab)] nil)
+    (define-key yas-keymap [backtab]     nil)
+    (define-key yas-keymap (my-key "_Yasnippet_ - Go to next field or expand") 
+      'yas-next-field-or-maybe-expand)
+    (define-key yas-keymap (my-key "_Yasnippet_ - Go to previous field") 'yas-prev-field))
 #+END_SRC
 
 *** Yasnippet with Org Mode
@@ -1489,6 +1489,7 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.erb\\'" . web-mode)
            ("\\.mustache\\'" . web-mode)
            ("\\.njk\\'" . web-mode)
+           ("\\.liquid\\'" . web-mode)
            ("\\.djhtml\\'" . web-mode)
            ("\\.html?\\'" . web-mode)
 ;;           ("\\.cjs$" . web-mode)
@@ -1609,15 +1610,15 @@ See [[Spellchecking in JS]].
 
 #+BEGIN_SRC emacs-lisp
 (flycheck-add-mode 'javascript-eslint 'web-mode)
-  (add-hook 'css-mode-hook (lambda () 
-                             (lsp-ensure-server 'css-ls)
-                             (lsp-mode)))
 #+END_SRC
 
 ** CSS
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'css-mode-hook #'prettier-js-mode)
+  (add-hook 'css-mode-hook #'prettier-js-mode)
+  (add-hook 'css-mode-hook (lambda () 
+                             (lsp-ensure-server 'css-ls)
+                             (lsp-mode)))
 #+END_SRC
 
 ** JSON
@@ -1678,7 +1679,8 @@ See [[Spellchecking in JS]].
       ("i" lsp-organize-and-remove-unused-imports "Organize imports")
       ("." lsp-execute-code-action "Fix"                       :column "Do")
 
-      ("s" sp-split-sexp "Split Group"              :column "Edit")
+      ("D" js-doc-insert-function-doc "Insert JS-Doc" :column "Edit")
+      ("s" sp-split-sexp "Split Group"                            )
       ("j" sp-join-sexp "Join Group"                              )
       ("u" combobulate-splice-parent "Unmantle JSX"               )
       ("w" combobulate-envelop "Wrap"                             )
@@ -1766,12 +1768,12 @@ See [[Spellchecking in JS]].
 ** Tailwind CSS
 
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-tailwindcss
-    :after lsp-mode
-    :ensure t
-    :init
-    (setq lsp-tailwindcss-add-on-mode t
-          lsp-tailwindcss-skip-config-check t))
+ (use-package lsp-tailwindcss
+   :after lsp-mode
+   :ensure t
+   :init
+   (setq lsp-tailwindcss-add-on-mode t
+         lsp-tailwindcss-skip-config-check t))
 #+END_SRC
 
 ** SQL
@@ -1909,7 +1911,7 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
         ("M-." xref-find-definitions-other-window "Goto Definition (other buf)")
         ("d" terraform-open-doc "Open Doc for Block")
         ("l" flycheck-list-errors "List errors")
-        ("?" hydra-prog-mode-search/body "Search" :color blue)))
+        ("?" hydra-prog-mode-search/body "Search")))
 #+END_SRC
 
 ** C Sharp
