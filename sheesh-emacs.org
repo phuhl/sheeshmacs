@@ -843,6 +843,7 @@ TransposeWindows. There may well be better ways to write this."
               ("=" balance-windows "Balance windows")
 
               ("?" toggle-window-split "Toggle split direction" :column "Layout")
+              ("2" (lambda () (interactive) (ensure-n-windows-balanced 2))  "Create two columns")
               ("3" (lambda () (interactive) (ensure-n-windows-balanced 3))  "Create three columns")
               ("4" (lambda () (interactive) (ensure-n-windows-balanced 4))  "Create three columns"))
 #+END_SRC
