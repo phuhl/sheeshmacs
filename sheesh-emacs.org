@@ -260,13 +260,15 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
 (load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
 (load-file (concat sheeshmacs-dir "/src/elegant-dark.el"))
 (load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
+(load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
+
 ;; (enable-theme 'elegant-dark)
 
 (use-package auto-dark
   :ensure t
   :init (auto-dark-mode)
   :custom
-  (auto-dark-themes '((elegant-dark org-beautify) (elegant-light org-beautify))))
+  (auto-dark-themes '((elegant-dark org-beautify md-beautify) (elegant-light org-beautify md-beautify))))
 #+END_SRC
 
 ** Modeline
@@ -1485,8 +1487,6 @@ Other modes
     :ensure t
     :init
 
-    (load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
-    (enable-theme 'md-beautify)
     (setq markdown-fontify-code-blocks-natively t)
     (font-lock-add-keywords 'markdown-mode
                             '(("^[ 	]+\\([*]\\) "
