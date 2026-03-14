@@ -175,6 +175,7 @@ information.
 ** Setup Keybinding function
 
 #+BEGIN_SRC emacs-lisp :var keybindings=Keybindings
+  (defvar global-keybindings nil "Keybinding lookup table from sheesh-emacs.org.")
   (setq global-keybindings keybindings)
 
   (defun find-keybindings-in-table (table term)
@@ -257,10 +258,11 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
 ** Theme
 
 #+BEGIN_SRC emacs-lisp
-(load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
-(load-file (concat sheeshmacs-dir "/src/elegant-dark.el"))
-(load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
-(load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/elegant.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/elegant-light.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/elegant-dark.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/org-beautify-theme.el"))
+(sheeshmacs-load-file (concat sheeshmacs-dir "/src/md-beautify-theme.el"))
 
 ;; (enable-theme 'elegant-dark)
 
@@ -376,8 +378,8 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
   (car (image-size (create-image (expand-file-name (concat "sheeshmacs" ext)
                                                    user-emacs-directory)))))
 (defun fancy-splash-head ()
-  (interactive)
   "Insert the head part of the splash screen into the current buffer."
+  (interactive)
   (let* ( (window-width (window-width))
           (image-file-ext (if (>= window-width (get-img-size ".svg")) ".svg"
                             (if (>= window-width   (get-img-size "_1.svg")) "_1.svg"
@@ -499,9 +501,8 @@ Set font size relative to DPI.
   
   
   (setq calendar-week-start-day 1)
-  (add-hook 'calendar-load-hook
-            (lambda ()
-              (calendar-set-date-style 'european)))
+  (with-eval-after-load 'calendar
+    (calendar-set-date-style 'european))
   
 #+END_SRC
 
@@ -574,15 +575,13 @@ Set font size relative to DPI.
       :config
       (openwith-mode t)
       ;; Prevent org-mode from opening inline images externally
-      (defadvice org-display-inline-images
-          (around handle-openwith
-                  (&optional include-linked refresh beg end) activate compile)
-        (if openwith-mode
-            (progn
-              (openwith-mode -1)
-              ad-do-it
-              (openwith-mode 1))
-          ad-do-it))))
+      (advice-add 'org-display-inline-images :around
+                  (lambda (orig-fn &rest args)
+                    (if openwith-mode
+                        (progn (openwith-mode -1)
+                               (apply orig-fn args)
+                               (openwith-mode 1))
+                      (apply orig-fn args))))))
 
 #+END_SRC
 
@@ -800,11 +799,11 @@ TransposeWindows. There may well be better ways to write this."
 
 #+BEGIN_SRC emacs-lisp
 ;; bury *scratch* buffer instead of kill it
-(defadvice kill-buffer (around kill-buffer-around-advice activate)
-  (let ((buffer-to-kill (ad-get-arg 0)))
-    (if (equal buffer-to-kill "*scratch*")
+(advice-add 'kill-buffer :around
+  (lambda (orig-fn &optional buffer-or-name)
+    (if (equal buffer-or-name "*scratch*")
         (bury-buffer)
-      ad-do-it)))
+      (funcall orig-fn buffer-or-name))))
 #+END_SRC
 
 *** Buffer Menu
@@ -954,6 +953,27 @@ TransposeWindows. There may well be better ways to write this."
       (global-set-key (my-key "M-x with _Counsel_") 'counsel-M-x)
       (global-set-key (my-key "Find file with _Counsel_") 'counsel-find-file)
       (global-set-key (my-key "Yank interactive") 'counsel-yank-pop)
+
+      ;; "/" enters the highlighted directory if it is one, but inserts
+      ;; a literal "/" when typing path components like ../ or ~/
+      (defun counsel-find-file-slash ()
+        "Enter highlighted directory, or navigate up for ../"
+        (interactive)
+        (cond
+         ;; ../ → go up a directory
+         ((string= ivy-text "..")
+          (ivy--cd (file-name-directory
+                    (directory-file-name ivy--directory))))
+         ;; ./ or ~/ → insert literal /
+         ((string-match-p "\\(^\\|/\\)\\.$\\|^~$" ivy-text)
+          (self-insert-command 1))
+         ;; highlighted item is a directory → enter it
+         ((let ((current (ivy-state-current ivy-last)))
+            (and current (string-suffix-p "/" current)))
+          (ivy-alt-done))
+         ;; default → insert literal /
+         (t (self-insert-command 1))))
+      (define-key counsel-find-file-map (kbd "/") 'counsel-find-file-slash)
 
       (defun crgrep ()
         "Search in current buffers directory with counsel-rg."
@@ -1137,10 +1157,26 @@ More information [[https://lists.gnu.org/archive/html/help-gnu-emacs/2014-04/msg
                 (when (eq system-type 'windows-nt)
                   (locate-file "hunspell"
                                exec-path exec-suffixes 'file-executable-p))))
-        (setq ispell-dictionary "en_US,de_DE")
-        (ispell-set-spellchecker-params)
-        (when (> emacs-major-version 24)
-          (ispell-hunspell-add-multi-dic "en_US,de_DE")))))
+        (if ispell-program-name
+            (progn
+              (when (eq system-type 'windows-nt)
+                (setenv "LANG" "en_US")
+                ;; hunspell -D on Windows doesn't list available dicts,
+                ;; so we manually register them for ispell.
+                (setq ispell-hunspell-dict-paths-alist
+                      '(("en_US" "C:/Hunspell/en_US.aff")
+                        ("de_DE" "C:/Hunspell/de_DE.aff"))))
+              (when (eq system-type 'gnu/linux)
+                (ispell-find-hunspell-dictionaries))
+              (setq ispell-dictionary "en_US,de_DE")
+              (ispell-set-spellchecker-params)
+              (when (> emacs-major-version 24)
+                (ispell-hunspell-add-multi-dic "en_US,de_DE")))
+          (warn "flyspell: hunspell not found in PATH. Install with: %s"
+                (if (eq system-type 'windows-nt)
+                    "choco install hunspell.portable"
+                  "sudo apt install hunspell (Debian/Ubuntu) or sudo pacman -S hunspell (Arch)"))))))
+
 #+END_SRC
 
 Install the required dictionaries!
@@ -1241,7 +1277,7 @@ Install the required dictionaries!
     :ensure t
     :mode ("restclient\\'" . restclient-mode)
     :config
-    (load-file (concat sheeshmacs-dir "/src/restclient-jq.el")))
+    (sheeshmacs-load-file (concat sheeshmacs-dir "/src/restclient-jq.el")))
   (use-package ob-restclient
     :ensure t)
   (use-package jq-mode
@@ -1284,6 +1320,8 @@ yay -S languagetool
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
+  (defvar languagetool-server-has-been-started nil)
+
   (use-package languagetool
     :ensure t
     :defer t
@@ -1299,8 +1337,7 @@ yay -S languagetool
   (setq languagetool-java-arguments '("-Dfile.encoding=UTF-8"
                                       "-cp" "/usr/share/languagetool:/usr/share/java/languagetool/*")
         languagetool-console-command "org.languagetool.commandline.Main"
-        languagetool-server-command "org.languagetool.server.HTTPServer"
-        languagetool-server-has-been-started nil)
+        languagetool-server-command "org.languagetool.server.HTTPServer")
 
   ;; For payed account:
   ;; (setq languagetool-api-key "xxxxxxxxxxxx"
@@ -1377,13 +1414,13 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
   directory as the buffer and insert
   a link to this file."
     (interactive)
-    (setq tilde-buffer-filename
+    (let* ((tilde-buffer-filename
           (if (eq system-type 'gnu/linux)
               buffer-file-name
             (replace-regexp-in-string "/" "\\" (buffer-file-name) t t)))
-    (unless (file-exists-p (concat tilde-buffer-filename ".img"))
-      (make-directory (concat tilde-buffer-filename ".img")))
-    (setq filename
+           (_ (unless (file-exists-p (concat tilde-buffer-filename ".img"))
+                (make-directory (concat tilde-buffer-filename ".img"))))
+           (filename
           (concat
            (make-temp-name
             (concat tilde-buffer-filename
@@ -1391,14 +1428,12 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
                         ".img/"
                       ".img\\")
                     (format-time-string "%Y%m%d_%H%M%S_")) )
-                    (if (eq system-type 'gnu/linux) ".png" ".jpg")
-                    ))
+             (if (eq system-type 'gnu/linux) ".png" ".jpg"))))
     (if (eq system-type 'gnu/linux)
         (if (eq window-system 'x)
             (call-process "xclip" nil `(:file ,filename) nil
                           "-selection" "clipboard" "-t" "image/png" "-o")
             (call-process "wl-paste" nil `(:file ,filename) nil "-t" "image/png" "-n"))
-
       ;; Windows: Irfanview
       (call-process "C:\\Program Files\\IrfanView\\i_view64.exe" nil nil nil
                     (concat "/clippaste /convert=" filename)))
@@ -1406,7 +1441,7 @@ new _(_-^+^-_e_xec _0_ [_r_] region      [_a_] add       [_x_] register
                      (if (eq system-type 'gnu/linux)
                          filename
                        (replace-regexp-in-string "\\\\" "/" filename t t))
-                     (file-name-directory (buffer-file-name))))
+       (file-name-directory (buffer-file-name)))))
 #+END_SRC
 
 ** GTD
@@ -1489,15 +1524,8 @@ Other modes
     :init
 
     (setq markdown-fontify-code-blocks-natively t)
-    (font-lock-add-keywords 'markdown-mode
-                            '(("^[ 	]+\\([*]\\) "
-                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "◦"))))))
-    (font-lock-add-keywords 'markdown-mode
-                            '(("^[ 	]*\\([+]\\) "
-                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "✧"))))))
-    (font-lock-add-keywords 'markdown-mode
-                            '(("^[ 	]*\\([-]\\) "
-                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+    (setq-default markdown-hide-markup t)
+    (setq markdown-list-item-bullets '("•" "◦" "✧"))
 
     (defhydra hydra-markdown-mode-formatting (:hint nil) "MD Formatting/Headings"
       ("h" markdown-insert-header-dwim "Header dwim" :column "Heading")
@@ -1511,7 +1539,7 @@ Other modes
       ("q" markdown-insert-blockquote "Block-Quote" :color blue)
       ("p" markdown-insert-pre "Pre" :color blue)
       ("c" markdown-insert-code "Code")
-      ("c" markdown-insert-code "Code")
+      ("C" markdown-insert-gfm-code-block "Code block" :color blue)
       ("~" markdown-insert-strike-through "Strike-through")
 
       ("C-g" hydra-markdown-mode/body :color blue :column "Other"))
@@ -1536,13 +1564,161 @@ Other modes
       ("W" markdown-insert-wiki-link "Wiki-link" :color blue)
       ("R" markdown-insert-reference-link-dwim "Reference-link-dwim" :color blue))
 
+    :config
+    ;; Override HR rendering: replace text with a full-width space
+    ;; (adapts to resize) and draw the line via face decoration.
+    ;; Style matches the HR character: --- → strike-through,
+    ;; ___ → underline, *** → overline.
+    (advice-add 'markdown--fontify-hrs-view-mode :override
+      (lambda (_hr-char)
+        (let* ((hr-text (match-string 1))
+               (face (cond
+                      ((string-match-p "^_" hr-text)
+                       '(:inherit markdown-hr-face :underline t))
+                      ((string-match-p "^\\*" hr-text)
+                       '(:inherit markdown-hr-face :overline t))
+                      (t
+                       '(:inherit markdown-hr-face :strike-through t)))))
+          (add-text-properties
+           (match-beginning 0) (match-end 0)
+           `(face ,face font-lock-multiline t
+                  display (space :align-to right-fringe))))))
+
+    ;; Reveal markup on current line, re-hide when cursor moves away.
+    ;; Works like org-appear does for org-mode.
+    (defface markdown-code-block-separator
+      '((t :underline t :extend t))
+      "Face for code block opening delimiter lines (full-width underline).")
+
+    (defvar-local markdown--reveal-prev-line nil
+      "Line number where markup was last revealed.")
+
+    (defun markdown--reveal-line (bol eol)
+      "Strip hiding properties from a single line BOL..EOL."
+      (remove-text-properties bol eol
+        '(invisible nil display nil composition nil))
+      ;; Remove code block delimiter underline when revealing
+      (let ((face (get-text-property bol 'face)))
+        (when (and (listp face) (memq 'markdown-code-block-separator face))
+          (put-text-property bol (min (1+ eol) (point-max)) 'face
+            (remq 'markdown-code-block-separator face))))
+      (when (get-text-property bol 'markdown-hr)
+        (remove-text-properties bol eol '(face nil))))
+
+    (defun markdown--fix-code-block-delimiters ()
+      "Fix code block delimiters across the visible window.
+Font-lock makes entire delimiter lines invisible; we unhide each
+line and hide just the backticks/tildes so the language name stays
+visible and the line is navigable.  Opening delimiters get a
+full-width underline.  Scans the whole visible window because
+font-lock may extend its region beyond what jit-lock passes us."
+      (let ((win-beg (if (get-buffer-window) (window-start) (point-min)))
+            (win-end (if (get-buffer-window) (window-end nil t) (point-max))))
+        (save-excursion
+          (goto-char win-beg)
+          (while (< (point) win-end)
+            (let ((bol (line-beginning-position))
+                  (eol (line-end-position)))
+              (when (and (eq (get-text-property bol 'invisible) 'markdown-markup)
+                         (save-excursion
+                           (goto-char bol)
+                           (looking-at "^[ \t]*\\(```+\\|~~~+\\)")))
+                (let ((line-end (min (1+ eol) (point-max))))
+                  (remove-text-properties bol line-end '(invisible nil))
+                  (put-text-property (match-beginning 1) (match-end 1)
+                    'display "")
+                  ;; Add full-width underline to opening delimiters only.
+                  ;; Opening = previous line is not code (i.e. not closing).
+                  (let* ((prev-pos (max (point-min) (- bol 2)))
+                         (prev-face (get-text-property prev-pos 'face))
+                         (prev-is-code (if (listp prev-face)
+                                           (memq 'markdown-code-face prev-face)
+                                         (eq prev-face 'markdown-code-face))))
+                    (unless (or prev-is-code
+                                (if (listp (get-text-property bol 'face))
+                                    (memq 'markdown-code-block-separator
+                                          (get-text-property bol 'face))
+                                  (eq (get-text-property bol 'face)
+                                      'markdown-code-block-separator)))
+                      (font-lock-append-text-property
+                       bol line-end
+                       'face 'markdown-code-block-separator))))))
+            (forward-line 1)))))
+
+    (defun markdown--fix-markup-display (beg end)
+      "Fix hidden markup display between BEG and END.
+Tables: replace invisible markup with spaces for column alignment.
+Also fixes code block delimiters and re-reveals the cursor line."
+      (when (bound-and-true-p markdown-hide-markup)
+        (with-silent-modifications
+          ;; Fix code block delimiters (always scans visible window)
+          (markdown--fix-code-block-delimiters)
+          (save-excursion
+            ;; Fix tables within the jit-lock region
+            (goto-char beg)
+            (while (< (point) end)
+              (when (markdown-table-at-point-p)
+                (let ((pos (line-beginning-position))
+                      (eol (line-end-position)))
+                  (while (< pos eol)
+                    (let ((inv  (get-text-property pos 'invisible))
+                          (disp (get-text-property pos 'display)))
+                      (when (or (eq inv 'markdown-markup)
+                                (equal disp ""))
+                        (when (eq inv 'markdown-markup)
+                          (put-text-property pos (1+ pos) 'invisible nil))
+                        (put-text-property pos (1+ pos) 'display " ")))
+                    (setq pos (1+ pos)))))
+              (forward-line 1))
+            ;; Re-reveal cursor line if it was in the fontified region
+            (when markdown--reveal-prev-line
+              (goto-char (point-min))
+              (forward-line (1- markdown--reveal-prev-line))
+              (when (and (>= (point) beg) (< (point) end))
+                (markdown--reveal-line
+                 (line-beginning-position) (line-end-position))))))))
+
+    (defun markdown--reveal-at-point ()
+      "Reveal hidden markup on the current line, re-hide the previous line."
+      (when (and (bound-and-true-p markdown-hide-markup)
+                 (derived-mode-p 'markdown-mode 'gfm-mode))
+        (let ((cur (line-number-at-pos)))
+          (unless (eq cur markdown--reveal-prev-line)
+            ;; Re-hide previous line by re-fontifying it
+            (when markdown--reveal-prev-line
+              (save-excursion
+                (goto-char (point-min))
+                (forward-line (1- markdown--reveal-prev-line))
+                (let ((bol (line-beginning-position))
+                      (eol (min (1+ (line-end-position)) (point-max))))
+                  (with-silent-modifications
+                    (font-lock-fontify-region bol eol)))))
+            ;; Update tracked line BEFORE fix-display, so it knows
+            ;; which line is current and won't re-reveal the old one
+            (setq markdown--reveal-prev-line cur)
+            ;; Fix visible tables (markup → spaces) and HRs
+            (markdown--fix-markup-display
+             (window-start) (window-end nil t)))
+          ;; Always reveal current line
+          ;; (jit-lock may re-hide during redisplay after post-command-hook)
+          (with-silent-modifications
+            (markdown--reveal-line
+             (line-beginning-position) (line-end-position))))))
+
     (add-hook
      'markdown-mode-hook
      #'(lambda ()
+         ;; Ensure hide-markup is active in this buffer
+         (setq markdown-hide-markup t)
+         (add-to-invisibility-spec 'markdown-markup)
          (local-unset-key (my-key "Go 3 lines forward"))
          (local-unset-key (my-key "Go 3 lines backward"))
          (local-set-key (my-key "Mode hydra") 'hydra-markdown-mode/body)
-         (languagetool-server-mode))))
+         (add-hook 'post-command-hook #'markdown--reveal-at-point nil t)
+         ;; Fix table and HR markup after font-lock runs
+         (jit-lock-register #'markdown--fix-markup-display)
+         ;; (languagetool-server-mode)
+         )))
 #+END_SRC
 
 ** ChatGPT

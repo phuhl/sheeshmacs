@@ -39,7 +39,7 @@ a lambda doesn't already exist in the list.
     (auto-fill-mode t)
 
     (editorconfig-mode 1)
-    (setq save-place t)
+    (save-place-mode 1)
     (whitespace-mode t)
     (rainbow-mode t)
     (rainbow-delimiters-mode t)
@@ -222,85 +222,90 @@ Let's use combobulate, where it is available and smartparens as a fallback.
 - Still missing lot's of features
 
 #+BEGIN_SRC emacs-lisp
-    (use-package combobulate
-      :init
-      ;; Remove default key map content. We want to set the keys ourselfs.
-      ;; (setq combobulate-key-map (let ((map (make-sparse-keymap "Combobulate"))) map))
-      :custom
-        (combobulate-key-prefix "C-c o")
+    (let ((combobulate-load-dir (file-name-concat
+                                  (file-name-directory (or load-file-name (buffer-file-name)))
+                                  "src" "combobulate")))
+      (if (file-directory-p combobulate-load-dir)
+          (use-package combobulate
+            :init
+            ;; Remove default key map content. We want to set the keys ourselfs.
+            ;; (setq combobulate-key-map (let ((map (make-sparse-keymap "Combobulate"))) map))
+            :custom
+              (combobulate-key-prefix "C-c o")
 
-      :bind
-      (:map combobulate-key-map
-            ("M-n" . nil)
-            ("M-p" . nil))
+            :bind
+            (:map combobulate-key-map
+                  ("M-n" . nil)
+                  ("M-p" . nil))
 
-      :config
-      ;; Jsx attributes will by default have {} instead of ""
-      ;; autocompleted when typing =
-      ;; Can also be set to nil to disable autocompleting the envelope
-      (setq combobulate-js-ts-attribute-envelope-default "attr-expression")
-
-
-      ;; (defhydra hydra-combobulate (:color blue :hint nil)
-      ;;   "Combobulate"
-      ;;   ("C-M-i" combobulate-navigate-down-list-maybe
-      ;;    "Navigate In" :color red                              :column "Navigation")
-      ;;   ("C-M-o" combobulate-navigate-up-list-maybe "Navigate Out" :color red      )
-      ;;   ("C-M-n" combobulate-navigate-next "Navigate Next" :color red              )
-      ;;   ("C-M-p" combobulate-navigate-previous "Navigate Prev" :color red          )
-      ;;   ("C-M-f" combobulate-navigate-forward "Navigate Forward" :color red        )
-      ;;   ("C-M-b" combobulate-navigate-backward "Navigate Backward" :color red      )
-      ;;   ("" nil ""                                                                 )
-      ;;   ("C-M-a" combobulate-navigate-beginning-of-defun "Beginning of defun"      )
-      ;;   ("C-M-e" combobulate-navigate-end-of-defun "End of defun"                  )
+            :config
+            ;; Jsx attributes will by default have {} instead of ""
+            ;; autocompleted when typing =
+            ;; Can also be set to nil to disable autocompleting the envelope
+            (setq combobulate-js-ts-attribute-envelope-default "attr-expression")
 
 
-      ;;   ("M-P" combobulate-drag-up "Drag backwards"   :column "Marking and Editing")
-      ;;   ("M-N" combobulate-drag-down "Drag forwards"                               )
-      ;;   ("" nil ""                                                                 )
-      ;;   ("M-k" combobulate-kill-node-dwim "Kill Node DWIM"                         )
-      ;;   ("SPC" combobulate-mark-node-dwim "Mark DWIM"                          )
-      ;;   ("C-M-t" combobulate-transpose-sexps "Transpose nodes"                     )
-      ;;   ("" nil ""                                                                 )
-      ;;   ("s" sp-split-sexp "Split Group"                                           )
-      ;;   ("j" sp-join-sexp "Join Group"                                             )
-      ;;   ("u" combobulate-vanish-node "Unmantle JSX"                   :column "JSX")
-      ;;   ("w" combobulate-envelop "Wrap"                                            )
-      ;;   ("e" combobulate-edit-cluster-dwim "Edit node cluster"                                  )
-
-      ;;   ("q" nil                                                   :column "Other"))
-      ;; (add-hook
-      ;;  'combobulate-mode-hook
-      ;;  (lambda ()
-      ;;    (local-set-key (my-key "Combobulate Hydra Prefix") 'hydra-combobulate/body)
-      ;;    (local-set-key (my-key "Forwards into sexp") 'combobulate-navigate-down-list-maybe)
-      ;;    (local-set-key (my-key "Backwards into sexp") 'combobulate-navigate-down-list-backward-maybe)
-
-      ;;    (local-set-key (my-key "Forwards out of sexp") 'combobulate-navigate-up-list-backward-maybe)
-      ;;    (local-set-key (my-key "Backwards out of sexp") 'combobulate-navigate-up-list-maybe)
-
-      ;;    ;; Does not work right...
-      ;;    ;; (local-set-key (my-key "Go forward over sexp") 'combobulate-navigate-forward)
-      ;;    ;; (local-set-key (my-key "Go backwards over sexp") 'combobulate-navigate-backward)
-
-      ;;    (local-set-key (my-key "Go to start of next sexp") 'combobulate-navigate-next)
-      ;;    (local-set-key (my-key "Go to end of previous sexp") 'combobulate-navigate-previous)
-
-      ;;    ;; No good equivalents as of now
-      ;;    ;; (local-set-key (my-key "Backwards out of sexp") 'sp-backward-up-sexp)
-      ;;    ;; (local-set-key (my-key "Go to beginning of sexp") ')
-      ;;    ;; (local-set-key (my-key "Go to ending of sexp") 'sp-end-of-sexp)
-
-      ;;    ;; Not great
-      ;;    ;;(local-set-key (my-key "Mark expression") 'combobulate-mark-node-dwim)
-      ;;    ))
+            ;; (defhydra hydra-combobulate (:color blue :hint nil)
+            ;;   "Combobulate"
+            ;;   ("C-M-i" combobulate-navigate-down-list-maybe
+            ;;    "Navigate In" :color red                              :column "Navigation")
+            ;;   ("C-M-o" combobulate-navigate-up-list-maybe "Navigate Out" :color red      )
+            ;;   ("C-M-n" combobulate-navigate-next "Navigate Next" :color red              )
+            ;;   ("C-M-p" combobulate-navigate-previous "Navigate Prev" :color red          )
+            ;;   ("C-M-f" combobulate-navigate-forward "Navigate Forward" :color red        )
+            ;;   ("C-M-b" combobulate-navigate-backward "Navigate Backward" :color red      )
+            ;;   ("" nil ""                                                                 )
+            ;;   ("C-M-a" combobulate-navigate-beginning-of-defun "Beginning of defun"      )
+            ;;   ("C-M-e" combobulate-navigate-end-of-defun "End of defun"                  )
 
 
+            ;;   ("M-P" combobulate-drag-up "Drag backwards"   :column "Marking and Editing")
+            ;;   ("M-N" combobulate-drag-down "Drag forwards"                               )
+            ;;   ("" nil ""                                                                 )
+            ;;   ("M-k" combobulate-kill-node-dwim "Kill Node DWIM"                         )
+            ;;   ("SPC" combobulate-mark-node-dwim "Mark DWIM"                          )
+            ;;   ("C-M-t" combobulate-transpose-sexps "Transpose nodes"                     )
+            ;;   ("" nil ""                                                                 )
+            ;;   ("s" sp-split-sexp "Split Group"                                           )
+            ;;   ("j" sp-join-sexp "Join Group"                                             )
+            ;;   ("u" combobulate-vanish-node "Unmantle JSX"                   :column "JSX")
+            ;;   ("w" combobulate-envelop "Wrap"                                            )
+            ;;   ("e" combobulate-edit-cluster-dwim "Edit node cluster"                                  )
 
-      :load-path
-      (lambda () (list (file-name-concat
-                        (file-name-directory (or load-file-name (buffer-file-name)))
-                        "src" "combobulate"))))
+            ;;   ("q" nil                                                   :column "Other"))
+            ;; (add-hook
+            ;;  'combobulate-mode-hook
+            ;;  (lambda ()
+            ;;    (local-set-key (my-key "Combobulate Hydra Prefix") 'hydra-combobulate/body)
+            ;;    (local-set-key (my-key "Forwards into sexp") 'combobulate-navigate-down-list-maybe)
+            ;;    (local-set-key (my-key "Backwards into sexp") 'combobulate-navigate-down-list-backward-maybe)
+
+            ;;    (local-set-key (my-key "Forwards out of sexp") 'combobulate-navigate-up-list-backward-maybe)
+            ;;    (local-set-key (my-key "Backwards out of sexp") 'combobulate-navigate-up-list-maybe)
+
+            ;;    ;; Does not work right...
+            ;;    ;; (local-set-key (my-key "Go forward over sexp") 'combobulate-navigate-forward)
+            ;;    ;; (local-set-key (my-key "Go backwards over sexp") 'combobulate-navigate-backward)
+
+            ;;    (local-set-key (my-key "Go to start of next sexp") 'combobulate-navigate-next)
+            ;;    (local-set-key (my-key "Go to end of previous sexp") 'combobulate-navigate-previous)
+
+            ;;    ;; No good equivalents as of now
+            ;;    ;; (local-set-key (my-key "Backwards out of sexp") 'sp-backward-up-sexp)
+            ;;    ;; (local-set-key (my-key "Go to beginning of sexp") ')
+            ;;    ;; (local-set-key (my-key "Go to ending of sexp") 'sp-end-of-sexp)
+
+            ;;    ;; Not great
+            ;;    ;;(local-set-key (my-key "Mark expression") 'combobulate-mark-node-dwim)
+            ;;    ))
+
+
+
+            :load-path
+            (lambda () (list (file-name-concat
+                              (file-name-directory (or load-file-name (buffer-file-name)))
+                              "src" "combobulate"))))
+        (warn "combobulate: not found in %s. Clone from https://github.com/mickeynp/combobulate" combobulate-load-dir)))
 #+END_SRC
 
 ** Code hiding
@@ -351,27 +356,25 @@ Let's use combobulate, where it is available and smartparens as a fallback.
 ** Yasnippet
 
 #+BEGIN_SRC emacs-lisp
-  (use-package yasnippet
-    :ensure t
-    :init
-    (progn
+    (use-package yasnippet
+      :ensure t
+      :init
+      (setq yas-snippet-dirs (list (expand-file-name "snippets" sheeshmacs-dir)))
+      (setq yas-prompt-functions '(yas-ido-prompt))
+      :mode
+      ("\\.yasnippet" . snippet-mode)
+      :config
+      (yas-global-mode 1)
       (add-hook 'after-save-hook
                 (lambda ()
                   (when (eql major-mode 'snippet-mode)
                     (yas-reload-all))))
-      (setq yas-snippet-dirs (list (expand-file-name "snippets" sheeshmacs-dir)))
-      (setq yas-prompt-functions '(yas/ido-prompt))
-      (yas-global-mode 1)
-      )
-    :mode
-    ("\\.yasnippet" . snippet-mode)
-    :config
-    (define-key yas-minor-mode-map (kbd "<tab>") nil)
-    (define-key yas-minor-mode-map (kbd "TAB") nil)
-    (define-key yas-minor-mode-map (kbd "<C-tab>")
-      #'(lambda ()
-         (interactive)
-         (yas-expand)))
+      (define-key yas-minor-mode-map (kbd "<tab>") nil)
+      (define-key yas-minor-mode-map (kbd "TAB") nil)
+      (define-key yas-minor-mode-map (kbd "<C-tab>")
+        #'(lambda ()
+           (interactive)
+           (yas-expand)))
 
     (define-key yas-keymap [(tab)]       nil)
     (define-key yas-keymap (kbd "TAB")   nil)
@@ -386,21 +389,17 @@ Let's use combobulate, where it is available and smartparens as a fallback.
 *** Yasnippet with Org Mode
 
 #+BEGIN_SRC emacs-lisp
-  (defun yas/org-very-safe-expand ()
-    (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+  (defun yas-org-very-safe-expand ()
+    (yas-expand))
 
-  (defun yas/org-setup ()
+  (defun yas-org-setup ()
     ;; yasnippet (using the new org-cycle hooks)
-    (make-variable-buffer-local 'yas/trigger-key)
-    ;; (setq yas/trigger-key [tab])
-    (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
-    ;; (define-key yas/keymap [tab] 'yas/next-field)
-    )
+    (add-to-list 'org-tab-first-hook 'yas-org-very-safe-expand))
 
   ;; See https://github.com/eschulte/emacs24-starter-kit/issues/80.
   (setq org-src-tab-acts-natively nil)
 
-  (add-hook 'org-mode-hook #'yas/org-setup)
+  (add-hook 'org-mode-hook #'yas-org-setup)
 #+END_SRC
 
 *** Custom Yasnippet methods
@@ -413,7 +412,7 @@ Let's use combobulate, where it is available and smartparens as a fallback.
 
   (defun yas-delete-space ()
     (goto-char yas-snippet-beg)
-    (delete-backward-char 1)
+    (delete-char -1)
     (goto-char (- yas-snippet-end 1)))
 
   (defun yas-capitalize-first-char (&optional string)
@@ -443,6 +442,13 @@ Let's use combobulate, where it is available and smartparens as a fallback.
                                       (concat "--until=\"" (org-read-date 'with-time) "\"")
                                       "--author=uhl")))))
 
+  ;; Windows: remove slow status sections to speed up refresh
+  (when (eq system-type 'windows-nt)
+    (with-eval-after-load 'magit-status
+      (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent)
+      (remove-hook 'magit-status-headers-hook 'magit-insert-tags-header)
+      (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)))
+
 #+END_SRC
 
 ** Flycheck
@@ -466,10 +472,10 @@ Let's use combobulate, where it is available and smartparens as a fallback.
     prettier-js parser to use.
 
   Requires `prettier-js' to be installed."
-    (setq prev-buffer (current-buffer))
-    (setq prev-point (point))
-    (setq prev-mark (mark))
-    (setq temp-buffer (generate-new-buffer "*beautify-temp-buffer*"))
+    (let ((prev-buffer (current-buffer))
+          (prev-point (point))
+          (prev-mark (mark))
+          (temp-buffer (generate-new-buffer "*beautify-temp-buffer*")))
     (if (use-region-p)
         (copy-region-as-kill (region-beginning) (region-end))
       (copy-region-as-kill (point-min) (point-max)))
@@ -486,7 +492,7 @@ Let's use combobulate, where it is available and smartparens as a fallback.
     (insert-buffer-substring temp-buffer)
     (kill-buffer temp-buffer)
     (goto-char prev-point)
-    (set-mark prev-mark))
+      (set-mark prev-mark)))
 
 
   (defun beautify-xml ()
@@ -529,7 +535,9 @@ to change it back afterwards. This affects compilation mode and dired
 mode.
 
 #+BEGIN_SRC emacs-lisp
-  (setq is-in-macro-mode nil)
+  (defvar is-in-macro-mode nil)
+  (defvar dired-find-file-orig nil)
+  (defvar compilation-find-file-orig nil)
   (defun macro-setup ()
     "Modify file opening in compilation mode to open files literally.
 
@@ -894,12 +902,9 @@ such a way that it uses RFC 4648 decoding.
 
 #+BEGIN_SRC emacs-lisp
 (use-package dap-mode
-  ;; Uncomment the config below if you want all UI panes to be hidden by default!
-  ;; :custom
-  ;; (lsp-enable-dap-auto-configure nil)
-  ;; :config
-
-
+  :ensure t
+  :defer t
+  :commands (dap-debug dap-debug-edit-template dap-breakpoint-toggle)
   :config
   (dap-ui-mode 1)
   ;; Set up Node debugging
@@ -915,28 +920,40 @@ such a way that it uses RFC 4648 decoding.
   (use-package treesit
     :commands (treesit-install-language-grammar nf/treesit-install-all-languages)
     :init
+    ;; Pinned to last ABI-14 compatible tags (Emacs 30.x only supports ABI 13-14).
+    ;; Bump these when upgrading to Emacs 31+ which supports ABI 15.
     (setq treesit-language-source-alist
-     '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
-       (c . ("https://github.com/tree-sitter/tree-sitter-c"))
-       (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-       (css . ("https://github.com/tree-sitter/tree-sitter-css"))
-       (c-sharp . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
-       (go . ("https://github.com/tree-sitter/tree-sitter-go"))
-       (html . ("https://github.com/tree-sitter/tree-sitter-html"))
-       (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
-       (json . ("https://github.com/tree-sitter/tree-sitter-json"))
-       (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
-       (make . ("https://github.com/alemuller/tree-sitter-make"))
-       (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" "ocaml/src" "ocaml"))
-       (python . ("https://github.com/tree-sitter/tree-sitter-python"))
-       (php . ("https://github.com/tree-sitter/tree-sitter-php"))
-       (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
-       (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
-       (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
-       (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
-       (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
-       (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
-       (zig . ("https://github.com/GrayJack/tree-sitter-zig"))))
+     '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"       "v0.23.3"))
+       (c          . ("https://github.com/tree-sitter/tree-sitter-c"          "v0.23.6"))
+       (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"        "v0.23.4"))
+       (css        . ("https://github.com/tree-sitter/tree-sitter-css"        "v0.23.2"))
+       (c-sharp    . ("https://github.com/tree-sitter/tree-sitter-c-sharp"    "v0.23.1"))
+       (go         . ("https://github.com/tree-sitter/tree-sitter-go"         "v0.23.4"))
+       (html       . ("https://github.com/tree-sitter/tree-sitter-html"       "v0.23.2"))
+       (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "v0.23.1"))
+       (json       . ("https://github.com/tree-sitter/tree-sitter-json"       "v0.24.8"))
+       (lua        . ("https://github.com/Azganoth/tree-sitter-lua"           "v2.1.3"))
+       (make       . ("https://github.com/alemuller/tree-sitter-make"))
+       (ocaml      . ("https://github.com/tree-sitter/tree-sitter-ocaml"      "v0.24.2" "grammars/ocaml/src"))
+       (python     . ("https://github.com/tree-sitter/tree-sitter-python"     "v0.23.6"))
+       (php        . ("https://github.com/tree-sitter/tree-sitter-php"        "v0.23.12" "php/src"))
+       (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "typescript/src"))
+       (tsx        . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "tsx/src"))
+       (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"       "v0.23.1"))
+       (rust       . ("https://github.com/tree-sitter/tree-sitter-rust"       "v0.23.3"))
+       (sql        . ("https://github.com/m-novikov/tree-sitter-sql"))
+       (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"       "v0.5.1"))
+       (zig        . ("https://github.com/GrayJack/tree-sitter-zig"))))
+
+    (let ((missing (seq-filter
+                    (lambda (lang) (not (treesit-language-available-p lang)))
+                    (mapcar #'car treesit-language-source-alist))))
+      (when missing
+        (display-warning 'treesit
+                         (format "Missing grammars: %s — run M-x nf/treesit-install-all-languages to install"
+                                 (mapconcat #'symbol-name missing ", "))
+                         :warning)))
+
     :config
     (defun nf/treesit-install-all-languages ()
       "Install all languages specified by `treesit-language-source-alist'."
@@ -1003,22 +1020,20 @@ such a way that it uses RFC 4648 decoding.
   ;;            :hook (prog-mode . copilot-mode)
   ;;            )
   ;;
-  (use-package copilot
-    :load-path (lambda ()
-                 (list (file-name-concat
-                        user-emacs-directory
-                        "src" "copilot" "copilot.el" "copilot.el")))
-    :hook (prog-mode . copilot-mode))
+  ;; (use-package copilot
+  ;;   :load-path (lambda ()
+  ;;                (list (file-name-concat
+  ;;                       user-emacs-directory
+  ;;                       "src" "copilot" "copilot.el" "copilot.el")))
+  ;;   :hook (prog-mode . copilot-mode))
 
-
-  (defhydra hydra-copilot (:color blue :hint nil)
-    "Copilot"
-    ("TAB" copilot-complete "Complete" :column "Sugest" :color red)
-
-    ("c" copilot-accept-completion "Accept" :column "Completion")
-    ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
-    ("n" copilot-next-completion "Next completion" :color red)
-    ("p" copilot-previous-Completion "Prev completion" :color red))
+  ;; (defhydra hydra-copilot (:color blue :hint nil)
+  ;;   "Copilot"
+  ;;   ("TAB" copilot-complete "Complete" :column "Sugest" :color red)
+  ;;   ("c" copilot-accept-completion "Accept" :column "Completion")
+  ;;   ("w" copilot-accept-completion-by-word "Accept by Word" :color red)
+  ;;   ("n" copilot-next-completion "Next completion" :color red)
+  ;;   ("p" copilot-previous-Completion "Prev completion" :color red))
 #+END_SRC
 
 ** Indentation guides
@@ -1055,7 +1070,8 @@ To be enabled by the programing language specific mode.
 
 #+BEGIN_SRC emacs-lisp
   (use-package graphql-mode
-    :ensure t)
+    :ensure t
+    :defer t)
 #+END_SRC
 
 ** Haskell
@@ -1393,7 +1409,8 @@ Once in a while it can be usefull to restart tern.
 
 #+BEGIN_SRC emacs-lisp
   (use-package eslint-fix
-    :ensure t)
+    :ensure t
+    :defer t)
   (defun js-fix ()
     (interactive)
     (setq eslint-fix-executable (my/use-eslint-from-node-modules))
@@ -1405,8 +1422,9 @@ Once in a while it can be usefull to restart tern.
 Adds a parser to compilation mode to support eslint output.
 
 #+BEGIN_SRC emacs-lisp
-(require 'compile-eslint)
-(push 'eslint compilation-error-regexp-alist)
+(with-eval-after-load 'compile
+  (require 'compile-eslint)
+  (push 'eslint compilation-error-regexp-alist))
 #+END_SRC
 
 Adds support for ansi style color escape sequences. Adapted from [[https://stackoverflow.com/questions/17605822/emacs-shell-or-terminal-escape-characters-in-compilation-buffer-for-rails-tests][here]].
@@ -1428,7 +1446,8 @@ Adds support for ansi style color escape sequences. Adapted from [[https://stack
 
 #+BEGIN_SRC emacs-lisp
   (use-package cycle-quotes
-    :ensure t)
+    :ensure t
+    :defer t)
   (defun setup-cycle-quotes ()
     (setq cycle-quotes--quote-chars '(34 96 39))
     (local-set-key (my-key "Cycle quotes")
@@ -1593,11 +1612,12 @@ Use =C-j= to expand emmet-code to html/css code.
 
   ;; for better jsx syntax-highlighting in web-mode
   ;; - courtesy of Patrick @halbtuerke
-  (defadvice web-mode-highlight-part (around tweak-jsx activate)
+  (advice-add 'web-mode-highlight-part :around
+    (lambda (orig-fn &rest args)
     (if (equal web-mode-content-type "jsx")
         (let ((web-mode-enable-part-face nil))
-          ad-do-it)
-      ad-do-it))
+            (apply orig-fn args))
+        (apply orig-fn args))))
 #+END_SRC
 
 **** Tern in Web Mode
@@ -1629,9 +1649,9 @@ See [[Spellchecking in JS]].
     :mode ("\\.json$" . json-mode)
     :config
     (add-hook 'json-mode-hook 'run-sheesh-coding-hook)
-    (setq-local flycheck-json-jsonlint-executable "jsonlint")
-    (flycheck-add-mode 'json-jsonlint 'json-mode)
-    (add-hook 'json-mode-hook 'flycheck-mode))
+    (add-hook 'json-mode-hook 'flycheck-mode)
+    (with-eval-after-load 'flycheck
+      (flycheck-add-mode 'json-python-json 'json-mode)))
 #+END_SRC
 
 ** YAML
@@ -1780,7 +1800,8 @@ See [[Spellchecking in JS]].
 
 #+BEGIN_SRC emacs-lisp
   (use-package sql-indent
-    :ensure t)
+    :ensure t
+    :defer t)
 
   (defun sheesh-launch-sql-submodes ()
     (sqlind-minor-mode))
@@ -1834,7 +1855,7 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
 #+BEGIN_SRC emacs-lisp
   (use-package rustic
       :ensure
-
+      :defer t
       :config
       ;; uncomment for less flashiness
       ;; (setq lsp-eldoc-hook nil)
@@ -1886,6 +1907,7 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
 
   (use-package terraform-mode
       :ensure t
+      :defer t
       :custom
       (terraform-format-on-save t)
       :config
@@ -1924,6 +1946,7 @@ dotnet tool install csharpier -g
 
 #+BEGIN_SRC emacs-lisp
   (use-package csharp-mode
+    :defer t
     :config
     (add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-ts-mode))
     (defun lsp-find-references-window ()
@@ -2012,6 +2035,7 @@ Not tested, but maybe useful: https://github.com/elizagamedev/unity.el
 #+BEGIN_SRC emacs-lisp
   (use-package groovy-mode
     :ensure t
+    :defer t
     :config
     (add-hook 'groovy-mode-hook 'run-sheesh-coding-hook))
 #+END_SRC
@@ -2021,6 +2045,7 @@ Not tested, but maybe useful: https://github.com/elizagamedev/unity.el
 #+BEGIN_SRC emacs-lisp
   (use-package glsl-mode
     :ensure t
+    :defer t
     :config
     (add-hook 'glsl-mode-hook 'run-sheesh-coding-hook))
 #+END_SRC

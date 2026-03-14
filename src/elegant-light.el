@@ -37,7 +37,6 @@
 
 ;;; Require elegant-emacs-common
 ;;; -------------------------------------------------------------------
-(load "~/.emacs.d/src/elegant.el")
 (require 'elegant)
 ;;; -------------------------------------------------------------------
 
@@ -48,6 +47,7 @@
 
   '(cursor ((t (:foreground "#111111" :background "#ffffff"))))
   '(outline-box ((t (:line-width 5 :color "#ffffff"))))
+  '(org-hide ((t (:foreground "#ffffff"))))
 
   '(default (( nil (
                     :background "#ffffff"

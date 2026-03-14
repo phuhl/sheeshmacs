@@ -90,7 +90,9 @@ If FILEXT is provided, return files with extension FILEXT instead."
   (progn
     (setq org-agenda-files
           (sa-find-org-file-recursively org-base-dir))
-    (org-agenda-list-priv pre)))
+    (if pre
+        (org-agenda-list-priv pre)
+      (org-agenda nil "n"))))
 
 
 

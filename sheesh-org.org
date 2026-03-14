@@ -34,6 +34,23 @@
                (global-whitespace-mode 0)
                ))
 #+END_SRC
+** Org Appear
+
+Automatically reveal emphasis markers, links, etc. when the cursor is
+on them. Complements =org-hide-emphasis-markers= (set in elegant.el).
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-appear
+    :ensure t
+    :hook (org-mode . org-appear-mode)
+    :custom
+    (org-appear-autoemphasis t)
+    ;; (org-appear-autolinks t)
+    (org-appear-autosubmarkers t)
+    (org-appear-autoentities t)
+    (org-appear-autokeywords t))
+#+END_SRC
+
 ** Code block fontification
 
 The following displays the contents of code blocks in Org-mode files
@@ -156,6 +173,17 @@ https://gist.github.com/rougier/baaf4ff6e0461680e3f070c5c32b64a2
   ;; Sets default clock report table properties
   (setq org-clock-clocktable-default-properties
         '(:maxlevel 10 :scope tree :properties ("Effort") :compact t))
+
+  ;; Custom agenda view: regular agenda + unscheduled TODOs
+  (setq org-agenda-custom-commands
+        '(("n" "Agenda + Unscheduled TODOs"
+           ((agenda "" nil)
+            (tags-todo "TIMESTAMP>=\"<-7d>\"&TIMESTAMP<=\"<-1d>\""
+                       ((org-agenda-overriding-header "Past Timestamped TODOs")))
+            (alltodo ""
+                     ((org-agenda-overriding-header "Unscheduled TODOs")
+                      (org-agenda-skip-function
+                       '(org-agenda-skip-entry-if 'scheduled 'deadline 'timestamp))))))))
 #+END_SRC
 
 Disabling some commands that are confusing or destructive:
@@ -166,15 +194,30 @@ Disabling some commands that are confusing or destructive:
 ** Org mode specific hydra
 
 #+BEGIN_SRC emacs-lisp
+  (defhydra hydra-org-mode-formatting (:hint nil) "Org Formatting/Headings"
+    ("b" (org-toggle-emphasis ?*) "Bold" :column "Formatting")
+    ("i" (org-toggle-emphasis ?/) "Italic")
+    ("c" (org-toggle-emphasis ?=) "Code")
+    ("v" (org-toggle-emphasis ?~) "Verbatim")
+    ("u" (org-toggle-emphasis ?_) "Underline")
+    ("~" (org-toggle-emphasis ?+) "Strike-through")
+
+    ("h" org-insert-heading "Heading dwim" :column "Heading")
+    ("1" (org-insert-heading) "Heading 1" :color blue)
+    ("2" (progn (org-insert-heading) (org-demote)) "Heading 2" :color blue)
+    ("3" (progn (org-insert-heading) (org-demote) (org-demote)) "Heading 3" :color blue)
+    ("4" (progn (org-insert-heading) (org-demote) (org-demote) (org-demote)) "Heading 4" :color blue)
+
+    ("C-g" hydra-org-mode/body :color blue :column "Other"))
+
   (defhydra hydra-org-mode (:hint nil :color blue)
     "Org"
-    ("I" org-screenshot "Insert Screenshot from Clipboard" :column "Edit")
-    ("*" org-wrap-bold "Make bold")
-    ("/" org-wrap-italic "Make italic")
-    ("=" org-wrap-code "Make code")
-    ("_" org-wrap-underline "Make underline")
+    ("f" hydra-org-mode-formatting/body "Formatting/Headings" :column "Edit")
+    ("t" org-toggle-list-checkbox "Toggle checkbox")
+    ("I" org-screenshot "Insert Screenshot from Clipboard")
 
-    ("c" ox-clip-formatted-copy "Copy formated" :column "Export/Import")
+    ("c" ox-clip-formatted-copy "Copy formatted" :column "Export/Import")
+    ("y" org-paste-html-clipboard "Paste HTML as Org")
 
     ("i" org-toggle-inline-images "Toggle inline images" :column "Display")
     ("n" org-toggle-narrow-to-subtree "Toggle narrow subtree")
@@ -371,8 +414,8 @@ HTLM export with CSS
          (let* ((my-row (- (org-table-current-line) 1))
                 (table (org-table-to-lisp))
                 (rows (remq 'hline table))
-                (row (nth my-row rows)))
-           (setq columns-number (apply #'max (mapcar #'length rows)))
+                (row (nth my-row rows))
+                (columns-number (apply #'max (mapcar #'length rows))))
            (dotimes (i columns-number)
              (let ((max-width 1))
                (let ((cell (or (nth i row) "")))
@@ -395,33 +438,44 @@ HTLM export with CSS
 ** Formatting
 
 #+BEGIN_SRC emacs-lisp
-  (defun org-wrap-in (char)
-    (let (p1 p2)
-      (if (use-region-p)
-          (setq p1 (region-beginning) p2 (region-end))
-        (setq p1 (point) p2 (point)))
-      (goto-char p2)
-      (insert char)
-      (goto-char p1)
-      (insert char)
-      (goto-char p2)
-      (forward-char 1)))
-
-  (defun org-wrap-bold ()
+  (defun org-toggle-emphasis (char)
+    "Toggle emphasis CHAR at point or on region.
+  If region is active, wrap it with CHAR.
+  If point is inside emphasis of the matching type, remove it.
+  Otherwise, insert new emphasis markers."
     (interactive)
-    (org-wrap-in "*"))
+    (if (use-region-p)
+        (org-emphasize char)
+      (let* ((elem (org-element-context))
+             (type (org-element-type elem))
+             (expected (pcase char
+                         (?* 'bold) (?/ 'italic) (?_ 'underline)
+                         (?+ 'strike-through) (?= 'code) (?~ 'verbatim))))
+        (if (eq type expected)
+            ;; Remove emphasis: delete closing marker first, then opening
+            (let ((begin (org-element-property :begin elem))
+                  (end (org-element-property :end elem)))
+              (save-excursion
+                (goto-char end)
+                (skip-chars-backward " \t\n")
+                (delete-char -1)
+                (goto-char begin)
+                (delete-char 1)))
+          (org-emphasize char)))))
 
-  (defun org-wrap-italic ()
+  (defun org-toggle-list-checkbox ()
+    "Toggle checkbox on current list item.
+  If item has no checkbox, add [ ].  If it has one, remove it."
     (interactive)
-    (org-wrap-in "/"))
-
-  (defun org-wrap-code ()
-    (interactive)
-    (org-wrap-in "="))
-
-  (defun org-wrap-underline ()
-    (interactive)
-    (org-wrap-in "_"))
+    (save-excursion
+      (beginning-of-line)
+      (cond
+       ;; Has checkbox — remove it
+       ((looking-at "\\([ \t]*\\(?:[-+*]\\|[0-9]+[.)]\\)\\) \\[[ X-]\\] ")
+        (replace-match "\\1 "))
+       ;; List item without checkbox — add [ ]
+       ((looking-at "\\([ \t]*\\(?:[-+*]\\|[0-9]+[.)]\\)\\) ")
+        (replace-match "\\1 [ ] ")))))
 #+END_SRC
 * Features
 ** Schedule Effort
@@ -550,6 +604,36 @@ schedule) add a corresponding end-hour.
                     )))
 #+END_SRC
 
+** Paste HTML as Org
+
+Pastes HTML from the system clipboard as org-mode markup using pandoc.
+Falls back to plain text if no HTML is available.
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-paste-html-clipboard ()
+    "Paste HTML from clipboard as org-mode markup via pandoc.
+  Falls back to regular yank if no HTML is on the clipboard."
+    (interactive)
+    (let* ((raw (string-trim
+                  (shell-command-to-string
+                   "powershell -command \"Get-Clipboard -TextFormatType Html\"")))
+            (html (if (string-match "^Version:.*\n\\(?:[A-Za-z].*\n\\)*" raw)
+                      (substring raw (match-end 0))
+                    raw)))
+      (if (or (string-empty-p html) (string-match-p "is not valid" raw))
+          (yank)
+        (insert (string-trim
+                 (with-temp-buffer
+                   (insert html)
+                   (shell-command-on-region (point-min) (point-max)
+                                           "pandoc -f html -t org --wrap=none"
+                                           t t)
+                   (goto-char (point-min))
+                   (while (search-forward "\u00a0" nil t)
+                     (replace-match " "))
+                   (buffer-string)))))))
+#+END_SRC
+
 ** Ox-Clip: Formatted copy/paste
 
 On Wayland: Requires a script "ox-clip" to be in the path:
@@ -565,7 +649,41 @@ wl-copy -t text/html < "$1"
   (use-package ox-clip :ensure t
     :config
     (if (eq (detect-os-display-type) 'wayland)
-        (setq ox-clip-linux-cmd "ox-clip \"%f\"")))
+        (setq ox-clip-linux-cmd "ox-clip \"%f\""))
+
+    ;; On Windows, override ox-clip's synchronous shell-command-on-region
+    ;; with an async start-process approach to avoid clipboard deadlock
+    (when (eq system-type 'windows-nt)
+      (defvar ox-clip-w32-ps1
+        (expand-file-name "src/html-clip-w32.ps1" sheeshmacs-dir))
+
+      (advice-add 'ox-clip-formatted-copy :around
+        (lambda (orig-fun r1 r2 &optional subtreep)
+          (if (null subtreep)
+              (copy-region-as-kill r1 r2)
+            (org-mark-subtree)
+            (org-copy-subtree))
+          (save-window-excursion
+            (let* ((html-buf (if (equal major-mode 'org-mode)
+                                 (org-export-to-buffer 'html "*Formatted Copy*"
+                                   nil subtreep (not subtreep) t)
+                               (let ((buf (generate-new-buffer "*Formatted Copy*")))
+                                 (with-current-buffer buf
+                                   (insert (htmlize-region-for-paste r1 r2)))
+                                 buf)))
+                   (tmpfile (make-temp-file "ox-clip-" nil ".html"
+                              (with-current-buffer html-buf (buffer-string))))
+                   (proc (start-process "ox-clip" "*ox-clip*"
+                           "powershell" "-NoProfile" "-STA"
+                           "-ExecutionPolicy" "Bypass"
+                           "-File" ox-clip-w32-ps1
+                           "-InputFile" tmpfile)))
+              (set-process-query-on-exit-flag proc nil)
+              (set-process-sentinel proc
+                (lambda (p e)
+                  (when (eq (process-status p) 'exit)
+                    (message "Copied to clipboard"))))
+              (kill-buffer html-buf)))))))
 #+END_SRC
 
 From the documentation:
