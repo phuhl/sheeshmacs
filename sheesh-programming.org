@@ -696,28 +696,60 @@ such a way that it uses RFC 4648 decoding.
 ** Auto complete
 
 #+BEGIN_SRC emacs-lisp
-  (use-package company
-    :ensure
-    :custom
-    (company-idle-delay 0.5) ;; how long to wait until popup
-    ;; (company-begin-commands nil) ;; uncomment to disable popup
-    :config
-    (add-hook
-     'company-mode-hook
-     #'(lambda ()
-         (local-set-key (my-key "Autocomplete")
-                        'company-indent-or-complete-common)))
+  ;; (use-package company
+  ;;   :ensure
+  ;;   :custom
+  ;;   (company-idle-delay 0.5) ;; how long to wait until popup
+  ;;   ;; (company-begin-commands nil) ;; uncomment to disable popup
+  ;;   :config
+  ;;   (add-hook
+  ;;    'company-mode-hook
+  ;;    #'(lambda ()
+  ;;        (local-set-key (my-key "Autocomplete")
+  ;;                       'company-indent-or-complete-common)))
 
+  ;;   :bind
+  ;;   (:map company-active-map
+  ;;         ("C-n". company-select-next)
+  ;;         ("C-p". company-select-previous)
+  ;;         ("M-<". company-select-first)
+  ;;         ("M->". company-select-last)))
+
+  ;; (use-package company-box
+  ;;   :ensure
+  ;;   :hook (company-mode . company-box-mode))
+
+
+  (use-package corfu
+    :ensure t
     :bind
-    (:map company-active-map
-          ("C-n". company-select-next)
-          ("C-p". company-select-previous)
-          ("M-<". company-select-first)
-          ("M->". company-select-last)))
+    (:map corfu-map
+          ("C-n" . corfu-next)
+          ("C-p" . corfu-previous)
+          ("M-n" . (lambda () (interactive) (corfu-next) (corfu-next) (corfu-next)))
+          ("M-p" . (lambda () (interactive) (corfu-previous) (corfu-previous) (corfu-previous)))
+          ("M-<" . corfu-first)
+          ("M->" . corfu-last)
+          ("M-d" . corfu-info-documentation)
+          ("SPC" . corfu-insert-separator))
+    :init
+    (global-corfu-mode)
+    (corfu-popupinfo-mode)
+    (setq text-mode-ispell-word-completion nil)
+    (setq tab-always-indent 'complete)
+    (setq global-corfu-minibuffer
+          (lambda ()
+            (not (or (bound-and-true-p mct--active)
+                     (bound-and-true-p vertico--input)
+                     (eq (current-local-map) read-passwd-map)))))
+    (setq corfu-popupinfo-delay '(0.5 . 1.0)))
 
-  (use-package company-box
-    :ensure
-    :hook (company-mode . company-box-mode))
+  (use-package kind-icon
+    :ensure t
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter) ; Enable `kind-icon'
+  )
 #+END_SRC
 
 ** Autocomplete UI
@@ -788,7 +820,11 @@ such a way that it uses RFC 4648 decoding.
       (lsp-rust-analyzer-display-closure-return-type-hints t)
       (lsp-rust-analyzer-display-parameter-hints nil)
       (lsp-rust-analyzer-display-reborrow-hints nil)
+      (lsp-completion-provider :none) ;; we use Corfu!
+
       :config
+      (add-to-list 'lsp-language-id-configuration '("\\.liquid" . "html"))
+
 
       ;; https://github.com/emacs-lsp/lsp-mode/issues/4773
       (lsp-make-interactive-code-action remove-unused-imports "source.removeUnusedImports")
@@ -1363,6 +1399,21 @@ Adds a parser to compilation mode to support eslint output.
 (push 'eslint compilation-error-regexp-alist)
 #+END_SRC
 
+Adds support for ansi style color escape sequences. Adapted from [[https://stackoverflow.com/questions/17605822/emacs-shell-or-terminal-escape-characters-in-compilation-buffer-for-rails-tests][here]].
+#+BEGIN_SRC emacs-lisp
+(define-derived-mode ansi-compilation-mode compilation-mode "ansi compilation"
+  "Compilation mode that understands ansi colors."
+  (require 'ansi-color)
+  (read-only-mode -1)
+  (ansi-color-apply-on-region (point-min) (point-max)))
+
+(defun colorize-compilation (one two)
+  "ansi colorize the compilation buffer."
+  (ansi-compilation-mode))
+
+(push 'colorize-compilation compilation-finish-functions)
+#+END_SRC
+
 *** Cycle Quotes
 
 #+BEGIN_SRC emacs-lisp
@@ -1516,9 +1567,10 @@ Use =C-j= to expand emmet-code to html/css code.
                                'web-mode-sp-split-sexp)
                 (local-set-key (my-key "Join (Group) sexp")
                                'web-mode-sp-join-sexp)
-                (bind-custom-tab-hydra
-                 '(("e" . ( emmet-expand-line "Expand Line" "Emmet")))
-                 "web-mode" web-mode-map )
+                ;(bind-custom-tab-hydra
+                ; '(("e" . ( emmet-expand-line "Expand Line" "Emmet")))
+                ; "web-mode" web-mode-map )
+                (lsp-mode)
                 ))
 
     :init
