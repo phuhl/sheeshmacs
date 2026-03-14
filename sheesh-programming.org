@@ -809,8 +809,16 @@ such a way that it uses RFC 4648 decoding.
       :init
       ;; (setq lsp-keymap-prefix "C-; l") Conflicts with C-; hydra, if
       ;; needed in future, re assign to something else
+      (defun my/lsp-mode-setup-completion ()
+         (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(flex))) ;; Configure flex
+
+      :hook
+      (lsp-completion-mode . my/lsp-mode-setup-completion)
+
       :custom
       (lsp-eldoc-render-all t)
+      (lsp-auto-execute-action nil)
       (lsp-idle-delay 0.6)
       ;; enable / disable the hints as you prefer:
       (lsp-rust-analyzer-server-display-inlay-hints t)
@@ -1251,6 +1259,8 @@ Issues?
      '(js-indent-level 2))
 
     :config
+    (lsp-ensure-server 'eslint)
+    (lsp-ensure-server 'ts-ls)
     (add-hook 'tsx-ts-mode-hook 'emmet-mode)
     (add-hook 'rjsx-mode-hook 'run-sheesh-coding-hook)
     (add-hook 'rjsx-mode-hook 'flycheck-mode)
@@ -1488,6 +1498,9 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.ftl\\'" . web-mode))
     :config
     (setq web-mode-enable-front-matter-block t)
+    (setq web-mode-enable-auto-indentation nil)
+
+    (lsp-ensure-server 'html-ls)
 
     (defun pretify-afterwards (fun)
       (interactive)
@@ -1596,6 +1609,9 @@ See [[Spellchecking in JS]].
 
 #+BEGIN_SRC emacs-lisp
 (flycheck-add-mode 'javascript-eslint 'web-mode)
+  (add-hook 'css-mode-hook (lambda () 
+                             (lsp-ensure-server 'css-ls)
+                             (lsp-mode)))
 #+END_SRC
 
 ** CSS
@@ -1643,6 +1659,8 @@ See [[Spellchecking in JS]].
     :config
     (flycheck-add-mode 'javascript-eslint 'typescript-ts-mode)
     (flycheck-add-mode 'javascript-eslint 'tsx-ts-mode)
+    (lsp-ensure-server 'ts-ls)
+    (lsp-ensure-server 'eslint)
 
     (defhydra hydra-tsx-ts-mode (:hint nil :color blue)
       "Typescript"
@@ -1873,9 +1891,13 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
       (add-hook 'terraform-mode-hook
                 (lambda ()
                   (local-set-key (my-key "Mode hydra") 'hydra-terraform/body)
-                  (lsp-mode)))
+                  (lsp-mode)
+                  (setq lsp-disabled-clients '(tfls))
+                  ;; (setq lsp-semantic-tokens-enable t)
+                  ;; (setq lsp-semantic-tokens-honor-refresh-requests t)
+                  ))
       :hydra
-      (hydra-terraform (:hint nil)
+      (hydra-terraform (:hint nil :color blue)
                        "terraform"
         ("L" hydra-lsp-mode/body "LSP")
         ("j" lsp-ui-imenu "Menu")
@@ -1929,7 +1951,7 @@ dotnet tool install csharpier -g
 
       ("TAB" hydra-copilot/body "Copilot"))
     :init
-    (add-hook 'csharp-ts-mode-hook #'company-mode)
+    ;;    (add-hook 'csharp-ts-mode-hook #'company-mode) replaced with corfu
     (add-hook 'csharp-ts-mode-hook #'rainbow-delimiters-mode)
     (add-hook 'csharp-ts-mode-hook #'lsp)
     (add-hook 'csharp-ts-mode-hook 'run-sheesh-coding-hook)
