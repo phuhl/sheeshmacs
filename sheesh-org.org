@@ -648,8 +648,10 @@ wl-copy -t text/html < "$1"
 #+BEGIN_SRC emacs-lisp
   (use-package ox-clip :ensure t
     :config
-    (if (eq (detect-os-display-type) 'wayland)
-        (setq ox-clip-linux-cmd "ox-clip \"%f\""))
+    (setq ox-clip-linux-cmd
+          (if (eq (detect-os-display-type) 'wayland)
+              "ox-clip \"%f\""
+            "xclip -verbose -i \"%f\" -t text/html -selection clipboard"))
 
     ;; On Windows, override ox-clip's synchronous shell-command-on-region
     ;; with an async start-process approach to avoid clipboard deadlock
