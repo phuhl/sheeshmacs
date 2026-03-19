@@ -1664,12 +1664,22 @@ Also fixes code block delimiters and re-reveals the cursor line."
                   (while (< pos eol)
                     (let ((inv  (get-text-property pos 'invisible))
                           (disp (get-text-property pos 'display)))
-                      (when (or (eq inv 'markdown-markup)
-                                (equal disp ""))
-                        (when (eq inv 'markdown-markup)
-                          (put-text-property pos (1+ pos) 'invisible nil))
-                        (put-text-property pos (1+ pos) 'display " ")))
-                    (setq pos (1+ pos)))))
+                      (if (or (eq inv 'markdown-markup)
+                              (equal disp ""))
+                          ;; Find the end of this contiguous hidden run
+                          (let ((run-start pos))
+                            (while (and (< pos eol)
+                                        (let ((i (get-text-property pos 'invisible))
+                                              (d (get-text-property pos 'display)))
+                                          (or (eq i 'markdown-markup)
+                                              (equal d ""))))
+                              (when (eq (get-text-property pos 'invisible) 'markdown-markup)
+                                (put-text-property pos (1+ pos) 'invisible nil))
+                              (setq pos (1+ pos)))
+                            ;; Replace entire run with correct number of spaces
+                            (put-text-property run-start pos
+                              'display (make-string (- pos run-start) ?\s)))
+                        (setq pos (1+ pos)))))))
               (forward-line 1))
             ;; Re-reveal cursor line if it was in the fontified region
             (when markdown--reveal-prev-line
