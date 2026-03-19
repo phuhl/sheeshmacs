@@ -1654,6 +1654,20 @@ Also fixes code block delimiters and re-reveals the cursor line."
         (with-silent-modifications
           ;; Fix code block delimiters (always scans visible window)
           (markdown--fix-code-block-delimiters)
+          ;; Remove subscript display from strikethrough text (~~text~~).
+          ;; The sub/superscript matcher sees ~text~ inside ~~text~~.
+          (save-excursion
+            (goto-char beg)
+            (while (< (point) end)
+              (let ((f (get-text-property (point) 'face)))
+                (when (if (listp f)
+                          (memq 'markdown-strike-through-face f)
+                        (eq f 'markdown-strike-through-face))
+                  (let ((d (get-text-property (point) 'display)))
+                    (when (and (consp d) (consp (car d)) (eq (caar d) 'raise))
+                      (remove-text-properties
+                       (point) (1+ (point)) '(display nil))))))
+              (forward-char 1)))
           (save-excursion
             ;; Fix tables within the jit-lock region
             (goto-char beg)
@@ -1679,7 +1693,22 @@ Also fixes code block delimiters and re-reveals the cursor line."
                             ;; Replace entire run with correct number of spaces
                             (put-text-property run-start pos
                               'display (make-string (- pos run-start) ?\s)))
-                        (setq pos (1+ pos)))))))
+                        (setq pos (1+ pos)))))
+                  ;; Ensure bold/italic faces render in tables
+                  (let ((p (line-beginning-position)))
+                    (while (< p eol)
+                      (let ((f (get-text-property p 'face)))
+                        (when (if (listp f)
+                                  (memq 'markdown-bold-face f)
+                                (eq f 'markdown-bold-face))
+                          (font-lock-prepend-text-property
+                           p (1+ p) 'face 'bold))
+                        (when (if (listp f)
+                                  (memq 'markdown-italic-face f)
+                                (eq f 'markdown-italic-face))
+                          (font-lock-prepend-text-property
+                           p (1+ p) 'face 'italic)))
+                      (setq p (1+ p))))))
               (forward-line 1))
             ;; Re-reveal cursor line if it was in the fontified region
             (when markdown--reveal-prev-line
