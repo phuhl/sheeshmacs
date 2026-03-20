@@ -10,7 +10,7 @@
    ;; it worth it in terms of estetics anyways (my opinion).
    ;; Seems to not be nessecary anymore since the use of
    ;; org-beautify-theme (EDIT: untrue?!)
-   (setq org-startup-indented t)
+   (setq org-startup-indented nil)
 
    ;; langauge of timestamps
    (setq system-time-locale "C")
@@ -28,9 +28,6 @@
 
    (add-hook 'org-mode-hook
              (lambda ()
-               ;; Don't wrap long lines and wrap them at words if you wrap (whut?)
-               (setq truncate-lines t)
-               (setq word-wrap t)
                (global-whitespace-mode 0)
                ))
 #+END_SRC

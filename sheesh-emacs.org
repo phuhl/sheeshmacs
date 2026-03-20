@@ -1086,7 +1086,11 @@ TransposeWindows. There may well be better ways to write this."
 
 *** Auto fill mode
   #+BEGIN_SRC emacs-lisp
+  ;; Disable auto-fill in org/markdown (visual-line-mode handles wrapping).
+  ;; Keep it for other text modes.
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
+  (add-hook 'org-mode-hook 'turn-off-auto-fill)
+  (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
   #+END_SRC
 *** Expand region
   #+BEGIN_SRC emacs-lisp
@@ -1516,6 +1520,13 @@ Other modes
     (interactive)
     (insert (concat "![screenshot](" (save-screenshot) ")"))
     (markdown-display-inline-images))
+
+  (use-package adaptive-wrap
+    :ensure t
+    :hook ((markdown-mode . adaptive-wrap-prefix-mode)
+           (markdown-mode . visual-line-mode)
+           (org-mode . adaptive-wrap-prefix-mode)
+           (org-mode . visual-line-mode)))
 
   (use-package markdown-mode
     :mode "\\.md\\'"
