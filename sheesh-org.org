@@ -660,13 +660,24 @@ wl-copy -t text/html < "$1"
             (org-mark-subtree)
             (org-copy-subtree))
           (save-window-excursion
-            (let* ((html-buf (if (equal major-mode 'org-mode)
-                                 (org-export-to-buffer 'html "*Formatted Copy*"
-                                   nil subtreep (not subtreep) t)
-                               (let ((buf (generate-new-buffer "*Formatted Copy*")))
-                                 (with-current-buffer buf
-                                   (insert (htmlize-region-for-paste r1 r2)))
-                                 buf)))
+            (let* ((html-buf (cond
+                               ((equal major-mode 'org-mode)
+                                (org-export-to-buffer 'html "*Formatted Copy*"
+                                  nil subtreep (not subtreep) t))
+                               ((derived-mode-p 'markdown-mode 'gfm-mode)
+                                (let ((buf (generate-new-buffer "*Formatted Copy*"))
+                                      (text (buffer-substring-no-properties r1 r2)))
+                                  (with-current-buffer buf
+                                    (insert text)
+                                    (shell-command-on-region
+                                     (point-min) (point-max)
+                                     "pandoc -f gfm -t html" t t))
+                                  buf))
+                               (t
+                                (let ((html (htmlize-region-for-paste r1 r2))
+                                     (buf (generate-new-buffer "*Formatted Copy*")))
+                                  (with-current-buffer buf (insert html))
+                                  buf)))))
                    (tmpfile (make-temp-file "ox-clip-" nil ".html"
                               (with-current-buffer html-buf (buffer-string))))
                    (proc (start-process "ox-clip" "*ox-clip*"
