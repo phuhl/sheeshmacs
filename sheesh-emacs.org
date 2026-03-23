@@ -1539,6 +1539,54 @@ Other modes
     (setq-default markdown-hide-markup t)
     (setq markdown-list-item-bullets '("•" "◦" "✧"))
 
+    (defun markdown-copy-formatted (r1 r2)
+      "Copy region R1..R2 as formatted HTML to clipboard via pandoc.
+Converts markdown to HTML, then puts it on the clipboard."
+      (interactive "r")
+      (let* ((text (buffer-substring-no-properties r1 r2))
+             (html (with-temp-buffer
+                     (insert text)
+                     (shell-command-on-region
+                      (point-min) (point-max)
+                      "pandoc -f gfm -t html" t t)
+                     (buffer-string)))
+             (tmpfile (make-temp-file "md-clip-" nil ".html" html))
+             (ps1 (expand-file-name "src/html-clip-w32.ps1" sheeshmacs-dir))
+             (proc (start-process "md-clip" "*md-clip*"
+                     "powershell" "-NoProfile" "-STA"
+                     "-ExecutionPolicy" "Bypass"
+                     "-File" ps1
+                     "-InputFile" tmpfile)))
+        (copy-region-as-kill r1 r2)
+        (set-process-query-on-exit-flag proc nil)
+        (set-process-sentinel proc
+          (lambda (p e)
+            (when (eq (process-status p) 'exit)
+              (message "Copied to clipboard"))))))
+
+    (defun markdown-paste-html-clipboard ()
+      "Paste HTML from clipboard as markdown markup via pandoc.
+Falls back to regular yank if no HTML is on the clipboard."
+      (interactive)
+      (let* ((raw (string-trim
+                   (shell-command-to-string
+                    "powershell -command \"Get-Clipboard -TextFormatType Html\"")))
+             (html (if (string-match "^Version:.*\n\\(?:[A-Za-z].*\n\\)*" raw)
+                       (substring raw (match-end 0))
+                     raw)))
+        (if (or (string-empty-p html) (string-match-p "is not valid" raw))
+            (yank)
+          (insert (string-trim
+                   (with-temp-buffer
+                     (insert html)
+                     (shell-command-on-region (point-min) (point-max)
+                                             "pandoc -f html -t gfm-raw_html --wrap=none"
+                                             t t)
+                     (goto-char (point-min))
+                     (while (search-forward "\u00a0" nil t)
+                       (replace-match " "))
+                     (buffer-string)))))))
+
     (defhydra hydra-markdown-mode-formatting (:hint nil) "MD Formatting/Headings"
       ("h" markdown-insert-header-dwim "Header dwim" :column "Heading")
       ("1" markdown-insert-header-atx-1 "Header 1")
@@ -1574,7 +1622,10 @@ Other modes
       ("i" md-screenshot "Screenshot" :color blue)
       ("F" markdown-insert-footnote "Footnote" :color blue)
       ("W" markdown-insert-wiki-link "Wiki-link" :color blue)
-      ("R" markdown-insert-reference-link-dwim "Reference-link-dwim" :color blue))
+      ("R" markdown-insert-reference-link-dwim "Reference-link-dwim" :color blue)
+
+      ("c" markdown-copy-formatted "Copy formatted" :color blue :column "Export/Import")
+      ("y" markdown-paste-html-clipboard "Paste HTML as MD" :color blue))
 
     :config
     ;; Override HR rendering: replace text with a full-width space
