@@ -677,7 +677,7 @@ wl-copy -t text/html < "$1"
                                 (let ((html (htmlize-region-for-paste r1 r2))
                                      (buf (generate-new-buffer "*Formatted Copy*")))
                                   (with-current-buffer buf (insert html))
-                                  buf)))))
+                                  buf))))
                    (tmpfile (make-temp-file "ox-clip-" nil ".html"
                               (with-current-buffer html-buf (buffer-string))))
                    (proc (start-process "ox-clip" "*ox-clip*"

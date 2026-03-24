@@ -1528,6 +1528,25 @@ Other modes
            (org-mode . adaptive-wrap-prefix-mode)
            (org-mode . visual-line-mode)))
 
+  ;; Truncate lines when cursor is on a table (prevents ugly wrapping),
+  ;; restore soft-wrap when cursor leaves the table.
+  (defvar-local truncate-lines--in-table nil)
+  (defun truncate-lines--table-toggle ()
+    "Enable truncate-lines on table lines, disable elsewhere."
+    (let ((in-table (or (and (derived-mode-p 'org-mode) (org-at-table-p))
+                        (and (derived-mode-p 'markdown-mode 'gfm-mode)
+                             (markdown-table-at-point-p)))))
+      (unless (eq in-table truncate-lines--in-table)
+        (setq truncate-lines--in-table in-table)
+        (setq truncate-lines in-table)
+        ;; visual-line-mode sets word-wrap; truncate-lines overrides it
+        ;; but we need to toggle word-wrap too for clean display
+        (setq word-wrap (not in-table)))))
+  (add-hook 'org-mode-hook
+    (lambda () (add-hook 'post-command-hook #'truncate-lines--table-toggle nil t)))
+  (add-hook 'markdown-mode-hook
+    (lambda () (add-hook 'post-command-hook #'truncate-lines--table-toggle nil t)))
+
   (use-package markdown-mode
     :mode "\\.md\\'"
     :ensure t
