@@ -1727,11 +1727,18 @@ font-lock may extend its region beyond what jit-lock passes us."
                        'face 'markdown-code-block-separator))))))
             (forward-line 1)))))
 
+    (defvar-local markdown--fix-in-progress nil
+      "Guard against recursive invocation of markup fixup.")
+
     (defun markdown--fix-markup-display (beg end)
       "Fix hidden markup display between BEG and END.
 Tables: replace invisible markup with spaces for column alignment.
 Also fixes code block delimiters and re-reveals the cursor line."
-      (when (bound-and-true-p markdown-hide-markup)
+      (when (and (bound-and-true-p markdown-hide-markup)
+                 (not markdown--fix-in-progress))
+        (setq markdown--fix-in-progress t)
+        (unwind-protect
+        (with-local-quit
         (with-silent-modifications
           ;; Fix code block delimiters (always scans visible window)
           (markdown--fix-code-block-delimiters)
@@ -1797,34 +1804,37 @@ Also fixes code block delimiters and re-reveals the cursor line."
               (forward-line (1- markdown--reveal-prev-line))
               (when (and (>= (point) beg) (< (point) end))
                 (markdown--reveal-line
-                 (line-beginning-position) (line-end-position))))))))
+                 (line-beginning-position) (line-end-position)))))))
+          (setq markdown--fix-in-progress nil))))
 
     (defun markdown--reveal-at-point ()
       "Reveal hidden markup on the current line, re-hide the previous line."
       (when (and (bound-and-true-p markdown-hide-markup)
+                 (not markdown--fix-in-progress)
                  (derived-mode-p 'markdown-mode 'gfm-mode))
-        (let ((cur (line-number-at-pos)))
-          (unless (eq cur markdown--reveal-prev-line)
-            ;; Re-hide previous line by re-fontifying it
-            (when markdown--reveal-prev-line
-              (save-excursion
-                (goto-char (point-min))
-                (forward-line (1- markdown--reveal-prev-line))
-                (let ((bol (line-beginning-position))
-                      (eol (min (1+ (line-end-position)) (point-max))))
-                  (with-silent-modifications
-                    (font-lock-fontify-region bol eol)))))
-            ;; Update tracked line BEFORE fix-display, so it knows
-            ;; which line is current and won't re-reveal the old one
-            (setq markdown--reveal-prev-line cur)
-            ;; Fix visible tables (markup → spaces) and HRs
-            (markdown--fix-markup-display
-             (window-start) (window-end nil t)))
-          ;; Always reveal current line
-          ;; (jit-lock may re-hide during redisplay after post-command-hook)
-          (with-silent-modifications
-            (markdown--reveal-line
-             (line-beginning-position) (line-end-position))))))
+        (with-local-quit
+          (let ((cur (line-number-at-pos)))
+            (unless (eq cur markdown--reveal-prev-line)
+              ;; Re-hide previous line by re-fontifying it
+              (when markdown--reveal-prev-line
+                (save-excursion
+                  (goto-char (point-min))
+                  (forward-line (1- markdown--reveal-prev-line))
+                  (let ((bol (line-beginning-position))
+                        (eol (min (1+ (line-end-position)) (point-max))))
+                    (with-silent-modifications
+                      (font-lock-fontify-region bol eol)))))
+              ;; Update tracked line BEFORE fix-display, so it knows
+              ;; which line is current and won't re-reveal the old one
+              (setq markdown--reveal-prev-line cur)
+              ;; Fix visible tables (markup → spaces) and HRs
+              (markdown--fix-markup-display
+               (window-start) (window-end nil t)))
+            ;; Always reveal current line
+            ;; (jit-lock may re-hide during redisplay after post-command-hook)
+            (with-silent-modifications
+              (markdown--reveal-line
+               (line-beginning-position) (line-end-position)))))))
 
     (add-hook
      'markdown-mode-hook
