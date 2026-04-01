@@ -1087,7 +1087,11 @@ TransposeWindows. There may well be better ways to write this."
 
 *** Auto fill mode
   #+BEGIN_SRC emacs-lisp
+  ;; Disable auto-fill in org/markdown (visual-line-mode handles wrapping).
+  ;; Keep it for other text modes.
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
+  (add-hook 'org-mode-hook 'turn-off-auto-fill)
+  (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
   #+END_SRC
 *** Expand region
   #+BEGIN_SRC emacs-lisp
@@ -1518,6 +1522,32 @@ Other modes
     (insert (concat "![screenshot](" (save-screenshot) ")"))
     (markdown-display-inline-images))
 
+  (use-package adaptive-wrap
+    :ensure t
+    :hook ((markdown-mode . adaptive-wrap-prefix-mode)
+           (markdown-mode . visual-line-mode)
+           (org-mode . adaptive-wrap-prefix-mode)
+           (org-mode . visual-line-mode)))
+
+  ;; Truncate lines when cursor is on a table (prevents ugly wrapping),
+  ;; restore soft-wrap when cursor leaves the table.
+  (defvar-local truncate-lines--in-table nil)
+  (defun truncate-lines--table-toggle ()
+    "Enable truncate-lines on table lines, disable elsewhere."
+    (let ((in-table (or (and (derived-mode-p 'org-mode) (org-at-table-p))
+                        (and (derived-mode-p 'markdown-mode 'gfm-mode)
+                             (markdown-table-at-point-p)))))
+      (unless (eq in-table truncate-lines--in-table)
+        (setq truncate-lines--in-table in-table)
+        (setq truncate-lines in-table)
+        ;; visual-line-mode sets word-wrap; truncate-lines overrides it
+        ;; but we need to toggle word-wrap too for clean display
+        (setq word-wrap (not in-table)))))
+  (add-hook 'org-mode-hook
+    (lambda () (add-hook 'post-command-hook #'truncate-lines--table-toggle nil t)))
+  (add-hook 'markdown-mode-hook
+    (lambda () (add-hook 'post-command-hook #'truncate-lines--table-toggle nil t)))
+
   (use-package markdown-mode
     :mode "\\.md\\'"
     :ensure t
@@ -1526,6 +1556,54 @@ Other modes
     (setq markdown-fontify-code-blocks-natively t)
     (setq-default markdown-hide-markup t)
     (setq markdown-list-item-bullets '("•" "◦" "✧"))
+
+    (defun markdown-copy-formatted (r1 r2)
+      "Copy region R1..R2 as formatted HTML to clipboard via pandoc.
+Converts markdown to HTML, then puts it on the clipboard."
+      (interactive "r")
+      (let* ((text (buffer-substring-no-properties r1 r2))
+             (html (with-temp-buffer
+                     (insert text)
+                     (shell-command-on-region
+                      (point-min) (point-max)
+                      "pandoc -f gfm -t html" t t)
+                     (buffer-string)))
+             (tmpfile (make-temp-file "md-clip-" nil ".html" html))
+             (ps1 (expand-file-name "src/html-clip-w32.ps1" sheeshmacs-dir))
+             (proc (start-process "md-clip" "*md-clip*"
+                     "powershell" "-NoProfile" "-STA"
+                     "-ExecutionPolicy" "Bypass"
+                     "-File" ps1
+                     "-InputFile" tmpfile)))
+        (copy-region-as-kill r1 r2)
+        (set-process-query-on-exit-flag proc nil)
+        (set-process-sentinel proc
+          (lambda (p e)
+            (when (eq (process-status p) 'exit)
+              (message "Copied to clipboard"))))))
+
+    (defun markdown-paste-html-clipboard ()
+      "Paste HTML from clipboard as markdown markup via pandoc.
+Falls back to regular yank if no HTML is on the clipboard."
+      (interactive)
+      (let* ((raw (string-trim
+                   (shell-command-to-string
+                    "powershell -command \"Get-Clipboard -TextFormatType Html\"")))
+             (html (if (string-match "^Version:.*\n\\(?:[A-Za-z].*\n\\)*" raw)
+                       (substring raw (match-end 0))
+                     raw)))
+        (if (or (string-empty-p html) (string-match-p "is not valid" raw))
+            (yank)
+          (insert (string-trim
+                   (with-temp-buffer
+                     (insert html)
+                     (shell-command-on-region (point-min) (point-max)
+                                             "pandoc -f html -t gfm-raw_html --wrap=none"
+                                             t t)
+                     (goto-char (point-min))
+                     (while (search-forward "\u00a0" nil t)
+                       (replace-match " "))
+                     (buffer-string)))))))
 
     (defhydra hydra-markdown-mode-formatting (:hint nil) "MD Formatting/Headings"
       ("h" markdown-insert-header-dwim "Header dwim" :column "Heading")
@@ -1562,7 +1640,10 @@ Other modes
       ("i" md-screenshot "Screenshot" :color blue)
       ("F" markdown-insert-footnote "Footnote" :color blue)
       ("W" markdown-insert-wiki-link "Wiki-link" :color blue)
-      ("R" markdown-insert-reference-link-dwim "Reference-link-dwim" :color blue))
+      ("R" markdown-insert-reference-link-dwim "Reference-link-dwim" :color blue)
+
+      ("c" markdown-copy-formatted "Copy formatted" :color blue :column "Export/Import")
+      ("y" markdown-paste-html-clipboard "Paste HTML as MD" :color blue))
 
     :config
     ;; Override HR rendering: replace text with a full-width space
@@ -1645,14 +1726,35 @@ font-lock may extend its region beyond what jit-lock passes us."
                        'face 'markdown-code-block-separator))))))
             (forward-line 1)))))
 
+    (defvar-local markdown--fix-in-progress nil
+      "Guard against recursive invocation of markup fixup.")
+
     (defun markdown--fix-markup-display (beg end)
       "Fix hidden markup display between BEG and END.
 Tables: replace invisible markup with spaces for column alignment.
 Also fixes code block delimiters and re-reveals the cursor line."
-      (when (bound-and-true-p markdown-hide-markup)
+      (when (and (bound-and-true-p markdown-hide-markup)
+                 (not markdown--fix-in-progress))
+        (setq markdown--fix-in-progress t)
+        (unwind-protect
+        (with-local-quit
         (with-silent-modifications
           ;; Fix code block delimiters (always scans visible window)
           (markdown--fix-code-block-delimiters)
+          ;; Remove subscript display from strikethrough text (~~text~~).
+          ;; The sub/superscript matcher sees ~text~ inside ~~text~~.
+          (save-excursion
+            (goto-char beg)
+            (while (< (point) end)
+              (let ((f (get-text-property (point) 'face)))
+                (when (if (listp f)
+                          (memq 'markdown-strike-through-face f)
+                        (eq f 'markdown-strike-through-face))
+                  (let ((d (get-text-property (point) 'display)))
+                    (when (and (consp d) (consp (car d)) (eq (caar d) 'raise))
+                      (remove-text-properties
+                       (point) (1+ (point)) '(display nil))))))
+              (forward-char 1)))
           (save-excursion
             ;; Fix tables within the jit-lock region
             (goto-char beg)
@@ -1663,12 +1765,37 @@ Also fixes code block delimiters and re-reveals the cursor line."
                   (while (< pos eol)
                     (let ((inv  (get-text-property pos 'invisible))
                           (disp (get-text-property pos 'display)))
-                      (when (or (eq inv 'markdown-markup)
-                                (equal disp ""))
-                        (when (eq inv 'markdown-markup)
-                          (put-text-property pos (1+ pos) 'invisible nil))
-                        (put-text-property pos (1+ pos) 'display " ")))
-                    (setq pos (1+ pos)))))
+                      (if (or (eq inv 'markdown-markup)
+                              (equal disp ""))
+                          ;; Find the end of this contiguous hidden run
+                          (let ((run-start pos))
+                            (while (and (< pos eol)
+                                        (let ((i (get-text-property pos 'invisible))
+                                              (d (get-text-property pos 'display)))
+                                          (or (eq i 'markdown-markup)
+                                              (equal d ""))))
+                              (when (eq (get-text-property pos 'invisible) 'markdown-markup)
+                                (put-text-property pos (1+ pos) 'invisible nil))
+                              (setq pos (1+ pos)))
+                            ;; Replace entire run with correct number of spaces
+                            (put-text-property run-start pos
+                              'display (make-string (- pos run-start) ?\s)))
+                        (setq pos (1+ pos)))))
+                  ;; Ensure bold/italic faces render in tables
+                  (let ((p (line-beginning-position)))
+                    (while (< p eol)
+                      (let ((f (get-text-property p 'face)))
+                        (when (if (listp f)
+                                  (memq 'markdown-bold-face f)
+                                (eq f 'markdown-bold-face))
+                          (font-lock-prepend-text-property
+                           p (1+ p) 'face 'bold))
+                        (when (if (listp f)
+                                  (memq 'markdown-italic-face f)
+                                (eq f 'markdown-italic-face))
+                          (font-lock-prepend-text-property
+                           p (1+ p) 'face 'italic)))
+                      (setq p (1+ p))))))
               (forward-line 1))
             ;; Re-reveal cursor line if it was in the fontified region
             (when markdown--reveal-prev-line
@@ -1676,34 +1803,37 @@ Also fixes code block delimiters and re-reveals the cursor line."
               (forward-line (1- markdown--reveal-prev-line))
               (when (and (>= (point) beg) (< (point) end))
                 (markdown--reveal-line
-                 (line-beginning-position) (line-end-position))))))))
+                 (line-beginning-position) (line-end-position)))))))
+          (setq markdown--fix-in-progress nil))))
 
     (defun markdown--reveal-at-point ()
       "Reveal hidden markup on the current line, re-hide the previous line."
       (when (and (bound-and-true-p markdown-hide-markup)
+                 (not markdown--fix-in-progress)
                  (derived-mode-p 'markdown-mode 'gfm-mode))
-        (let ((cur (line-number-at-pos)))
-          (unless (eq cur markdown--reveal-prev-line)
-            ;; Re-hide previous line by re-fontifying it
-            (when markdown--reveal-prev-line
-              (save-excursion
-                (goto-char (point-min))
-                (forward-line (1- markdown--reveal-prev-line))
-                (let ((bol (line-beginning-position))
-                      (eol (min (1+ (line-end-position)) (point-max))))
-                  (with-silent-modifications
-                    (font-lock-fontify-region bol eol)))))
-            ;; Update tracked line BEFORE fix-display, so it knows
-            ;; which line is current and won't re-reveal the old one
-            (setq markdown--reveal-prev-line cur)
-            ;; Fix visible tables (markup → spaces) and HRs
-            (markdown--fix-markup-display
-             (window-start) (window-end nil t)))
-          ;; Always reveal current line
-          ;; (jit-lock may re-hide during redisplay after post-command-hook)
-          (with-silent-modifications
-            (markdown--reveal-line
-             (line-beginning-position) (line-end-position))))))
+        (with-local-quit
+          (let ((cur (line-number-at-pos)))
+            (unless (eq cur markdown--reveal-prev-line)
+              ;; Re-hide previous line by re-fontifying it
+              (when markdown--reveal-prev-line
+                (save-excursion
+                  (goto-char (point-min))
+                  (forward-line (1- markdown--reveal-prev-line))
+                  (let ((bol (line-beginning-position))
+                        (eol (min (1+ (line-end-position)) (point-max))))
+                    (with-silent-modifications
+                      (font-lock-fontify-region bol eol)))))
+              ;; Update tracked line BEFORE fix-display, so it knows
+              ;; which line is current and won't re-reveal the old one
+              (setq markdown--reveal-prev-line cur)
+              ;; Fix visible tables (markup → spaces) and HRs
+              (markdown--fix-markup-display
+               (window-start) (window-end nil t)))
+            ;; Always reveal current line
+            ;; (jit-lock may re-hide during redisplay after post-command-hook)
+            (with-silent-modifications
+              (markdown--reveal-line
+               (line-beginning-position) (line-end-position)))))))
 
     (add-hook
      'markdown-mode-hook

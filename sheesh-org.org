@@ -10,7 +10,7 @@
    ;; it worth it in terms of estetics anyways (my opinion).
    ;; Seems to not be nessecary anymore since the use of
    ;; org-beautify-theme (EDIT: untrue?!)
-   (setq org-startup-indented t)
+   (setq org-startup-indented nil)
 
    ;; langauge of timestamps
    (setq system-time-locale "C")
@@ -28,9 +28,6 @@
 
    (add-hook 'org-mode-hook
              (lambda ()
-               ;; Don't wrap long lines and wrap them at words if you wrap (whut?)
-               (setq truncate-lines t)
-               (setq word-wrap t)
                (global-whitespace-mode 0)
                ))
 #+END_SRC
@@ -666,13 +663,24 @@ wl-copy -t text/html < "$1"
             (org-mark-subtree)
             (org-copy-subtree))
           (save-window-excursion
-            (let* ((html-buf (if (equal major-mode 'org-mode)
-                                 (org-export-to-buffer 'html "*Formatted Copy*"
-                                   nil subtreep (not subtreep) t)
-                               (let ((buf (generate-new-buffer "*Formatted Copy*")))
-                                 (with-current-buffer buf
-                                   (insert (htmlize-region-for-paste r1 r2)))
-                                 buf)))
+            (let* ((html-buf (cond
+                               ((equal major-mode 'org-mode)
+                                (org-export-to-buffer 'html "*Formatted Copy*"
+                                  nil subtreep (not subtreep) t))
+                               ((derived-mode-p 'markdown-mode 'gfm-mode)
+                                (let ((buf (generate-new-buffer "*Formatted Copy*"))
+                                      (text (buffer-substring-no-properties r1 r2)))
+                                  (with-current-buffer buf
+                                    (insert text)
+                                    (shell-command-on-region
+                                     (point-min) (point-max)
+                                     "pandoc -f gfm -t html" t t))
+                                  buf))
+                               (t
+                                (let ((html (htmlize-region-for-paste r1 r2))
+                                     (buf (generate-new-buffer "*Formatted Copy*")))
+                                  (with-current-buffer buf (insert html))
+                                  buf))))
                    (tmpfile (make-temp-file "ox-clip-" nil ".html"
                               (with-current-buffer html-buf (buffer-string))))
                    (proc (start-process "ox-clip" "*ox-clip*"
