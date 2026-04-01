@@ -4,6 +4,15 @@
 (setq mc/cmds-to-run-for-all
       '(
         backward-sexp
+        backward-up-list
+        c-electric-brace
+        c-electric-colon
+        c-electric-delete-forward
+        c-electric-paren
+        c-electric-semi&comma
+        c-electric-slash
+        c-electric-star
+        c-indent-line-or-region
         capitalize-first-char
         combobulate-javascript-jsx-rename-element
         combobulate-maybe-auto-close-tag
@@ -43,7 +52,9 @@
         hydra-tsx-ts-mode/hydra-combobulate/body-and-exit
         indent-for-tab-command
         kill-region
+        kmacro-end-and-call-macro
         mark-sexp
+        markdown-beginning-of-line
         markdown-end-of-line
         markdown-outdent-or-delete
         org-beginning-of-line
@@ -57,9 +68,12 @@
         org-open-line
         org-self-insert-command
         org-shiftmetaright
+        org-shifttab
         org-yank
         phi-search
+        query-replace
         reposition-window
+        restclient-toggle-body-visibility-or-indent
         rjsx-delete-creates-full-tag
         slime-autodoc-space
         sp-backward-down-sexp
@@ -79,6 +93,7 @@
         web-mode-sp-backward-unwrap-sexp
         web-mode-sp-join-sexp
         web-mode-sp-unwrap-sexp
+        wgrep-finish-edit
         yaml-electric-backspace
         yaml-electric-dash-and-dot
         ))
@@ -110,4 +125,5 @@
         ivy-switch-buffer
         mouse-set-region
         previous-multiframe-window
+        swiper
         ))

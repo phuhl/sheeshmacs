@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: itypes
+# key: itypes
+# --
+import * as types from "@apparts/types";

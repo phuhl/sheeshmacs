@@ -374,17 +374,16 @@ Let's use combobulate, where it is available and smartparens as a fallback.
       (define-key yas-minor-mode-map (kbd "<C-tab>")
         #'(lambda ()
            (interactive)
-           (indent-for-tab-command)
            (yas-expand)))
 
-      (define-key yas-keymap [(tab)]       nil)
-      (define-key yas-keymap (kbd "TAB")   nil)
-      (define-key yas-keymap [tab] nil)
-      (define-key yas-keymap [(shift tab)] nil)
-      (define-key yas-keymap [backtab]     nil)
-      (define-key yas-keymap (my-key "_Yasnippet_ - Go to next field or expand") 
-        'yas-next-field-or-maybe-expand)
-      (define-key yas-keymap (my-key "_Yasnippet_ - Go to previous field") 'yas-prev-field))
+    (define-key yas-keymap [(tab)]       nil)
+    (define-key yas-keymap (kbd "TAB")   nil)
+    (define-key yas-keymap [tab] nil)
+    (define-key yas-keymap [(shift tab)] nil)
+    (define-key yas-keymap [backtab]     nil)
+    (define-key yas-keymap (my-key "_Yasnippet_ - Go to next field or expand") 
+      'yas-next-field-or-maybe-expand)
+    (define-key yas-keymap (my-key "_Yasnippet_ - Go to previous field") 'yas-prev-field))
 #+END_SRC
 
 *** Yasnippet with Org Mode
@@ -705,28 +704,60 @@ such a way that it uses RFC 4648 decoding.
 ** Auto complete
 
 #+BEGIN_SRC emacs-lisp
-  (use-package company
-    :ensure
-    :custom
-    (company-idle-delay 0.5) ;; how long to wait until popup
-    ;; (company-begin-commands nil) ;; uncomment to disable popup
-    :config
-    (add-hook
-     'company-mode-hook
-     #'(lambda ()
-         (local-set-key (my-key "Autocomplete")
-                        'company-indent-or-complete-common)))
+  ;; (use-package company
+  ;;   :ensure
+  ;;   :custom
+  ;;   (company-idle-delay 0.5) ;; how long to wait until popup
+  ;;   ;; (company-begin-commands nil) ;; uncomment to disable popup
+  ;;   :config
+  ;;   (add-hook
+  ;;    'company-mode-hook
+  ;;    #'(lambda ()
+  ;;        (local-set-key (my-key "Autocomplete")
+  ;;                       'company-indent-or-complete-common)))
 
+  ;;   :bind
+  ;;   (:map company-active-map
+  ;;         ("C-n". company-select-next)
+  ;;         ("C-p". company-select-previous)
+  ;;         ("M-<". company-select-first)
+  ;;         ("M->". company-select-last)))
+
+  ;; (use-package company-box
+  ;;   :ensure
+  ;;   :hook (company-mode . company-box-mode))
+
+
+  (use-package corfu
+    :ensure t
     :bind
-    (:map company-active-map
-          ("C-n". company-select-next)
-          ("C-p". company-select-previous)
-          ("M-<". company-select-first)
-          ("M->". company-select-last)))
+    (:map corfu-map
+          ("C-n" . corfu-next)
+          ("C-p" . corfu-previous)
+          ("M-n" . (lambda () (interactive) (corfu-next) (corfu-next) (corfu-next)))
+          ("M-p" . (lambda () (interactive) (corfu-previous) (corfu-previous) (corfu-previous)))
+          ("M-<" . corfu-first)
+          ("M->" . corfu-last)
+          ("M-d" . corfu-info-documentation)
+          ("SPC" . corfu-insert-separator))
+    :init
+    (global-corfu-mode)
+    (corfu-popupinfo-mode)
+    (setq text-mode-ispell-word-completion nil)
+    (setq tab-always-indent 'complete)
+    (setq global-corfu-minibuffer
+          (lambda ()
+            (not (or (bound-and-true-p mct--active)
+                     (bound-and-true-p vertico--input)
+                     (eq (current-local-map) read-passwd-map)))))
+    (setq corfu-popupinfo-delay '(0.5 . 1.0)))
 
-  (use-package company-box
-    :ensure
-    :hook (company-mode . company-box-mode))
+  (use-package kind-icon
+    :ensure t
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter) ; Enable `kind-icon'
+  )
 #+END_SRC
 
 ** Autocomplete UI
@@ -740,7 +771,7 @@ such a way that it uses RFC 4648 decoding.
            ("C-c" copilot-complete "Show completion")
            ("C" hydra-copilot/body "Copilot")
 
-           ("s" yas-next-field-or-maybe-expand "Snippet" :column "Yas")
+           ("y" yas-expand "Snippet" :column "Yas")
 
            ("h" hydra-autocomplete/body "Help" :column nil)
            ("?" hydra-autocomplete/body "Help" :column nil)))
@@ -786,8 +817,16 @@ such a way that it uses RFC 4648 decoding.
       :init
       ;; (setq lsp-keymap-prefix "C-; l") Conflicts with C-; hydra, if
       ;; needed in future, re assign to something else
+      (defun my/lsp-mode-setup-completion ()
+         (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(flex))) ;; Configure flex
+
+      :hook
+      (lsp-completion-mode . my/lsp-mode-setup-completion)
+
       :custom
       (lsp-eldoc-render-all t)
+      (lsp-auto-execute-action nil)
       (lsp-idle-delay 0.6)
       ;; enable / disable the hints as you prefer:
       (lsp-rust-analyzer-server-display-inlay-hints t)
@@ -797,7 +836,11 @@ such a way that it uses RFC 4648 decoding.
       (lsp-rust-analyzer-display-closure-return-type-hints t)
       (lsp-rust-analyzer-display-parameter-hints nil)
       (lsp-rust-analyzer-display-reborrow-hints nil)
+      (lsp-completion-provider :none) ;; we use Corfu!
+
       :config
+      (add-to-list 'lsp-language-id-configuration '("\\.liquid" . "html"))
+
 
       ;; https://github.com/emacs-lsp/lsp-mode/issues/4773
       (lsp-make-interactive-code-action remove-unused-imports "source.removeUnusedImports")
@@ -1232,6 +1275,8 @@ Issues?
      '(js-indent-level 2))
 
     :config
+    (lsp-ensure-server 'eslint)
+    (lsp-ensure-server 'ts-ls)
     (add-hook 'tsx-ts-mode-hook 'emmet-mode)
     (add-hook 'rjsx-mode-hook 'run-sheesh-coding-hook)
     (add-hook 'rjsx-mode-hook 'flycheck-mode)
@@ -1382,6 +1427,21 @@ Adds a parser to compilation mode to support eslint output.
   (push 'eslint compilation-error-regexp-alist))
 #+END_SRC
 
+Adds support for ansi style color escape sequences. Adapted from [[https://stackoverflow.com/questions/17605822/emacs-shell-or-terminal-escape-characters-in-compilation-buffer-for-rails-tests][here]].
+#+BEGIN_SRC emacs-lisp
+(define-derived-mode ansi-compilation-mode compilation-mode "ansi compilation"
+  "Compilation mode that understands ansi colors."
+  (require 'ansi-color)
+  (read-only-mode -1)
+  (ansi-color-apply-on-region (point-min) (point-max)))
+
+(defun colorize-compilation (one two)
+  "ansi colorize the compilation buffer."
+  (ansi-compilation-mode))
+
+(push 'colorize-compilation compilation-finish-functions)
+#+END_SRC
+
 *** Cycle Quotes
 
 #+BEGIN_SRC emacs-lisp
@@ -1448,6 +1508,7 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.erb\\'" . web-mode)
            ("\\.mustache\\'" . web-mode)
            ("\\.njk\\'" . web-mode)
+           ("\\.liquid\\'" . web-mode)
            ("\\.djhtml\\'" . web-mode)
            ("\\.html?\\'" . web-mode)
 ;;           ("\\.cjs$" . web-mode)
@@ -1457,6 +1518,9 @@ Use =C-j= to expand emmet-code to html/css code.
            ("\\.ftl\\'" . web-mode))
     :config
     (setq web-mode-enable-front-matter-block t)
+    (setq web-mode-enable-auto-indentation nil)
+
+    (lsp-ensure-server 'html-ls)
 
     (defun pretify-afterwards (fun)
       (interactive)
@@ -1536,9 +1600,10 @@ Use =C-j= to expand emmet-code to html/css code.
                                'web-mode-sp-split-sexp)
                 (local-set-key (my-key "Join (Group) sexp")
                                'web-mode-sp-join-sexp)
-                (bind-custom-tab-hydra
-                 '(("e" . ( emmet-expand-line "Expand Line" "Emmet")))
-                 "web-mode" web-mode-map )
+                ;(bind-custom-tab-hydra
+                ; '(("e" . ( emmet-expand-line "Expand Line" "Emmet")))
+                ; "web-mode" web-mode-map )
+                (lsp-mode)
                 ))
 
     :init
@@ -1570,7 +1635,10 @@ See [[Spellchecking in JS]].
 ** CSS
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'css-mode-hook #'prettier-js-mode)
+  (add-hook 'css-mode-hook #'prettier-js-mode)
+  (add-hook 'css-mode-hook (lambda () 
+                             (lsp-ensure-server 'css-ls)
+                             (lsp-mode)))
 #+END_SRC
 
 ** JSON
@@ -1612,6 +1680,8 @@ See [[Spellchecking in JS]].
     :config
     (flycheck-add-mode 'javascript-eslint 'typescript-ts-mode)
     (flycheck-add-mode 'javascript-eslint 'tsx-ts-mode)
+    (lsp-ensure-server 'ts-ls)
+    (lsp-ensure-server 'eslint)
 
     (defhydra hydra-tsx-ts-mode (:hint nil :color blue)
       "Typescript"
@@ -1629,7 +1699,8 @@ See [[Spellchecking in JS]].
       ("i" lsp-organize-and-remove-unused-imports "Organize imports")
       ("." lsp-execute-code-action "Fix"                       :column "Do")
 
-      ("s" sp-split-sexp "Split Group"              :column "Edit")
+      ("D" js-doc-insert-function-doc "Insert JS-Doc" :column "Edit")
+      ("s" sp-split-sexp "Split Group"                            )
       ("j" sp-join-sexp "Join Group"                              )
       ("u" combobulate-splice-parent "Unmantle JSX"               )
       ("w" combobulate-envelop "Wrap"                             )
@@ -1717,12 +1788,12 @@ See [[Spellchecking in JS]].
 ** Tailwind CSS
 
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-tailwindcss
-    :after lsp-mode
-    :ensure t
-    :init
-    (setq lsp-tailwindcss-add-on-mode t
-          lsp-tailwindcss-skip-config-check t))
+ (use-package lsp-tailwindcss
+   :after lsp-mode
+   :ensure t
+   :init
+   (setq lsp-tailwindcss-add-on-mode t
+         lsp-tailwindcss-skip-config-check t))
 #+END_SRC
 
 ** SQL
@@ -1844,9 +1915,13 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
       (add-hook 'terraform-mode-hook
                 (lambda ()
                   (local-set-key (my-key "Mode hydra") 'hydra-terraform/body)
-                  (lsp-mode)))
+                  (lsp-mode)
+                  (setq lsp-disabled-clients '(tfls))
+                  ;; (setq lsp-semantic-tokens-enable t)
+                  ;; (setq lsp-semantic-tokens-honor-refresh-requests t)
+                  ))
       :hydra
-      (hydra-terraform (:hint nil)
+      (hydra-terraform (:hint nil :color blue)
                        "terraform"
         ("L" hydra-lsp-mode/body "LSP")
         ("j" lsp-ui-imenu "Menu")
@@ -1858,7 +1933,7 @@ You can link to there from ~/.cargo/bin or configure your editor to use the full
         ("M-." xref-find-definitions-other-window "Goto Definition (other buf)")
         ("d" terraform-open-doc "Open Doc for Block")
         ("l" flycheck-list-errors "List errors")
-        ("?" hydra-prog-mode-search/body "Search" :color blue)))
+        ("?" hydra-prog-mode-search/body "Search")))
 #+END_SRC
 
 ** C Sharp
@@ -1901,7 +1976,7 @@ dotnet tool install csharpier -g
 
       ("TAB" hydra-copilot/body "Copilot"))
     :init
-    (add-hook 'csharp-ts-mode-hook #'company-mode)
+    ;;    (add-hook 'csharp-ts-mode-hook #'company-mode) replaced with corfu
     (add-hook 'csharp-ts-mode-hook #'rainbow-delimiters-mode)
     (add-hook 'csharp-ts-mode-hook #'lsp)
     (add-hook 'csharp-ts-mode-hook 'run-sheesh-coding-hook)
