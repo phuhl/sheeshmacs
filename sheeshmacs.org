@@ -11,6 +11,63 @@
 #+END_SRC
 
 
+* Windows Setup
+
+External programs needed for full feature support. Run these commands
+in an elevated (Admin) PowerShell.
+
+** Install Chocolatey (if not installed)
+
+#+BEGIN_SRC powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+#+END_SRC
+
+** Install all dependencies
+
+#+BEGIN_SRC powershell
+choco install git diffutils pandoc ripgrep hunspell.portable nodejs python rustup.install plantuml irfanview languagetool temurin -y
+#+END_SRC
+
+| Program       | Purpose                                    |
+|---------------+--------------------------------------------|
+| git           | Version control, Magit                     |
+| diffutils     | Ediff diff/merge                           |
+| pandoc        | HTML/Org/Markdown format conversion        |
+| ripgrep       | Fast search (counsel-rg)                   |
+| hunspell      | Spell checking                             |
+| nodejs        | ESLint, Prettier, JS/TS tooling            |
+| python        | Org-mode code blocks                       |
+| rustup        | Rust development + rust-analyzer           |
+| plantuml      | UML diagrams in org-mode                   |
+| irfanview     | Paste screenshots from clipboard           |
+| languagetool  | Grammar checking                           |
+| temurin       | Java runtime (needed by LanguageTool)      |
+
+** Post-install steps
+
+*** Hunspell dictionaries
+Download =en_US= and =de_DE= dictionaries (.aff and .dic files) from
+[[https://cgit.freedesktop.org/libreoffice/dictionaries/tree/]] and
+place them in =C:\Hunspell\=.
+
+*** Rust toolchain
+#+BEGIN_SRC powershell
+rustup default stable
+rustup component add rust-analyzer rust-src
+#+END_SRC
+
+*** Node packages (Prettier)
+#+BEGIN_SRC powershell
+cd $env:APPDATA\.emacs.d
+npm install
+#+END_SRC
+
+*** Verify PATH
+The =pathes.el= file (generated on first start) must include paths to
+=diffutils=, =git=, and =hunspell=. See the Pathes section below.
+
 * Pathes
 
 Pathes, potentially different on every system. That is why this code
@@ -60,10 +117,11 @@ automatically regenerated when you next start emacs.
   ;; If you need git, ediff, hunspell, ... you can set the paths to the
   ;; executables here. This setup is only required for windows systems.
   (when (eq system-type 'windows-nt)
-    (setenv \"PATH\" (concat (getenv \"PATH\") \";C:/Program Files/diffutils/bin\"))
-    (setq exec-path (append exec-path '(\"C:/Program Files/diffutils/bin\")))
-    (setq exec-path (append exec-path '(\"C:/Program Files/Git/bin\")))
-    (setq exec-path (append exec-path '(\"C:/Program Files/hunspell/bin\")))
+    ;; Chocolatey binaries (diff, hunspell, ripgrep, pandoc, etc.)
+    (setenv \"PATH\" (concat (getenv \"PATH\") \";C:/ProgramData/chocolatey/bin\"))
+    (setq exec-path (append exec-path '(\"C:/ProgramData/chocolatey/bin\")))
+    ;; Git
+    (setq exec-path (append exec-path '(\"C:/Program Files/Git/cmd\")))
     )
 
   ;; SSH-Keys
