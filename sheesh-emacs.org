@@ -591,6 +591,12 @@ Set font size relative to DPI.
 #+BEGIN_SRC emacs-lisp
   (defalias 'yes-or-no-p 'y-or-n-p)
   (random t)
+
+  ;; Terminal: decode CSI u sequences for keys without standard escapes.
+  ;; Requires matching sendInput actions in Windows Terminal settings.json.
+  (unless (display-graphic-p)
+    (define-key input-decode-map "\e[46;5u" (kbd "C-."))
+    (define-key input-decode-map "\e[44;5u" (kbd "C-,")))
 #+END_SRC
 
 ** Navigation
