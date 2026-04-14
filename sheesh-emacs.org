@@ -278,7 +278,8 @@ To see all keybindings in a buffer, use =counsel-descbinds=.
 #+BEGIN_SRC emacs-lisp
 
   ;;; This line below makes things a bit faster
-  (set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16")
+  (when (display-graphic-p)
+    (set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16"))
 
   (define-key mode-line-major-mode-keymap [header-line]
     (lookup-key mode-line-major-mode-keymap [mode-line]))

@@ -3,10 +3,11 @@
 
 (deftheme md-beautify "Sub-theme to beautify md mode")
 
-(let* ((sans-font (cond ((x-list-fonts "Lucida Grande") '(:font "Lucida Grande"))
-                        ((x-list-fonts "Verdana") '(:font "Verdana"))
-                        ((x-family-fonts "Sans Serif") '(:family "Sans Serif"))
-                        (nil (warn "Cannot find a Sans Serif Font.")))))
+(let* ((sans-font (when (display-graphic-p)
+                    (cond ((x-list-fonts "Lucida Grande") '(:font "Lucida Grande"))
+                          ((x-list-fonts "Verdana") '(:font "Verdana"))
+                          ((x-family-fonts "Sans Serif") '(:family "Sans Serif"))
+                          (nil (warn "Cannot find a Sans Serif Font."))))))
   (custom-theme-set-faces
    'md-beautify
 
