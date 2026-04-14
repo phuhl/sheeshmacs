@@ -594,9 +594,14 @@ Set font size relative to DPI.
 
   ;; Terminal: decode CSI u sequences for keys without standard escapes.
   ;; Requires matching sendInput actions in Windows Terminal settings.json.
+  ;; See "Terminal Setup" section in sheeshmacs.org for the full
+  ;; Windows Terminal configuration.
   (unless (display-graphic-p)
-    (define-key input-decode-map "\e[46;5u" (kbd "C-."))
-    (define-key input-decode-map "\e[44;5u" (kbd "C-,")))
+    (define-key input-decode-map "\e[44;5u" (kbd "C-,"))   ; 44 = ,
+    (define-key input-decode-map "\e[46;5u" (kbd "C-."))   ; 46 = .
+    (define-key input-decode-map "\e[59;5u" (kbd "C-;"))   ; 59 = ;
+    (define-key input-decode-map "\e[39;5u" (kbd "C-'"))   ; 39 = '
+    )
 #+END_SRC
 
 ** Navigation

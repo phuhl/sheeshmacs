@@ -68,6 +68,34 @@ npm install
 The =pathes.el= file (generated on first start) must include paths to
 =diffutils=, =git=, and =hunspell=. See the Pathes section below.
 
+** Terminal Setup (Windows Terminal)
+
+When running Emacs in a terminal, some key combinations (=C-.=, =C-,=,
+=C-;=, =C-'=) have no standard escape sequences. Sheeshmacs includes
+CSI u decoding for these keys, but Windows Terminal must be configured
+to send the matching sequences.
+
+Add the following to your Windows Terminal =settings.json=
+(Settings → Open JSON file), inside the ="actions"= array:
+
+#+BEGIN_SRC json
+{ "keys": "ctrl+,", "command": { "action": "sendInput", "input": "\u001b[44;5u" } },
+{ "keys": "ctrl+.", "command": { "action": "sendInput", "input": "\u001b[46;5u" } },
+{ "keys": "ctrl+;", "command": { "action": "sendInput", "input": "\u001b[59;5u" } },
+{ "keys": "ctrl+'", "command": { "action": "sendInput", "input": "\u001b[39;5u" } }
+#+END_SRC
+
+The format is CSI u: =ESC [ <ascii-code> ; <modifier> u= where the
+modifier 5 means Ctrl. This is the same protocol used by kitty and
+other modern terminals.
+
+| Key   | ASCII | Escape Sequence  | Sheeshmacs Function        |
+|-------+-------+------------------+----------------------------|
+| =C-,= |    44 | =\e[44;5u=       | Previous buffer            |
+| =C-.= |    46 | =\e[46;5u=       | Next buffer                |
+| =C-;= |    59 | =\e[59;5u=       | Main hydra menu            |
+| =C-'= |    39 | =\e[39;5u=       | Cycle quotes (JS/TS)       |
+
 * Pathes
 
 Pathes, potentially different on every system. That is why this code
