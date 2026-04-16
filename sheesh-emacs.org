@@ -601,6 +601,8 @@ Set font size relative to DPI.
     (define-key input-decode-map "\e[46;5u" (kbd "C-."))   ; 46 = .
     (define-key input-decode-map "\e[59;5u" (kbd "C-;"))   ; 59 = ;
     (define-key input-decode-map "\e[39;5u" (kbd "C-'"))   ; 39 = '
+    ;; C-M- combos: modifier 7 = Ctrl(4) + Meta(2) + 1
+    (define-key input-decode-map "\e[106;7u" (kbd "C-M-j")) ; 106 = j
     )
 #+END_SRC
 

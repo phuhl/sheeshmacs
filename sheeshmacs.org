@@ -82,7 +82,8 @@ Add the following to your Windows Terminal =settings.json=
 { "keys": "ctrl+,", "command": { "action": "sendInput", "input": "\u001b[44;5u" } },
 { "keys": "ctrl+.", "command": { "action": "sendInput", "input": "\u001b[46;5u" } },
 { "keys": "ctrl+;", "command": { "action": "sendInput", "input": "\u001b[59;5u" } },
-{ "keys": "ctrl+'", "command": { "action": "sendInput", "input": "\u001b[39;5u" } }
+{ "keys": "ctrl+'", "command": { "action": "sendInput", "input": "\u001b[39;5u" } },
+{ "keys": "ctrl+alt+j", "command": { "action": "sendInput", "input": "\u001b[106;7u" } }
 #+END_SRC
 
 The format is CSI u: =ESC [ <ascii-code> ; <modifier> u= where the
@@ -95,6 +96,7 @@ other modern terminals.
 | =C-.= |    46 | =\e[46;5u=       | Next buffer                |
 | =C-;= |    59 | =\e[59;5u=       | Main hydra menu            |
 | =C-'= |    39 | =\e[39;5u=       | Cycle quotes (JS/TS)       |
+| =C-M-j= |   106 | =\e[106;7u=      | Ivy immediate done         |
 
 * Pathes
 
