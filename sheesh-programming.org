@@ -916,6 +916,18 @@ such a way that it uses RFC 4648 decoding.
 
 ** Tree Sitter
 
+Workaround for Emacs bug#79687: Emacs 30.2 serialises `:match' predicates
+as `#match' (no trailing `?'), but libtree-sitter >=0.26 rejects those.
+Load this *before* any tree-sitter mode initialises its font-lock rules.
+https://mwolson.org/blog/emacs/2026-04-20-fixing-typescript-ts-mode-in-emacs-30-2/
+#+BEGIN_SRC emacs-lisp
+  (when (version<= "31.0" emacs-version)
+  (display-warning 'sheeshmacs
+                     (format "Emacs %s detected. The treesit-predicate-rewrite workaround may no longer be needed. Consider removing it from sheesh-programming.org." emacs-version)
+                     :warning))
+  (require 'treesit-predicate-rewrite)
+#+END_SRC
+
 #+BEGIN_SRC emacs-lisp
   (use-package treesit
     :commands (treesit-install-language-grammar nf/treesit-install-all-languages)
