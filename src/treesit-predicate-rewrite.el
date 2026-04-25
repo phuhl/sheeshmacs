@@ -56,17 +56,13 @@
 ;;      should avoid loading it with this advice active, OR accept
 ;;      the over-fontification.
 ;;
-;; :equal predicates are handled for cases 1 and 2. :pred falls back to strip
-;; (case 3) since replicating an arbitrary user function inside a fontifier is more
-;; trouble than it's worth.
-;;
-;; I've verified the fix on typescript-ts-mode, tsx-ts-mode, python-ts-mode,
-;; js-ts-mode, c-ts-mode, rust-ts-mode, java-ts-mode, go-ts-mode, and
-;; lua-ts-mode. All load and fontify without errors.
+;; :equal (@cap "literal") is handled for Case A/B; :pred is not
+;; (would require re-invoking the user's fn) and is treated as Case C.
 ;;
 ;; Removal plan: delete this whole file and its `load' in
 ;; `shared-init.el' once we upgrade to an Emacs that carries the
-;; bug#79687 fix (Emacs 31, or a backport into a future 30.x).
+;; bug#79687 fix (Emacs 31+, or a backport landing in a future 30.x
+;; point release).
 
 ;;; Code:
 
@@ -177,7 +173,7 @@ string; non-list inputs are returned unchanged."
         ;; Bottom-up: recurse children first, then handle Case A at
         ;; this level so inner predicates are resolved before outer.
         (let ((children (mapcar #'my-ts-rw--walk form)))
-          (my-ts-rw--rewrite-case-a children))))))
+          (my-ts-rw--rewrite-case-a children)))))))
 
 ;;;; Case B: (((NODE) @scratch (:match REGEX @scratch)) @FACE)
 
@@ -210,7 +206,7 @@ predicate in place; Case A handling will lift it."
             ;; face symbol and drop the outer wrapping. Case A will
             ;; then recognise the predicate + face pairing.
             (my-ts-rw--replace-capture-in-tree
-             group target outer-face-sym))))))))
+             group target outer-face-sym)))))))
 
 (defun my-ts-rw--cap-directly-on-root-of-p (group cap-sym)
   "Non-nil if CAP-SYM appears as a top-level capture marker in GROUP.
@@ -273,7 +269,7 @@ Return the fontifier symbol, or nil if PREDICATE isn't supported."
             (when (equal (treesit-node-text node t) literal)
               (treesit-fontify-with-override
                (treesit-node-start node) (treesit-node-end node)
-               face override start end))))))))
+               face override start end)))))))
     (_ nil)))
 
 (defun my-ts-rw--intern-fontifier (key fn)
