@@ -32,10 +32,11 @@ Note that this has a side effect that can make the theme look
 really bad under some circumstances."
   :type 'boolean)
 
-(let* ((sans-font (cond ((x-list-fonts "Lucida Grande") '(:font "Lucida Grande"))
-                        ((x-list-fonts "Verdana") '(:font "Verdana"))
-                        ((x-family-fonts "Sans Serif") '(:family "Sans Serif"))
-                        (nil (warn "Cannot find a Sans Serif Font.  Please report at: https://github.com/jonnay/org-beautify-theme/issues"))))
+(let* ((sans-font (when (display-graphic-p)
+                    (cond ((x-list-fonts "Lucida Grande") '(:font "Lucida Grande"))
+                          ((x-list-fonts "Verdana") '(:font "Verdana"))
+                          ((x-family-fonts "Sans Serif") '(:family "Sans Serif"))
+                          (nil (warn "Cannot find a Sans Serif Font.")))))
        (padding (if org-beautify-theme-use-box-hack
                     `:inherit outline-box
                     nil)))
