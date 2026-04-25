@@ -1906,7 +1906,7 @@ Also fixes code block delimiters and re-reveals the cursor line."
       "C-;"
 
       ("," flyspell-goto-next-error "Next error" :column "Flyspell")
-      ("." toggle-truncate-lines "Autocorrect word")
+      ("." flyspell-auto-correct-word "Autocorrect word")
 
       (")" emojify-insert-emoji "Insert Emoji" :column "Editing")
 
