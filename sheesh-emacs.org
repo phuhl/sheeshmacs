@@ -1293,9 +1293,10 @@ Install the required dictionaries!
 #+BEGIN_SRC emacs-lisp
   (use-package restclient
     :ensure t
-    :mode ("restclient\\'" . restclient-mode)
-    :config
-    (sheeshmacs-load-file (concat sheeshmacs-dir "/src/restclient-jq.el")))
+    :mode ("restclient\\'" . restclient-mode))
+  (use-package restclient-jq
+    :ensure t
+    :after restclient)
   (use-package ob-restclient
     :ensure t)
   (use-package jq-mode
