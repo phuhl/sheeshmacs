@@ -888,6 +888,13 @@ TransposeWindows. There may well be better ways to write this."
   ;;   (setq ido-vertical-define-keys 'C-n-and-C-p-only))
 #+END_SRC
 
+*** Disable savehist
+Don't persist minibuffer history (e.g. `file-name-history') across sessions,
+so old files don't pollute `counsel-find-file' candidates.
+#+BEGIN_SRC emacs-lisp
+  (savehist-mode -1)
+#+END_SRC
+
 *** Ivy
 
 #+BEGIN_SRC emacs-lisp
