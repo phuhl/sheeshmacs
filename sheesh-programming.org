@@ -828,6 +828,23 @@ such a way that it uses RFC 4648 decoding.
       (lsp-eldoc-render-all t)
       (lsp-auto-execute-action nil)
       (lsp-idle-delay 0.6)
+      ;; File watchers are enabled but bounded to avoid errors on
+      ;; non-existent dirs or massive node_modules trees.
+      (lsp-file-watch-threshold 5000)
+      (lsp-file-watch-ignored-directories
+       '(
+         "[/\\\\]\\.git$"
+         "[/\\\\]node_modules$"
+         "[/\\\\]\\.hg$"
+         "[/\\\\]\\.svn$"
+         "[/\\\\]target$"
+         "[/\\\\]dist$"
+         "[/\\\\]build$"
+         "[/\\\\]\\.cargo$"
+         "[/\\\\]__pycache__$"
+         "[/\\\\]\\.tox$"
+         "[/\\\\]\\.venv$"
+         "[/\\\\]custom_nodes$"))
       ;; enable / disable the hints as you prefer:
       (lsp-rust-analyzer-server-display-inlay-hints t)
       (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
